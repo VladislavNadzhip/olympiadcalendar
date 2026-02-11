@@ -6,77 +6,144 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a1a2e;
     min-height: 100vh;
-    padding: 20px;
+    color: #eaeaea;
+    overflow-x: hidden;
 }
 
 .container {
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
 }
 
-/* Year View - 12 месяцев */
+/* Year View - 12 месяцев в виде календарной сетки */
+.year-view {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
 .year-view h1 {
     text-align: center;
-    color: white;
-    margin-bottom: 40px;
+    color: #eaeaea;
+    margin-bottom: 30px;
     font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .months-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-    padding: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    flex: 1;
+    padding: 0 40px 40px 40px;
 }
 
 .month-card {
-    background: white;
+    background: #2d2d44;
     border-radius: 15px;
     padding: 30px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.month-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 50, 50, 0) 0%, rgba(255, 50, 50, 0) 100%);
+    transition: all 0.3s ease;
+    z-index: 0;
+}
+
+.month-card.heat-1::before {
+    background: linear-gradient(135deg, rgba(255, 150, 100, 0.15) 0%, rgba(255, 100, 100, 0.15) 100%);
+}
+
+.month-card.heat-2::before {
+    background: linear-gradient(135deg, rgba(255, 120, 80, 0.3) 0%, rgba(255, 80, 80, 0.3) 100%);
+}
+
+.month-card.heat-3::before {
+    background: linear-gradient(135deg, rgba(255, 100, 60, 0.45) 0%, rgba(255, 60, 60, 0.45) 100%);
+}
+
+.month-card.heat-4::before {
+    background: linear-gradient(135deg, rgba(255, 80, 40, 0.6) 0%, rgba(255, 40, 40, 0.6) 100%);
+}
+
+.month-card.heat-5::before {
+    background: linear-gradient(135deg, rgba(255, 50, 20, 0.75) 0%, rgba(255, 20, 20, 0.75) 100%);
 }
 
 .month-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-color: #667eea;
 }
 
 .month-card h3 {
-    color: #667eea;
-    font-size: 1.8em;
-    margin-bottom: 10px;
+    color: #eaeaea;
+    font-size: 2em;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
 }
 
 .month-preview {
     color: #999;
-    font-size: 0.9em;
+    font-size: 1em;
+    position: relative;
+    z-index: 1;
 }
 
-/* Month View - календарь месяца */
+.month-count {
+    color: #667eea;
+    font-size: 0.9em;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Month View - календарь месяца на всю страницу */
 .month-view {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 100%;
+    height: 100vh;
+    background: #1a1a2e;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .month-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid #2d2d44;
 }
 
 .month-header h2 {
-    color: #667eea;
+    color: #eaeaea;
     font-size: 2em;
 }
 
@@ -90,12 +157,14 @@ body {
 }
 
 .back-btn {
-    background: #f0f0f0;
-    color: #333;
+    background: #2d2d44;
+    color: #eaeaea;
+    border: 2px solid #3d3d54;
 }
 
 .back-btn:hover {
-    background: #e0e0e0;
+    background: #3d3d54;
+    border-color: #667eea;
 }
 
 .add-btn {
@@ -106,12 +175,14 @@ body {
 
 .add-btn:hover {
     background: #5568d3;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    gap: 15px;
+    flex: 1;
 }
 
 .weekday {
@@ -119,7 +190,9 @@ body {
     font-weight: 600;
     color: #667eea;
     padding: 15px;
-    font-size: 0.9em;
+    font-size: 1em;
+    background: #2d2d44;
+    border-radius: 10px;
 }
 
 .days-container {
@@ -127,25 +200,29 @@ body {
 }
 
 .day-cell {
-    min-height: 120px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 10px;
-    background: #fafafa;
+    background: #2d2d44;
+    border: 2px solid #3d3d54;
+    border-radius: 15px;
+    padding: 15px;
     transition: all 0.2s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .day-cell:hover {
-    background: #f0f0f0;
+    background: #3d3d54;
     border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .day-number {
     font-weight: 600;
-    color: #333;
-    margin-bottom: 8px;
-    font-size: 1.1em;
+    color: #eaeaea;
+    margin-bottom: 10px;
+    font-size: 1.3em;
 }
 
 .day-cell.other-month {
@@ -153,12 +230,12 @@ body {
 }
 
 .olympiad-event {
-    background: #4A90E2;
+    background: #667eea;
     color: white;
-    padding: 6px 8px;
-    border-radius: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
     font-size: 0.85em;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     overflow: hidden;
@@ -168,7 +245,7 @@ body {
 
 .olympiad-event:hover {
     transform: scale(1.02);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.5);
 }
 
 /* Side Panel */
@@ -178,8 +255,8 @@ body {
     top: 0;
     width: 450px;
     height: 100vh;
-    background: white;
-    box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+    background: #2d2d44;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.5);
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     overflow-y: auto;
@@ -194,7 +271,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 25px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid #3d3d54;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
@@ -229,19 +306,19 @@ body {
 .info-field {
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #3d3d54;
 }
 
 .info-field label {
     display: block;
     font-weight: 600;
-    color: #666;
+    color: #999;
     margin-bottom: 8px;
     font-size: 0.9em;
 }
 
 .info-field span, .info-field a {
-    color: #333;
+    color: #eaeaea;
     font-size: 1.1em;
 }
 
@@ -277,12 +354,14 @@ body {
 }
 
 .edit-btn {
-    background: #f0f0f0;
-    color: #333;
+    background: #3d3d54;
+    color: #eaeaea;
+    border: 2px solid #4d4d64;
 }
 
 .edit-btn:hover {
-    background: #e0e0e0;
+    background: #4d4d64;
+    border-color: #667eea;
 }
 
 .delete-btn {
@@ -292,6 +371,7 @@ body {
 
 .delete-btn:hover {
     background: #ee3344;
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
 }
 
 /* Modal */
@@ -302,7 +382,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.8);
     z-index: 2000;
     align-items: center;
     justify-content: center;
@@ -313,7 +393,7 @@ body {
 }
 
 .modal-content {
-    background: white;
+    background: #2d2d44;
     border-radius: 20px;
     width: 90%;
     max-width: 600px;
@@ -326,7 +406,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 25px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid #3d3d54;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 20px 20px 0 0;
@@ -352,16 +432,18 @@ body {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #333;
+    color: #eaeaea;
 }
 
 .form-group input, .form-group select {
     width: 100%;
     padding: 12px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #3d3d54;
     border-radius: 8px;
     font-size: 1em;
     transition: border-color 0.3s ease;
+    background: #1a1a2e;
+    color: #eaeaea;
 }
 
 .form-group input:focus, .form-group select:focus {
@@ -387,12 +469,13 @@ body {
 }
 
 .cancel-btn {
-    background: #f0f0f0;
-    color: #333;
+    background: #3d3d54;
+    color: #eaeaea;
+    border: 2px solid #4d4d64;
 }
 
 .cancel-btn:hover {
-    background: #e0e0e0;
+    background: #4d4d64;
 }
 
 .submit-btn {
@@ -410,6 +493,13 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+    .months-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .side-panel {
         width: 100%;
@@ -417,15 +507,21 @@ body {
     }
     
     .months-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(6, 1fr);
         gap: 15px;
+        padding: 0 20px 20px 20px;
     }
     
     .month-card {
         padding: 20px;
     }
     
-    .day-cell {
-        min-height: 80px;
+    .month-card h3 {
+        font-size: 1.5em;
+    }
+    
+    .calendar-grid {
+        gap: 10px;
     }
 }

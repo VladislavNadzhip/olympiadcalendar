@@ -30,6 +30,7 @@ const deleteOlympiadBtn = document.getElementById('deleteOlympiadBtn');
 document.addEventListener('DOMContentLoaded', () => {
     initializeMonthCards();
     initializeEventListeners();
+    updateMonthHeatMap();
 });
 
 // Инициализация карточек месяцев
@@ -40,6 +41,39 @@ function initializeMonthCards() {
             const month = parseInt(card.dataset.month);
             openMonthView(month);
         });
+    });
+}
+
+// Обновление тепловой карты месяцев
+function updateMonthHeatMap() {
+    const monthCards = document.querySelectorAll('.month-card');
+    
+    monthCards.forEach(card => {
+        const month = parseInt(card.dataset.month);
+        const monthOlympiads = olympiads.filter(o => {
+            const olympiadDate = new Date(o.date + 'T00:00:00');
+            return olympiadDate.getMonth() === month && olympiadDate.getFullYear() === currentYear;
+        });
+        
+        const count = monthOlympiads.length;
+        
+        // Удаляем все классы heat
+        card.classList.remove('heat-1', 'heat-2', 'heat-3', 'heat-4', 'heat-5');
+        
+        // Добавляем класс в зависимости от количества олимпиад
+        if (count > 0) {
+            const heatLevel = Math.min(5, Math.ceil(count / 2));
+            card.classList.add(`heat-${heatLevel}`);
+        }
+        
+        // Обновляем счетчик
+        let countElement = card.querySelector('.month-count');
+        if (!countElement) {
+            countElement = document.createElement('div');
+            countElement.className = 'month-count';
+            card.appendChild(countElement);
+        }
+        countElement.textContent = count > 0 ? `Олимпиад: ${count}` : '';
     });
 }
 
@@ -70,6 +104,7 @@ function closeMonthView() {
     monthView.classList.add('hidden');
     yearView.classList.remove('hidden');
     closeSidePanel();
+    updateMonthHeatMap();
 }
 
 // Отрисовка календаря месяца
@@ -124,7 +159,7 @@ function createDayCell(day, isOtherMonth) {
             const event = document.createElement('div');
             event.className = 'olympiad-event';
             event.textContent = olympiad.name;
-            event.style.backgroundColor = olympiad.color || '#4A90E2';
+            event.style.backgroundColor = olympiad.color || '#667eea';
             event.addEventListener('click', (e) => {
                 e.stopPropagation();
                 showOlympiadDetails(olympiad);
@@ -226,6 +261,7 @@ function handleFormSubmit(e) {
     localStorage.setItem('olympiads', JSON.stringify(olympiads));
     closeOlympiadModal();
     renderMonthCalendar();
+    updateMonthHeatMap();
 }
 
 // Обработка регистрации
@@ -249,7 +285,7 @@ function handleEdit() {
         document.getElementById('locationInput').value = olympiad.location;
         document.getElementById('websiteInput').value = olympiad.website || '';
         document.getElementById('archiveInput').value = olympiad.archive || '';
-        document.getElementById('colorInput').value = olympiad.color || '#4A90E2';
+        document.getElementById('colorInput').value = olympiad.color || '#667eea';
         
         closeSidePanel();
         olympiadModal.classList.add('active');
@@ -265,6 +301,7 @@ function handleDelete() {
         localStorage.setItem('olympiads', JSON.stringify(olympiads));
         closeSidePanel();
         renderMonthCalendar();
+        updateMonthHeatMap();
     }
 }
 
