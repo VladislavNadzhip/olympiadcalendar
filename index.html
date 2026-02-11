@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь математических олимпиад</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Year View: 12 месяцев -->
+        <div id="yearView" class="year-view">
+            <h1>Календарь математических олимпиад</h1>
+            <div class="months-grid">
+                <div class="month-card" data-month="0">
+                    <h3>Январь</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="1">
+                    <h3>Февраль</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="2">
+                    <h3>Март</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="3">
+                    <h3>Апрель</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="4">
+                    <h3>Май</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="5">
+                    <h3>Июнь</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="6">
+                    <h3>Июль</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="7">
+                    <h3>Август</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="8">
+                    <h3>Сентябрь</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="9">
+                    <h3>Октябрь</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="10">
+                    <h3>Ноябрь</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+                <div class="month-card" data-month="11">
+                    <h3>Декабрь</h3>
+                    <div class="month-preview">2026</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Month View: календарь выбранного месяца -->
+        <div id="monthView" class="month-view hidden">
+            <div class="month-header">
+                <button id="backBtn" class="back-btn">← Назад к году</button>
+                <h2 id="currentMonthTitle"></h2>
+                <button id="addOlympiadBtn" class="add-btn">+ Добавить олимпиаду</button>
+            </div>
+            <div class="calendar-grid">
+                <div class="weekday">Пн</div>
+                <div class="weekday">Вт</div>
+                <div class="weekday">Ср</div>
+                <div class="weekday">Чт</div>
+                <div class="weekday">Пт</div>
+                <div class="weekday">Сб</div>
+                <div class="weekday">Вс</div>
+                <div id="daysContainer" class="days-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panel для информации об олимпиаде -->
+    <div id="sidePanel" class="side-panel">
+        <div class="panel-header">
+            <h3 id="panelTitle">Информация об олимпиаде</h3>
+            <button id="closePanelBtn" class="close-btn">×</button>
+        </div>
+        <div class="panel-content" id="panelContent">
+            <div class="olympiad-info">
+                <h4 id="olympiadName"></h4>
+                <div class="info-field">
+                    <label>Дата:</label>
+                    <span id="olympiadDate"></span>
+                </div>
+                <div class="info-field">
+                    <label>Время:</label>
+                    <span id="olympiadTime"></span>
+                </div>
+                <div class="info-field">
+                    <label>Сложность:</label>
+                    <span id="olympiadDifficulty"></span>
+                </div>
+                <div class="info-field">
+                    <label>Класс:</label>
+                    <span id="olympiadGrade"></span>
+                </div>
+                <div class="info-field">
+                    <label>Место проведения:</label>
+                    <span id="olympiadLocation"></span>
+                </div>
+                <div class="info-field">
+                    <label>Сайт олимпиады:</label>
+                    <a id="olympiadWebsite" href="#" target="_blank"></a>
+                </div>
+                <div class="info-field">
+                    <label>Задачи прошлых лет:</label>
+                    <a id="olympiadArchive" href="#" target="_blank">Скачать</a>
+                </div>
+                <button id="registerBtn" class="register-btn">Записаться на олимпиаду</button>
+                <button id="editOlympiadBtn" class="edit-btn">Редактировать</button>
+                <button id="deleteOlympiadBtn" class="delete-btn">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal для добавления/редактирования олимпиады -->
+    <div id="olympiadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Добавить олимпиаду</h3>
+                <button id="closeModalBtn" class="close-btn">×</button>
+            </div>
+            <form id="olympiadForm">
+                <div class="form-group">
+                    <label for="nameInput">Название олимпиады:</label>
+                    <input type="text" id="nameInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="dateInput">Дата:</label>
+                    <input type="date" id="dateInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="timeInput">Время:</label>
+                    <input type="time" id="timeInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="difficultyInput">Сложность:</label>
+                    <select id="difficultyInput" required>
+                        <option value="">Выберите сложность</option>
+                        <option value="Легкая">Легкая</option>
+                        <option value="Средняя">Средняя</option>
+                        <option value="Сложная">Сложная</option>
+                        <option value="Очень сложная">Очень сложная</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gradeInput">Класс:</label>
+                    <input type="text" id="gradeInput" placeholder="Например: 9-11 класс" required>
+                </div>
+                <div class="form-group">
+                    <label for="locationInput">Место проведения:</label>
+                    <input type="text" id="locationInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="websiteInput">Сайт олимпиады:</label>
+                    <input type="url" id="websiteInput" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label for="archiveInput">Ссылка на задачи прошлых лет:</label>
+                    <input type="url" id="archiveInput" placeholder="https://example.com/archive">
+                </div>
+                <div class="form-group">
+                    <label for="colorInput">Цвет метки:</label>
+                    <input type="color" id="colorInput" value="#4A90E2">
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelFormBtn" class="cancel-btn">Отмена</button>
+                    <button type="submit" class="submit-btn">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
