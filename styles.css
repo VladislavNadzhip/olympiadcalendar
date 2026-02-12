@@ -91,7 +91,7 @@ body {
 }
 
 .month-card.heat-5::before {
-    background: linear-gradient(135deg, rgba(255, 50, 20, 0.75) 0%, rgba(255, 20, 20, 0.75) 100%);
+    background: linear-gradient(135deg, rgba(255, 50, 20, 0.75) 0%, rgba(255, 20, 20, 0.75) 100());
 }
 
 .month-card:hover {
@@ -209,6 +209,9 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    height: 100%;
+    max-height: 150px;
+    overflow: hidden;
 }
 
 .day-cell:hover {
@@ -223,10 +226,45 @@ body {
     color: #eaeaea;
     margin-bottom: 10px;
     font-size: 1.3em;
+    flex-shrink: 0;
 }
 
 .day-cell.other-month {
     opacity: 0.3;
+}
+
+.olympiad-events-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+    min-height: 0;
+}
+
+/* Кастомный скроллбар */
+.olympiad-events-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.olympiad-events-container::-webkit-scrollbar-track {
+    background: rgba(61, 61, 84, 0.3);
+    border-radius: 10px;
+}
+
+.olympiad-events-container::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.olympiad-events-container::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
+/* Для Firefox */
+.olympiad-events-container {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea rgba(61, 61, 84, 0.3);
 }
 
 .olympiad-event {
@@ -241,6 +279,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .olympiad-event:hover {
