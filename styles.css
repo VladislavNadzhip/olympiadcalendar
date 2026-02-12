@@ -129,7 +129,7 @@ body {
     width: 100%;
     height: 100vh;
     background: #1a1a2e;
-    padding: 20px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
 }
@@ -138,9 +138,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
     border-bottom: 2px solid #2d2d44;
+    flex-shrink: 0;
 }
 
 .month-header h2 {
@@ -182,18 +183,21 @@ body {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: auto 1fr 1fr 1fr 1fr 1fr 1fr;
     gap: 5px;
     flex: 1;
+    min-height: 0;
 }
 
 .weekday {
     text-align: center;
     font-weight: 600;
     color: #667eea;
-    padding: 15px;
+    padding: 10px;
     font-size: 1em;
     background: #2d2d44;
-    border-radius: 10px;
+    border-radius: 8px;
+    height: fit-content;
 }
 
 .days-container {
@@ -203,15 +207,13 @@ body {
 .day-cell {
     background: #2d2d44;
     border: 2px solid #3d3d54;
-    border-radius: 15px;
-    padding: 15px;
+    border-radius: 12px;
+    padding: 12px;
     transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    height: 100%;
-    max-height: 200px;
     overflow: hidden;
 }
 
@@ -225,8 +227,8 @@ body {
 .day-number {
     font-weight: 600;
     color: #eaeaea;
-    margin-bottom: 10px;
-    font-size: 1.3em;
+    margin-bottom: 8px;
+    font-size: 1.2em;
     flex-shrink: 0;
 }
 
@@ -244,7 +246,7 @@ body {
 
 /* Кастомный скроллбар */
 .olympiad-events-container::-webkit-scrollbar {
-    width:  8px;;
+    width:  6px;
 }
 
 .olympiad-events-container::-webkit-scrollbar-track {
