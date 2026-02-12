@@ -692,6 +692,8 @@ body {
     font-size: 1.2em;
     color: #667eea;
     transition: transform 0.3s ease;
+    cursor: pointer;
+    user-select: none;
 }
 
 .day-olympiad-preview {
