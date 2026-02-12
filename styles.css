@@ -75,23 +75,23 @@ body {
 }
 
 .month-card.heat-1::before {
-    background: linear-gradient(135deg, rgba(255, 150, 100, 0.15) 0%, rgba(255, 100, 100, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(180, 100, 70, 0.2) 0%, rgba(180, 70, 70, 0.2) 100%);
 }
 
 .month-card.heat-2::before {
-    background: linear-gradient(135deg, rgba(255, 120, 80, 0.3) 0%, rgba(255, 80, 80, 0.3) 100%);
+    background: linear-gradient(135deg, rgba(170, 80, 60, 0.35) 0%, rgba(170, 60, 60, 0.35) 100%);
 }
 
 .month-card.heat-3::before {
-    background: linear-gradient(135deg, rgba(255, 100, 60, 0.45) 0%, rgba(255, 60, 60, 0.45) 100%);
+    background: linear-gradient(135deg, rgba(160, 70, 50, 0.5) 0%, rgba(160, 50, 50, 0.5) 100%);
 }
 
 .month-card.heat-4::before {
-    background: linear-gradient(135deg, rgba(255, 80, 40, 0.6) 0%, rgba(255, 40, 40, 0.6) 100%);
+    background: linear-gradient(135deg, rgba(150, 60, 40, 0.65) 0%, rgba(150, 40, 40, 0.65) 100%);
 }
 
 .month-card.heat-5::before {
-    background: linear-gradient(135deg, rgba(255, 50, 20, 0.75) 0%, rgba(255, 20, 20, 0.75) 100());
+    background: linear-gradient(135deg, rgba(140, 50, 30, 0.8) 0%, rgba(140, 30, 30, 0.8) 100());
 }
 
 .month-card:hover {
@@ -182,13 +182,56 @@ body {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
+/* Контейнер для скролла месяцев */
+.months-scroll-container {
+    flex: 1;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding-right: 15px;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+/* Кастомный скроллбар для контейнера месяцев */
+.months-scroll-container::-webkit-scrollbar {
+    width: 12px;
+}
+
+.months-scroll-container::-webkit-scrollbar-track {
+    background: #1a1a2e;
+    border-radius: 10px;
+}
+
+.months-scroll-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    border: 2px solid #1a1a2e;
+    transition: background 0.3s ease;
+}
+
+.months-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
+}
+
+/* Для Firefox */
+.months-scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea #1a1a2e;
+}
+
+/* Каждый месяц в скролле */
+.month-calendar-wrapper {
+    height: 100vh;
+    scroll-snap-align: start;
+    padding: 3px 3px 3px 3px;
+}
+
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: auto repeat(6, 1fr);
     gap: 3px;
-    flex: 1;
-    padding: 3px;
+    height: calc(100vh - 32px - 6px);
 }
 
 .weekday {
@@ -273,7 +316,7 @@ body {
 }
 
 .olympiad-event {
-    background: #667eea;
+    background: #4a5ab3;
     color: white;
     padding: 4px 6px;
     border-radius: 4px;
@@ -289,7 +332,7 @@ body {
 
 .olympiad-event:hover {
     transform: scale(1.02);
-    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 3px 10px rgba(74, 90, 179, 0.5);
 }
 
 /* Side Panel */
