@@ -155,6 +155,10 @@ function createDayCell(day, isOtherMonth) {
         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const dayOlympiads = olympiads.filter(o => o.date === dateStr);
         
+        // Создаем контейнер для олимпиад с прокруткой
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'olympiad-events-container';
+        
         dayOlympiads.forEach(olympiad => {
             const event = document.createElement('div');
             event.className = 'olympiad-event';
@@ -164,8 +168,10 @@ function createDayCell(day, isOtherMonth) {
                 e.stopPropagation();
                 showOlympiadDetails(olympiad);
             });
-            cell.appendChild(event);
+            eventsContainer.appendChild(event);
         });
+        
+        cell.appendChild(eventsContainer);
         
         // Клик по ячейке для добавления олимпиады
         cell.addEventListener('click', () => {
