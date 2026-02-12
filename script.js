@@ -433,25 +433,56 @@ function renderMonthDays(month, filteredOlympiads) {
     return html;
 }
 
-// ИЗМЕНЕНО: Используем кастомные метки и цвета из настроек олимпиады
+// Функция для преобразования hex цвета в rgba с прозрачностью
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ИЗМЕНЕНО: Используем кастомные метки и цвета из настроек олимпиады с динамическими стилями
 function createDayCellHTML(day, month, filteredOlympiads) {
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
     
     let regLabel = '';
     let regClass = '';
+    let customGlowStyle = '';
     
     if (focusedOlympiadId !== null) {
         const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
         if (focusedOlympiad) {
             if (focusedOlympiad.regStart === dateStr) {
                 const labelText = focusedOlympiad.focusLabelStart || 'Начало регистрации';
-                regLabel = `<div class="reg-label">${labelText}</div>`;
+                const color = focusedOlympiad.focusColorStart || '#ff6b6b';
+                
+                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
                 regClass = ' reg-start';
+                
+                // Создаем кастомное свечение с цветом из настроек
+                customGlowStyle = `
+                    <style>
+                        .day-cell.reg-start[data-date="${dateStr}"]::before {
+                            background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
+                        }
+                    </style>
+                `;
             } else if (focusedOlympiad.regEnd === dateStr) {
                 const labelText = focusedOlympiad.focusLabelEnd || 'Конец регистрации';
-                regLabel = `<div class="reg-label">${labelText}</div>`;
+                const color = focusedOlympiad.focusColorEnd || '#ff4757';
+                
+                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
                 regClass = ' reg-end';
+                
+                // Создаем кастомное свечение с цветом из настроек
+                customGlowStyle = `
+                    <style>
+                        .day-cell.reg-end[data-date="${dateStr}"]::before {
+                            background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.6)} 0%, ${hexToRgba(color, 0.3)} 50%, ${hexToRgba(color, 0)} 100%) !important;
+                        }
+                    </style>
+                `;
             }
         }
     }
@@ -475,7 +506,8 @@ function createDayCellHTML(day, month, filteredOlympiads) {
         : (isAdmin ? `onclick="openOlympiadModal('${dateStr}')"` : '');
     
     return `
-        <div class="day-cell${regClass}${focusClass}" ${clickHandler}>
+        ${customGlowStyle}
+        <div class="day-cell${regClass}${focusClass}" data-date="${dateStr}" ${clickHandler}>
             ${regLabel}
             <div class="day-number">${day}</div>
             <div class="olympiad-events-container">
@@ -709,7 +741,7 @@ function closeOlympiadModal() {
     editingOlympiadId = null;
 }
 
-// НОВАЯ ФУНКЦИЯ: Заполнение формы при редактировании
+// Заполнение формы при редактировании
 function populateFormForEdit(olympiad) {
     editingOlympiadId = olympiad.id;
     document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
@@ -731,7 +763,7 @@ function populateFormForEdit(olympiad) {
     document.getElementById('colorInput').value = olympiad.color || '#667eea';
 }
 
-// ИЗМЕНЕНО: Сохраняем кастомные метки и цвета
+// Сохраняем кастомные метки и цвета
 function handleFormSubmit(e) {
     e.preventDefault();
     
