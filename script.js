@@ -14,7 +14,7 @@ const yearView = document.getElementById('yearView');
 const monthView = document.getElementById('monthView');
 const backBtn = document.getElementById('backBtn');
 const currentMonthTitle = document.getElementById('currentMonthTitle');
-const daysContainer = document.getElementById('daysContainer');
+const monthsScrollContainer = document.getElementById('monthsScrollContainer');
 const sidePanel = document.getElementById('sidePanel');
 const closePanelBtn = document.getElementById('closePanelBtn');
 const addOlympiadBtn = document.getElementById('addOlympiadBtn');
@@ -96,7 +96,15 @@ function openMonthView(month) {
     yearView.classList.add('hidden');
     monthView.classList.remove('hidden');
     currentMonthTitle.textContent = `${monthNames[month]} ${currentYear}`;
-    renderMonthCalendar();
+    renderAllMonths();
+    
+    // Прокрутка к выбранному месяцу
+    setTimeout(() => {
+        const monthWrapper = document.getElementById(`month-${month}`);
+        if (monthWrapper) {
+            monthWrapper.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 100);
 }
 
 // Закрыть календарь месяца
@@ -107,13 +115,55 @@ function closeMonthView() {
     updateMonthHeatMap();
 }
 
-// Отрисовка календаря месяца
-function renderMonthCalendar() {
-    daysContainer.innerHTML = '';
+// Отрисовка всех месяцев
+function renderAllMonths() {
+    monthsScrollContainer.innerHTML = '';
     
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-    const prevLastDay = new Date(currentYear, currentMonth, 0);
+    for (let month = 0; month < 12; month++) {
+        const monthWrapper = document.createElement('div');
+        monthWrapper.className = 'month-calendar-wrapper';
+        monthWrapper.id = `month-${month}`;
+        
+        const calendarGrid = document.createElement('div');
+        calendarGrid.className = 'calendar-grid';
+        
+        // Дни недели
+        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        weekdays.forEach(day => {
+            const weekdayDiv = document.createElement('div');
+            weekdayDiv.className = 'weekday';
+            weekdayDiv.textContent = day;
+            calendarGrid.appendChild(weekdayDiv);
+        });
+        
+        // Дни месяца
+        const daysContainer = document.createElement('div');
+        daysContainer.className = 'days-container';
+        daysContainer.innerHTML = renderMonthDays(month);
+        calendarGrid.appendChild(daysContainer);
+        
+        monthWrapper.appendChild(calendarGrid);
+        monthsScrollContainer.appendChild(monthWrapper);
+    }
+    
+    // Обновляем заголовок при скролле
+    monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
+}
+
+// Обновление заголовка при скролле
+function updateCurrentMonthTitle() {
+    const scrollTop = monthsScrollContainer.scrollTop;
+    const monthIndex = Math.round(scrollTop / window.innerHeight);
+    currentMonthTitle.textContent = `${monthNames[monthIndex]} ${currentYear}`;
+}
+
+// Отрисовка дней месяца
+function renderMonthDays(month) {
+    let html = '';
+    
+    const firstDay = new Date(currentYear, month, 1);
+    const lastDay = new Date(currentYear, month + 1, 0);
+    const prevLastDay = new Date(currentYear, month, 0);
     
     const firstDayWeek = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
     const lastDayDate = lastDay.getDate();
@@ -121,65 +171,58 @@ function renderMonthCalendar() {
     
     // Дни предыдущего месяца
     for (let i = firstDayWeek - 1; i > 0; i--) {
-        const dayCell = createDayCell(prevLastDayDate - i + 1, true);
-        daysContainer.appendChild(dayCell);
+        html += createDayCellHTML(prevLastDayDate - i + 1, true, month);
     }
     
     // Дни текущего месяца
     for (let day = 1; day <= lastDayDate; day++) {
-        const dayCell = createDayCell(day, false);
-        daysContainer.appendChild(dayCell);
+        html += createDayCellHTML(day, false, month);
     }
     
     // Дни следующего месяца
-    const totalCells = daysContainer.children.length;
+    const totalCells = firstDayWeek - 1 + lastDayDate;
     const remainingCells = 35 - totalCells;
     for (let day = 1; day <= remainingCells; day++) {
-        const dayCell = createDayCell(day, true);
-        daysContainer.appendChild(dayCell);
+        html += createDayCellHTML(day, true, month);
     }
+    
+    return html;
 }
 
-// Создать ячейку дня
-function createDayCell(day, isOtherMonth) {
-    const cell = document.createElement('div');
-    cell.className = 'day-cell';
-    if (isOtherMonth) cell.classList.add('other-month');
-    
-    const dayNumber = document.createElement('div');
-    dayNumber.className = 'day-number';
-    dayNumber.textContent = day;
-    cell.appendChild(dayNumber);
+// Создать HTML ячейки дня
+function createDayCellHTML(day, isOtherMonth, month) {
+    const otherMonthClass = isOtherMonth ? ' other-month' : '';
+    let eventsHTML = '';
     
     if (!isOtherMonth) {
-        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const dayOlympiads = olympiads.filter(o => o.date === dateStr);
         
-        // Создаем контейнер для олимпиад с прокруткой
-        const eventsContainer = document.createElement('div');
-        eventsContainer.className = 'olympiad-events-container';
-        
         dayOlympiads.forEach(olympiad => {
-            const event = document.createElement('div');
-            event.className = 'olympiad-event';
-            event.textContent = olympiad.name;
-            event.style.backgroundColor = olympiad.color || '#667eea';
-            event.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showOlympiadDetails(olympiad);
-            });
-            eventsContainer.appendChild(event);
-        });
-        
-        cell.appendChild(eventsContainer);
-        
-        // Клик по ячейке для добавления олимпиады
-        cell.addEventListener('click', () => {
-            openOlympiadModal(dateStr);
+            const bgColor = olympiad.color || '#4a5ab3';
+            eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
         });
     }
     
-    return cell;
+    const dateStr = !isOtherMonth ? `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` : '';
+    const clickHandler = !isOtherMonth ? `onclick="openOlympiadModal('${dateStr}')"` : '';
+    
+    return `
+        <div class="day-cell${otherMonthClass}" ${clickHandler}>
+            <div class="day-number">${day}</div>
+            <div class="olympiad-events-container">
+                ${eventsHTML}
+            </div>
+        </div>
+    `;
+}
+
+// Показать детали олимпиады по ID
+function showOlympiadDetailsById(olympiadId) {
+    const olympiad = olympiads.find(o => o.id === olympiadId);
+    if (olympiad) {
+        showOlympiadDetails(olympiad);
+    }
 }
 
 // Показать детали олимпиады
@@ -266,7 +309,7 @@ function handleFormSubmit(e) {
     
     localStorage.setItem('olympiads', JSON.stringify(olympiads));
     closeOlympiadModal();
-    renderMonthCalendar();
+    renderAllMonths();
     updateMonthHeatMap();
 }
 
@@ -306,7 +349,7 @@ function handleDelete() {
         olympiads = olympiads.filter(o => o.id !== olympiadId);
         localStorage.setItem('olympiads', JSON.stringify(olympiads));
         closeSidePanel();
-        renderMonthCalendar();
+        renderAllMonths();
         updateMonthHeatMap();
     }
 }
