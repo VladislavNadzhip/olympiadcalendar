@@ -224,6 +224,39 @@ body {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
+/* Focus Hint */
+.focus-hint {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+    font-weight: 600;
+    animation: pulseHint 2s infinite;
+}
+
+@keyframes pulseHint {
+    0%, 100% {
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 30px rgba(255, 107, 107, 0.7);
+    }
+}
+
+.hint-text {
+    font-size: 0.9em;
+    opacity: 0.95;
+}
+
 /* Контейнер для скролла месяцев */
 .months-scroll-container {
     flex: 1;
@@ -299,6 +332,7 @@ body {
     flex-direction: column;
     height: 180px;
     overflow: hidden;
+    position: relative;
 }
 
 .day-cell:hover {
@@ -321,6 +355,62 @@ body {
     box-shadow: none;
 }
 
+/* Registration Indicators */
+.day-cell.reg-start::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(255, 107, 107, 0.5) 0%, rgba(255, 107, 107, 0.2) 50%, rgba(255, 107, 107, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+    animation: glowPulse 2s infinite;
+}
+
+.day-cell.reg-end::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(255, 71, 87, 0.6) 0%, rgba(255, 71, 87, 0.3) 50%, rgba(255, 71, 87, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+    animation: glowPulse 2s infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.reg-label {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: 700;
+    z-index: 10;
+    box-shadow: 0 3px 10px rgba(255, 107, 107, 0.5);
+    white-space: nowrap;
+}
+
+/* Hidden olympiads in focus mode */
+.day-cell.focus-hidden .olympiad-events-container {
+    opacity: 0.1;
+}
+
 .day-number {
     font-weight: 600;
     color: #eaeaea;
@@ -328,6 +418,8 @@ body {
     font-size: 1.3em;
     flex-shrink: 0;
     line-height: 1;
+    position: relative;
+    z-index: 5;
 }
 
 .day-cell.other-month {
@@ -340,6 +432,8 @@ body {
     overflow-x: hidden;
     padding-right: 5px;
     min-height: 0;
+    position: relative;
+    z-index: 5;
 }
 
 /* Кастомный скроллбар для событий внутри ячеек */
