@@ -3,6 +3,10 @@ let currentYear = 2026;
 let currentMonth = 0;
 let olympiads = JSON.parse(localStorage.getItem('olympiads')) || [];
 let editingOlympiadId = null;
+let isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+// Пароль админа (в реальном проекте хранить на сервере)
+const ADMIN_PASSWORD = 'admin123';
 
 const monthNames = [
     'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -25,13 +29,37 @@ const cancelFormBtn = document.getElementById('cancelFormBtn');
 const registerBtn = document.getElementById('registerBtn');
 const editOlympiadBtn = document.getElementById('editOlympiadBtn');
 const deleteOlympiadBtn = document.getElementById('deleteOlympiadBtn');
+const adminBtn = document.getElementById('adminBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const adminModal = document.getElementById('adminModal');
+const closeAdminModalBtn = document.getElementById('closeAdminModalBtn');
+const adminForm = document.getElementById('adminForm');
+const cancelAdminBtn = document.getElementById('cancelAdminBtn');
+const adminPasswordInput = document.getElementById('adminPasswordInput');
+const adminError = document.getElementById('adminError');
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     initializeMonthCards();
     initializeEventListeners();
     updateMonthHeatMap();
+    updateAdminUI();
 });
+
+// Обновление интерфейса в зависимости от роли
+function updateAdminUI() {
+    const adminElements = document.querySelectorAll('.admin-only');
+    
+    if (isAdmin) {
+        adminElements.forEach(el => el.classList.remove('hidden'));
+        adminBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+    } else {
+        adminElements.forEach(el => el.classList.add('hidden'));
+        adminBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+    }
+}
 
 // Инициализация карточек месяцев
 function initializeMonthCards() {
@@ -88,6 +116,51 @@ function initializeEventListeners() {
     registerBtn.addEventListener('click', handleRegistration);
     editOlympiadBtn.addEventListener('click', handleEdit);
     deleteOlympiadBtn.addEventListener('click', handleDelete);
+    
+    // Админские обработчики
+    adminBtn.addEventListener('click', openAdminModal);
+    logoutBtn.addEventListener('click', handleLogout);
+    closeAdminModalBtn.addEventListener('click', closeAdminModal);
+    cancelAdminBtn.addEventListener('click', closeAdminModal);
+    adminForm.addEventListener('submit', handleAdminLogin);
+}
+
+// Открыть модальное окно авторизации
+function openAdminModal() {
+    adminModal.classList.add('active');
+    adminPasswordInput.value = '';
+    adminError.classList.add('hidden');
+}
+
+// Закрыть модальное окно авторизации
+function closeAdminModal() {
+    adminModal.classList.remove('active');
+}
+
+// Обработка входа админа
+function handleAdminLogin(e) {
+    e.preventDefault();
+    
+    const password = adminPasswordInput.value;
+    
+    if (password === ADMIN_PASSWORD) {
+        isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        closeAdminModal();
+        updateAdminUI();
+        renderAllMonths(); // Перерисовка для обновления кликов на ячейки
+    } else {
+        adminError.classList.remove('hidden');
+    }
+}
+
+// Выход из режима админа
+function handleLogout() {
+    isAdmin = false;
+    localStorage.setItem('isAdmin', 'false');
+    updateAdminUI();
+    closeSidePanel();
+    renderAllMonths(); // Перерисовка для обновления кликов на ячейки
 }
 
 // Открыть календарь месяца
@@ -192,7 +265,8 @@ function createDayCellHTML(day, month) {
         eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
     });
     
-    const clickHandler = `onclick="openOlympiadModal('${dateStr}')"`;
+    // Клик по ячейке доступен только для админа
+    const clickHandler = isAdmin ? `onclick="openOlympiadModal('${dateStr}')"` : '';
     
     return `
         <div class="day-cell" ${clickHandler}>
@@ -251,6 +325,8 @@ function closeSidePanel() {
 
 // Открыть модальное окно
 function openOlympiadModal(dateStr = null) {
+    if (!isAdmin) return; // Только для админа
+    
     editingOlympiadId = null;
     olympiadForm.reset();
     document.getElementById('modalTitle').textContent = 'Добавить олимпиаду';
@@ -271,6 +347,8 @@ function closeOlympiadModal() {
 // Обработка отправки формы
 function handleFormSubmit(e) {
     e.preventDefault();
+    
+    if (!isAdmin) return; // Только для админа
     
     const olympiad = {
         id: editingOlympiadId || Date.now(),
@@ -307,6 +385,8 @@ function handleRegistration() {
 
 // Обработка редактирования
 function handleEdit() {
+    if (!isAdmin) return; // Только для админа
+    
     const olympiadId = parseInt(sidePanel.dataset.olympiadId);
     const olympiad = olympiads.find(o => o.id === olympiadId);
     
@@ -330,6 +410,8 @@ function handleEdit() {
 
 // Обработка удаления
 function handleDelete() {
+    if (!isAdmin) return; // Только для админа
+    
     const olympiadId = parseInt(sidePanel.dataset.olympiadId);
     
     if (confirm('Вы уверены, что хотите удалить эту олимпиаду?')) {
