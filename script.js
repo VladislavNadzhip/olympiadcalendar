@@ -444,13 +444,13 @@ function showDayPanel(dateStr) {
                     <strong>Описание:</strong> ${olympiad.description}
                 </div>` : ''}
                 <div class="detail-item">
-                    <strong>Время:</strong> ${olympiad.time}
+                    <strong>Время:</strong> ${olympiad.time || 'Не установлено'}
                 </div>
                 <div class="detail-item">
                     <strong>Класс:</strong> ${olympiad.grade}
                 </div>
                 <div class="detail-item">
-                    <strong>Место проведения:</strong> ${olympiad.location}
+                    <strong>Место проведения:</strong> ${olympiad.location || 'Не установлено'}
                 </div>
                 ${olympiad.regStart ? `<div class="detail-item">
                     <strong>Начало регистрации:</strong> ${formatDate(olympiad.regStart)}
@@ -519,12 +519,12 @@ function handleEditFromDay(olympiadId) {
         document.getElementById('nameInput').value = olympiad.name;
         document.getElementById('descriptionInput').value = olympiad.description || '';
         document.getElementById('dateInput').value = olympiad.date;
-        document.getElementById('timeInput').value = olympiad.time;
+        document.getElementById('timeInput').value = olympiad.time || '';
         document.getElementById('regStartInput').value = olympiad.regStart || '';
         document.getElementById('regEndInput').value = olympiad.regEnd || '';
         document.getElementById('difficultyInput').value = olympiad.difficulty;
         document.getElementById('gradeInput').value = olympiad.grade;
-        document.getElementById('locationInput').value = olympiad.location;
+        document.getElementById('locationInput').value = olympiad.location || '';
         document.getElementById('websiteInput').value = olympiad.website || '';
         document.getElementById('archiveInput').value = olympiad.archive || '';
         document.getElementById('colorInput').value = olympiad.color || '#667eea';
@@ -567,13 +567,13 @@ function showOlympiadDetails(olympiad) {
     document.getElementById('olympiadName').textContent = olympiad.name;
     document.getElementById('olympiadDescription').textContent = olympiad.description || 'Нет описания';
     document.getElementById('olympiadDate').textContent = formatDate(olympiad.date);
-    document.getElementById('olympiadTime').textContent = olympiad.time;
+    document.getElementById('olympiadTime').textContent = olympiad.time || 'Не установлено';
     document.getElementById('olympiadDifficulty').textContent = olympiad.difficulty;
     document.getElementById('olympiadGrade').textContent = olympiad.grade;
-    document.getElementById('olympiadLocation').textContent = olympiad.location;
+    document.getElementById('olympiadLocation').textContent = olympiad.location || 'Не установлено';
     
-    document.getElementById('olympiadRegStart').textContent = olympiad.regStart ? formatDate(olympiad.regStart) : 'Не указано';
-    document.getElementById('olympiadRegEnd').textContent = olympiad.regEnd ? formatDate(olympiad.regEnd) : 'Не указано';
+    document.getElementById('olympiadRegStart').textContent = olympiad.regStart ? formatDate(olympiad.regStart) : 'Не установлено';
+    document.getElementById('olympiadRegEnd').textContent = olympiad.regEnd ? formatDate(olympiad.regEnd) : 'Не установлено';
     
     const websiteLink = document.getElementById('olympiadWebsite');
     if (olympiad.website) {
@@ -668,12 +668,12 @@ function handleEdit() {
         document.getElementById('nameInput').value = olympiad.name;
         document.getElementById('descriptionInput').value = olympiad.description || '';
         document.getElementById('dateInput').value = olympiad.date;
-        document.getElementById('timeInput').value = olympiad.time;
+        document.getElementById('timeInput').value = olympiad.time || '';
         document.getElementById('regStartInput').value = olympiad.regStart || '';
         document.getElementById('regEndInput').value = olympiad.regEnd || '';
         document.getElementById('difficultyInput').value = olympiad.difficulty;
         document.getElementById('gradeInput').value = olympiad.grade;
-        document.getElementById('locationInput').value = olympiad.location;
+        document.getElementById('locationInput').value = olympiad.location || '';
         document.getElementById('websiteInput').value = olympiad.website || '';
         document.getElementById('archiveInput').value = olympiad.archive || '';
         document.getElementById('colorInput').value = olympiad.color || '#667eea';
