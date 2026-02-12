@@ -13,6 +13,11 @@ const monthNames = [
     'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
 ];
 
+const monthNamesGenitive = [
+    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+];
+
 // DOM элементы
 const yearView = document.getElementById('yearView');
 const monthView = document.getElementById('monthView');
@@ -127,6 +132,30 @@ function initializeEventListeners() {
     closeAdminModalBtn.addEventListener('click', closeAdminModal);
     cancelAdminBtn.addEventListener('click', closeAdminModal);
     adminForm.addEventListener('submit', handleAdminLogin);
+    
+    // Закрытие панелей при клике вне их
+    document.addEventListener('click', handleOutsideClick);
+}
+
+// Обработка клика вне панелей
+function handleOutsideClick(e) {
+    // Проверяем, открыта ли какая-то панель
+    const isSidePanelOpen = sidePanel.classList.contains('active');
+    const isDayPanelOpen = dayPanel.classList.contains('active');
+    
+    if (!isSidePanelOpen && !isDayPanelOpen) return;
+    
+    // Проверяем, что клик не по панелям и не по элементам, которые открывают панели
+    const clickedInsideSidePanel = sidePanel.contains(e.target);
+    const clickedInsideDayPanel = dayPanel.contains(e.target);
+    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
+    const clickedOnDayCell = e.target.closest('.day-cell');
+    
+    // Если клик вне панелей и не по триггерам - закрываем
+    if (!clickedInsideSidePanel && !clickedInsideDayPanel && !clickedOnOlympiadEvent && !clickedOnDayCell) {
+        closeSidePanel();
+        closeDayPanel();
+    }
 }
 
 // Открыть модальное окно авторизации
@@ -306,8 +335,15 @@ function showDayPanel(dateStr) {
     // Закрываем панель отдельной олимпиады если открыта
     closeSidePanel();
     
+    // Форматируем дату и количество олимпиад
+    const date = new Date(dateStr + 'T00:00:00');
+    const day = date.getDate();
+    const monthGenitive = monthNamesGenitive[date.getMonth()];
+    const year = date.getFullYear();
+    const olympiadWord = getOlympiadWord(dayOlympiads.length);
+    
     // Обновляем заголовок
-    document.getElementById('dayPanelTitle').textContent = `${formatDate(dateStr)} - ${dayOlympiads.length} олимпиад`;
+    document.getElementById('dayPanelTitle').innerHTML = `${day} ${monthGenitive} ${year}<br><small style="font-size: 0.7em; font-weight: 400; opacity: 0.9;">${dayOlympiads.length} ${olympiadWord}</small>`;
     
     // Рендерим карточки олимпиад
     dayPanelContent.innerHTML = dayOlympiads.map(olympiad => `
@@ -354,6 +390,26 @@ function showDayPanel(dateStr) {
     dayPanel.classList.add('active');
 }
 
+// Получить правильное склонение слова "олимпиада"
+function getOlympiadWord(count) {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return 'олимпиад';
+    }
+    
+    if (lastDigit === 1) {
+        return 'олимпиада';
+    }
+    
+    if (lastDigit >= 2 && lastDigit <= 4) {
+        return 'олимпиады';
+    }
+    
+    return 'олимпиад';
+}
+
 // Раскрыть/скрыть детали олимпиады в панели дня
 function toggleOlympiadDetails(olympiadId) {
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
@@ -395,12 +451,13 @@ function handleEditFromDay(olympiadId) {
 // Удалить из панели дня
 function handleDeleteFromDay(olympiadId) {
     if (confirm('Вы уверены, что хотите удалить эту олимпиаду?')) {
+        const dateStr = olympiads.find(o => o.id === olympiadId)?.date;
         olympiads = olympiads.filter(o => o.id !== olympiadId);
         localStorage.setItem('olympiads', JSON.stringify(olympiads));
         
         // Обновляем панель дня
-        const dateStr = olympiads.length > 0 ? olympiads[0].date : null;
-        if (dateStr) {
+        const remainingOlympiads = olympiads.filter(o => o.date === dateStr);
+        if (remainingOlympiads.length > 0) {
             showDayPanel(dateStr);
         } else {
             closeDayPanel();
@@ -563,7 +620,7 @@ function handleDelete() {
 function formatDate(dateStr) {
     const date = new Date(dateStr + 'T00:00:00');
     const day = date.getDate();
-    const month = monthNames[date.getMonth()];
+    const month = monthNamesGenitive[date.getMonth()];
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
 }
