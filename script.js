@@ -367,8 +367,8 @@ function createDayCellHTML(day, month) {
     let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        // Двойной клик для входа в режим фокуса
-        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})" ondblclick="event.stopPropagation(); enterFocusMode(${olympiad.id})">${olympiad.name}</div>`;
+        // ОДИНОЧНЫЙ клик открывает панель олимпиады, ДВОЙНОЙ - режим фокуса
+        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})" ondblclick="event.stopPropagation(); enterFocusMode(${olympiad.id})">${olympiad.name}</div>`;
     });
     
     // Определяем класс для скрытия в режиме фокуса
@@ -380,8 +380,10 @@ function createDayCellHTML(day, month) {
         }
     }
     
-    // Клик по ячейке открывает панель дня или модальное окно для админа
-    const clickHandler = isAdmin ? `onclick="handleDayCellClick('${dateStr}', event)"` : `onclick="showDayPanel('${dateStr}')"`;
+    // Клик по ячейке дня открывает панель дня (только если есть олимпиады) или модальное окно для админа
+    const clickHandler = dayOlympiads.length > 0 
+        ? `onclick="handleDayCellClick('${dateStr}', event)"` 
+        : (isAdmin ? `onclick="openOlympiadModal('${dateStr}')"` : '');
     
     return `
         <div class="day-cell${regClass}${focusClass}" ${clickHandler}>
@@ -394,17 +396,10 @@ function createDayCellHTML(day, month) {
     `;
 }
 
-// Обработка клика по ячейке дня
+// Обработка клика по ячейке дня (НЕ по олимпиаде)
 function handleDayCellClick(dateStr, event) {
-    const dayOlympiads = olympiads.filter(o => o.date === dateStr);
-    
-    if (dayOlympiads.length === 0) {
-        // Если олимпиад нет - открыть модальное окно для добавления
-        openOlympiadModal(dateStr);
-    } else {
-        // Если олимпиады есть - показать панель дня
-        showDayPanel(dateStr);
-    }
+    // Клик на саму ячейку (не на олимпиаду) открывает панель дня
+    showDayPanel(dateStr);
 }
 
 // Показать панель дня со всеми олимпиадами
@@ -454,6 +449,12 @@ function showDayPanel(dateStr) {
                 <div class="detail-item">
                     <strong>Место проведения:</strong> ${olympiad.location}
                 </div>
+                ${olympiad.regStart ? `<div class="detail-item">
+                    <strong>Начало регистрации:</strong> ${formatDate(olympiad.regStart)}
+                </div>` : ''}
+                ${olympiad.regEnd ? `<div class="detail-item">
+                    <strong>Конец регистрации:</strong> ${formatDate(olympiad.regEnd)}
+                </div>` : ''}
                 ${olympiad.archive ? `<div class="detail-item">
                     <strong>Архив задач:</strong> <a href="${olympiad.archive}" target="_blank" onclick="event.stopPropagation()">Скачать</a>
                 </div>` : ''}
