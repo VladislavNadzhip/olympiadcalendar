@@ -264,7 +264,7 @@ function handleCityChange() {
     }
 }
 
-// ИЗМЕНЕНО: Обработчик ПКМ - переключает режим фокуса или выключает его
+// Обработчик ПКМ - переключает режим фокуса или выключает его
 function handleRightClick(e) {
     // Проверяем, был ли клик по элементу олимпиады в календаре
     const olympiadEvent = e.target.closest('.olympiad-event');
@@ -433,6 +433,7 @@ function renderMonthDays(month, filteredOlympiads) {
     return html;
 }
 
+// ИЗМЕНЕНО: Используем кастомные метки и цвета из настроек олимпиады
 function createDayCellHTML(day, month, filteredOlympiads) {
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
@@ -444,10 +445,12 @@ function createDayCellHTML(day, month, filteredOlympiads) {
         const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
         if (focusedOlympiad) {
             if (focusedOlympiad.regStart === dateStr) {
-                regLabel = '<div class="reg-label">Начало регистрации</div>';
+                const labelText = focusedOlympiad.focusLabelStart || 'Начало регистрации';
+                regLabel = `<div class="reg-label">${labelText}</div>`;
                 regClass = ' reg-start';
             } else if (focusedOlympiad.regEnd === dateStr) {
-                regLabel = '<div class="reg-label">Конец регистрации</div>';
+                const labelText = focusedOlympiad.focusLabelEnd || 'Конец регистрации';
+                regLabel = `<div class="reg-label">${labelText}</div>`;
                 regClass = ' reg-end';
             }
         }
@@ -456,7 +459,6 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        // ИЗМЕНЕНО: убран ondblclick, оставлен только onclick для открытия деталей
         eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
     });
     
@@ -610,21 +612,7 @@ function handleEditFromDay(olympiadId) {
     closeDayPanel();
     const olympiad = olympiads.find(o => o.id === olympiadId);
     if (olympiad) {
-        editingOlympiadId = olympiadId;
-        document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
-        document.getElementById('nameInput').value = olympiad.name;
-        document.getElementById('descriptionInput').value = olympiad.description || '';
-        document.getElementById('dateInput').value = olympiad.date;
-        document.getElementById('timeInput').value = olympiad.time || '';
-        document.getElementById('regStartInput').value = olympiad.regStart || '';
-        document.getElementById('regEndInput').value = olympiad.regEnd || '';
-        document.getElementById('difficultyInput').value = olympiad.difficulty;
-        document.getElementById('gradeInput').value = olympiad.grade;
-        document.getElementById('locationInput').value = olympiad.location || '';
-        document.getElementById('websiteInput').value = olympiad.website || '';
-        document.getElementById('archiveInput').value = olympiad.archive || '';
-        document.getElementById('colorInput').value = olympiad.color || '#667eea';
-        
+        populateFormForEdit(olympiad);
         olympiadModal.classList.add('active');
     }
 }
@@ -703,6 +691,12 @@ function openOlympiadModal(dateStr = null) {
     olympiadForm.reset();
     document.getElementById('modalTitle').textContent = 'Добавить олимпиаду';
     
+    // Значения по умолчанию для новой олимпиады
+    document.getElementById('focusLabelStartInput').value = '';
+    document.getElementById('focusColorStartInput').value = '#ff6b6b';
+    document.getElementById('focusLabelEndInput').value = '';
+    document.getElementById('focusColorEndInput').value = '#ff4757';
+    
     if (dateStr) {
         document.getElementById('dateInput').value = dateStr;
     }
@@ -715,6 +709,29 @@ function closeOlympiadModal() {
     editingOlympiadId = null;
 }
 
+// НОВАЯ ФУНКЦИЯ: Заполнение формы при редактировании
+function populateFormForEdit(olympiad) {
+    editingOlympiadId = olympiad.id;
+    document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
+    document.getElementById('nameInput').value = olympiad.name;
+    document.getElementById('descriptionInput').value = olympiad.description || '';
+    document.getElementById('dateInput').value = olympiad.date;
+    document.getElementById('timeInput').value = olympiad.time || '';
+    document.getElementById('regStartInput').value = olympiad.regStart || '';
+    document.getElementById('regEndInput').value = olympiad.regEnd || '';
+    document.getElementById('focusLabelStartInput').value = olympiad.focusLabelStart || '';
+    document.getElementById('focusColorStartInput').value = olympiad.focusColorStart || '#ff6b6b';
+    document.getElementById('focusLabelEndInput').value = olympiad.focusLabelEnd || '';
+    document.getElementById('focusColorEndInput').value = olympiad.focusColorEnd || '#ff4757';
+    document.getElementById('difficultyInput').value = olympiad.difficulty;
+    document.getElementById('gradeInput').value = olympiad.grade;
+    document.getElementById('locationInput').value = olympiad.location || '';
+    document.getElementById('websiteInput').value = olympiad.website || '';
+    document.getElementById('archiveInput').value = olympiad.archive || '';
+    document.getElementById('colorInput').value = olympiad.color || '#667eea';
+}
+
+// ИЗМЕНЕНО: Сохраняем кастомные метки и цвета
 function handleFormSubmit(e) {
     e.preventDefault();
     
@@ -728,6 +745,10 @@ function handleFormSubmit(e) {
         time: document.getElementById('timeInput').value,
         regStart: document.getElementById('regStartInput').value,
         regEnd: document.getElementById('regEndInput').value,
+        focusLabelStart: document.getElementById('focusLabelStartInput').value,
+        focusColorStart: document.getElementById('focusColorStartInput').value,
+        focusLabelEnd: document.getElementById('focusLabelEndInput').value,
+        focusColorEnd: document.getElementById('focusColorEndInput').value,
         difficulty: document.getElementById('difficultyInput').value,
         grade: document.getElementById('gradeInput').value,
         location: document.getElementById('locationInput').value,
@@ -759,22 +780,8 @@ function handleEdit() {
     const olympiad = olympiads.find(o => o.id === olympiadId);
     
     if (olympiad) {
-        editingOlympiadId = olympiadId;
-        document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
-        document.getElementById('nameInput').value = olympiad.name;
-        document.getElementById('descriptionInput').value = olympiad.description || '';
-        document.getElementById('dateInput').value = olympiad.date;
-        document.getElementById('timeInput').value = olympiad.time || '';
-        document.getElementById('regStartInput').value = olympiad.regStart || '';
-        document.getElementById('regEndInput').value = olympiad.regEnd || '';
-        document.getElementById('difficultyInput').value = olympiad.difficulty;
-        document.getElementById('gradeInput').value = olympiad.grade;
-        document.getElementById('locationInput').value = olympiad.location || '';
-        document.getElementById('websiteInput').value = olympiad.website || '';
-        document.getElementById('archiveInput').value = olympiad.archive || '';
-        document.getElementById('colorInput').value = olympiad.color || '#667eea';
-        
         closeSidePanel();
+        populateFormForEdit(olympiad);
         olympiadModal.classList.add('active');
     }
 }
