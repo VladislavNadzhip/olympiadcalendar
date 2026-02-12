@@ -21,6 +21,9 @@ const currentMonthTitle = document.getElementById('currentMonthTitle');
 const monthsScrollContainer = document.getElementById('monthsScrollContainer');
 const sidePanel = document.getElementById('sidePanel');
 const closePanelBtn = document.getElementById('closePanelBtn');
+const dayPanel = document.getElementById('dayPanel');
+const closeDayPanelBtn = document.getElementById('closeDayPanelBtn');
+const dayPanelContent = document.getElementById('dayPanelContent');
 const addOlympiadBtn = document.getElementById('addOlympiadBtn');
 const olympiadModal = document.getElementById('olympiadModal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -109,6 +112,7 @@ function updateMonthHeatMap() {
 function initializeEventListeners() {
     backBtn.addEventListener('click', closeMonthView);
     closePanelBtn.addEventListener('click', closeSidePanel);
+    closeDayPanelBtn.addEventListener('click', closeDayPanel);
     addOlympiadBtn.addEventListener('click', () => openOlympiadModal());
     closeModalBtn.addEventListener('click', closeOlympiadModal);
     cancelFormBtn.addEventListener('click', closeOlympiadModal);
@@ -160,6 +164,7 @@ function handleLogout() {
     localStorage.setItem('isAdmin', 'false');
     updateAdminUI();
     closeSidePanel();
+    closeDayPanel();
     renderAllMonths(); // Перерисовка для обновления кликов на ячейки
 }
 
@@ -185,6 +190,7 @@ function closeMonthView() {
     monthView.classList.add('hidden');
     yearView.classList.remove('hidden');
     closeSidePanel();
+    closeDayPanel();
     updateMonthHeatMap();
 }
 
@@ -262,11 +268,11 @@ function createDayCellHTML(day, month) {
     
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
+        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
     });
     
-    // Клик по ячейке доступен только для админа
-    const clickHandler = isAdmin ? `onclick="openOlympiadModal('${dateStr}')"` : '';
+    // Клик по ячейке открывает панель дня или модальное окно для админа
+    const clickHandler = isAdmin ? `onclick="handleDayCellClick('${dateStr}', event)"` : `onclick="showDayPanel('${dateStr}')"`;
     
     return `
         <div class="day-cell" ${clickHandler}>
@@ -276,6 +282,133 @@ function createDayCellHTML(day, month) {
             </div>
         </div>
     `;
+}
+
+// Обработка клика по ячейке дня
+function handleDayCellClick(dateStr, event) {
+    const dayOlympiads = olympiads.filter(o => o.date === dateStr);
+    
+    if (dayOlympiads.length === 0) {
+        // Если олимпиад нет - открыть модальное окно для добавления
+        openOlympiadModal(dateStr);
+    } else {
+        // Если олимпиады есть - показать панель дня
+        showDayPanel(dateStr);
+    }
+}
+
+// Показать панель дня со всеми олимпиадами
+function showDayPanel(dateStr) {
+    const dayOlympiads = olympiads.filter(o => o.date === dateStr);
+    
+    if (dayOlympiads.length === 0) return;
+    
+    // Закрываем панель отдельной олимпиады если открыта
+    closeSidePanel();
+    
+    // Обновляем заголовок
+    document.getElementById('dayPanelTitle').textContent = `${formatDate(dateStr)} - ${dayOlympiads.length} олимпиад`;
+    
+    // Рендерим карточки олимпиад
+    dayPanelContent.innerHTML = dayOlympiads.map(olympiad => `
+        <div class="day-olympiad-card" data-olympiad-id="${olympiad.id}">
+            <div class="day-olympiad-header" onclick="toggleOlympiadDetails(${olympiad.id})">
+                <div class="day-olympiad-title">
+                    <div class="day-olympiad-color" style="background-color: ${olympiad.color || '#4a5ab3'}"></div>
+                    <span>${olympiad.name}</span>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="day-olympiad-preview">
+                <div class="preview-item">
+                    <strong>Сложность:</strong> ${olympiad.difficulty}
+                </div>
+                ${olympiad.website ? `<div class="preview-item">
+                    <strong>Сайт:</strong> <a href="${olympiad.website}" target="_blank" onclick="event.stopPropagation()">${olympiad.website}</a>
+                </div>` : ''}
+            </div>
+            <div class="day-olympiad-details hidden">
+                <div class="detail-item">
+                    <strong>Время:</strong> ${olympiad.time}
+                </div>
+                <div class="detail-item">
+                    <strong>Класс:</strong> ${olympiad.grade}
+                </div>
+                <div class="detail-item">
+                    <strong>Место проведения:</strong> ${olympiad.location}
+                </div>
+                ${olympiad.archive ? `<div class="detail-item">
+                    <strong>Архив задач:</strong> <a href="${olympiad.archive}" target="_blank" onclick="event.stopPropagation()">Скачать</a>
+                </div>` : ''}
+                <button class="register-btn-compact" onclick="event.stopPropagation(); handleRegistration()">Записаться</button>
+                ${isAdmin ? `
+                    <div class="admin-actions-compact">
+                        <button class="edit-btn-compact" onclick="event.stopPropagation(); handleEditFromDay(${olympiad.id})">Редактировать</button>
+                        <button class="delete-btn-compact" onclick="event.stopPropagation(); handleDeleteFromDay(${olympiad.id})">Удалить</button>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    dayPanel.classList.add('active');
+}
+
+// Раскрыть/скрыть детали олимпиады в панели дня
+function toggleOlympiadDetails(olympiadId) {
+    const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
+    if (!card) return;
+    
+    const details = card.querySelector('.day-olympiad-details');
+    const icon = card.querySelector('.expand-icon');
+    
+    details.classList.toggle('hidden');
+    icon.style.transform = details.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+// Закрыть панель дня
+function closeDayPanel() {
+    dayPanel.classList.remove('active');
+}
+
+// Редактировать из панели дня
+function handleEditFromDay(olympiadId) {
+    closeDayPanel();
+    const olympiad = olympiads.find(o => o.id === olympiadId);
+    if (olympiad) {
+        editingOlympiadId = olympiadId;
+        document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
+        document.getElementById('nameInput').value = olympiad.name;
+        document.getElementById('dateInput').value = olympiad.date;
+        document.getElementById('timeInput').value = olympiad.time;
+        document.getElementById('difficultyInput').value = olympiad.difficulty;
+        document.getElementById('gradeInput').value = olympiad.grade;
+        document.getElementById('locationInput').value = olympiad.location;
+        document.getElementById('websiteInput').value = olympiad.website || '';
+        document.getElementById('archiveInput').value = olympiad.archive || '';
+        document.getElementById('colorInput').value = olympiad.color || '#667eea';
+        
+        olympiadModal.classList.add('active');
+    }
+}
+
+// Удалить из панели дня
+function handleDeleteFromDay(olympiadId) {
+    if (confirm('Вы уверены, что хотите удалить эту олимпиаду?')) {
+        olympiads = olympiads.filter(o => o.id !== olympiadId);
+        localStorage.setItem('olympiads', JSON.stringify(olympiads));
+        
+        // Обновляем панель дня
+        const dateStr = olympiads.length > 0 ? olympiads[0].date : null;
+        if (dateStr) {
+            showDayPanel(dateStr);
+        } else {
+            closeDayPanel();
+        }
+        
+        renderAllMonths();
+        updateMonthHeatMap();
+    }
 }
 
 // Показать детали олимпиады по ID
@@ -288,6 +421,9 @@ function showOlympiadDetailsById(olympiadId) {
 
 // Показать детали олимпиады
 function showOlympiadDetails(olympiad) {
+    // Закрываем панель дня если открыта
+    closeDayPanel();
+    
     document.getElementById('olympiadName').textContent = olympiad.name;
     document.getElementById('olympiadDate').textContent = formatDate(olympiad.date);
     document.getElementById('olympiadTime').textContent = olympiad.time;
