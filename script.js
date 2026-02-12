@@ -6,6 +6,7 @@ let olympiads = JSON.parse(localStorage.getItem(`olympiads_${currentCity}`)) || 
 let editingOlympiadId = null;
 let isAdmin = localStorage.getItem('isAdmin') === 'true';
 let focusedOlympiadId = null;
+let expandedOlympiads = new Set(); // НОВОЕ: хранение раскрытых олимпиад
 
 // Фильтры
 let currentFilter = {
@@ -125,11 +126,11 @@ function initializeEventListeners() {
     document.addEventListener('click', handleOutsideClick);
     document.addEventListener('contextmenu', handleRightClick);
     
-    // НОВОЕ: Делегирование событий для Day Panel
+    // Делегирование событий для Day Panel
     dayPanel.addEventListener('click', handleDayPanelClick);
 }
 
-// НОВОЕ: Обработчик кликов внутри Day Panel
+// Обработчик кликов внутри Day Panel
 function handleDayPanelClick(e) {
     // Обработка клика по хедеру карточки олимпиады
     const header = e.target.closest('.day-olympiad-header');
@@ -475,15 +476,20 @@ function showDayPanel(dateStr) {
     
     document.getElementById('dayPanelTitle').innerHTML = `${day} ${monthGenitive} ${year}<br><small style="font-size: 0.7em; font-weight: 400; opacity: 0.9;">${dayOlympiads.length} ${olympiadWord}</small>`;
     
-    // ИЗМЕНЕНО: убраны все inline onclick обработчики
-    dayPanelContent.innerHTML = dayOlympiads.map(olympiad => `
+    // ИЗМЕНЕНО: учитываем состояние раскрытия из expandedOlympiads
+    dayPanelContent.innerHTML = dayOlympiads.map(olympiad => {
+        const isExpanded = expandedOlympiads.has(olympiad.id);
+        const detailsClass = isExpanded ? '' : 'hidden';
+        const iconRotation = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+        
+        return `
         <div class="day-olympiad-card" data-olympiad-id="${olympiad.id}">
             <div class="day-olympiad-header">
                 <div class="day-olympiad-title">
                     <div class="day-olympiad-color" style="background-color: ${olympiad.color || '#4a5ab3'}"></div>
                     <span>${olympiad.name}</span>
                 </div>
-                <span class="expand-icon">▼</span>
+                <span class="expand-icon" style="transform: ${iconRotation}">▼</span>
             </div>
             <div class="day-olympiad-preview">
                 <div class="preview-item">
@@ -493,7 +499,7 @@ function showDayPanel(dateStr) {
                     <strong>Сайт:</strong> <a href="${olympiad.website}" target="_blank">${olympiad.website}</a>
                 </div>` : ''}
             </div>
-            <div class="day-olympiad-details hidden">
+            <div class="day-olympiad-details ${detailsClass}">
                 ${olympiad.description ? `<div class="detail-item">
                     <strong>Описание:</strong> ${olympiad.description}
                 </div>` : ''}
@@ -524,7 +530,8 @@ function showDayPanel(dateStr) {
                 ` : ''}
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
     
     dayPanel.classList.add('active');
 }
@@ -548,7 +555,7 @@ function getOlympiadWord(count) {
     return 'олимпиад';
 }
 
-// ИЗМЕНЕНО: упрощена функция, убран window
+// ИЗМЕНЕНО: сохранение состояния в expandedOlympiads
 function toggleOlympiadDetails(olympiadId) {
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     if (!card) return;
@@ -556,12 +563,23 @@ function toggleOlympiadDetails(olympiadId) {
     const details = card.querySelector('.day-olympiad-details');
     const icon = card.querySelector('.expand-icon');
     
-    details.classList.toggle('hidden');
-    icon.style.transform = details.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+    const isCurrentlyHidden = details.classList.contains('hidden');
+    
+    if (isCurrentlyHidden) {
+        details.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+        expandedOlympiads.add(olympiadId);
+    } else {
+        details.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+        expandedOlympiads.delete(olympiadId);
+    }
 }
 
 function closeDayPanel() {
     dayPanel.classList.remove('active');
+    // ИЗМЕНЕНО: очищаем expandedOlympiads при закрытии панели
+    expandedOlympiads.clear();
 }
 
 function handleEditFromDay(olympiadId) {
