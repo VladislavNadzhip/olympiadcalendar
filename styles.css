@@ -406,6 +406,32 @@ body {
     right: 0;
 }
 
+/* Кастомный скроллбар для боковой панели */
+.side-panel::-webkit-scrollbar {
+    width: 10px;
+}
+
+.side-panel::-webkit-scrollbar-track {
+    background: #1a1a2e;
+    border-radius: 10px;
+}
+
+.side-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.side-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
+}
+
+/* Для Firefox */
+.side-panel {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea #1a1a2e;
+}
+
 .panel-header {
     display: flex;
     justify-content: space-between;
@@ -510,6 +536,169 @@ body {
 }
 
 .delete-btn:hover {
+    background: #ee3344;
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+}
+
+/* Day Panel - карточки олимпиад дня */
+.day-olympiad-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    border: 2px solid #3d3d54;
+    transition: all 0.3s ease;
+}
+
+.day-olympiad-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.day-olympiad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    background: #2d2d44;
+    transition: background 0.2s ease;
+}
+
+.day-olympiad-header:hover {
+    background: #3d3d54;
+}
+
+.day-olympiad-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #eaeaea;
+}
+
+.day-olympiad-color {
+    width: 8px;
+    height: 30px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.expand-icon {
+    font-size: 1.2em;
+    color: #667eea;
+    transition: transform 0.3s ease;
+}
+
+.day-olympiad-preview {
+    padding: 15px 20px;
+    padding-left: 52px;
+    background: #1a1a2e;
+}
+
+.preview-item {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    color: #ccc;
+}
+
+.preview-item strong {
+    color: #999;
+    margin-right: 8px;
+}
+
+.preview-item a {
+    color: #667eea;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.preview-item a:hover {
+    text-decoration: underline;
+}
+
+.day-olympiad-details {
+    padding: 15px 20px;
+    padding-left: 52px;
+    background: #1a1a2e;
+    border-top: 1px solid #3d3d54;
+}
+
+.detail-item {
+    margin-bottom: 12px;
+    font-size: 0.95em;
+    color: #ccc;
+}
+
+.detail-item strong {
+    color: #999;
+    margin-right: 8px;
+}
+
+.detail-item a {
+    color: #667eea;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.detail-item a:hover {
+    text-decoration: underline;
+}
+
+.register-btn-compact {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+.register-btn-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.admin-actions-compact {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.edit-btn-compact, .delete-btn-compact {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-btn-compact {
+    background: #3d3d54;
+    color: #eaeaea;
+    border: 2px solid #4d4d64;
+}
+
+.edit-btn-compact:hover {
+    background: #4d4d64;
+    border-color: #667eea;
+}
+
+.delete-btn-compact {
+    background: #ff4757;
+    color: white;
+}
+
+.delete-btn-compact:hover {
     background: #ee3344;
     box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
 }
