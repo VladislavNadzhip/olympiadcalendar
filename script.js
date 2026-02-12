@@ -102,6 +102,87 @@ function updateAdminUI() {
     }
 }
 
+// ИСПРАВЛЕНО: Объединены обработчики кликов в один
+function handleGlobalClick(e) {
+    // ПРИОРИТЕТ 1: Обработка кликов внутри dayPanel (для динамически созданных элементов)
+    if (dayPanel.contains(e.target)) {
+        // Обработка клика по хедеру карточки олимпиады
+        const header = e.target.closest('.day-olympiad-header');
+        if (header) {
+            e.stopPropagation();
+            const card = header.closest('.day-olympiad-card');
+            if (card) {
+                const olympiadId = parseInt(card.dataset.olympiadId);
+                console.log('Клик по хедеру карточки, olympiadId:', olympiadId);
+                toggleOlympiadDetails(olympiadId);
+            }
+            return;
+        }
+        
+        // Обработка кнопки регистрации
+        if (e.target.classList.contains('register-btn-compact')) {
+            e.stopPropagation();
+            handleRegistration();
+            return;
+        }
+        
+        // Обработка кнопки редактирования
+        if (e.target.classList.contains('edit-btn-compact')) {
+            e.stopPropagation();
+            const card = e.target.closest('.day-olympiad-card');
+            if (card) {
+                const olympiadId = parseInt(card.dataset.olympiadId);
+                handleEditFromDay(olympiadId);
+            }
+            return;
+        }
+        
+        // Обработка кнопки удаления
+        if (e.target.classList.contains('delete-btn-compact')) {
+            e.stopPropagation();
+            const card = e.target.closest('.day-olympiad-card');
+            if (card) {
+                const olympiadId = parseInt(card.dataset.olympiadId);
+                handleDeleteFromDay(olympiadId);
+            }
+            return;
+        }
+        
+        // Обработка ссылок - не блокируем
+        if (e.target.tagName === 'A') {
+            e.stopPropagation();
+            return;
+        }
+        
+        // Если клик внутри dayPanel, но не обработан выше - не закрываем панель
+        return;
+    }
+    
+    // ПРИОРИТЕТ 2: Проверка кликов вне панелей (handleOutsideClick)
+    const isSidePanelOpen = sidePanel.classList.contains('active');
+    const isDayPanelOpen = dayPanel.classList.contains('active');
+    
+    if (!isSidePanelOpen && !isDayPanelOpen) return;
+    
+    const clickedInsideSidePanel = sidePanel.contains(e.target);
+    const clickedInsideDayPanel = dayPanel.contains(e.target);
+    
+    if (clickedInsideSidePanel || clickedInsideDayPanel) return;
+    
+    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
+    if (clickedOnOlympiadEvent) return;
+    
+    const clickedDayCell = e.target.closest('.day-cell:not(.empty-cell)');
+    if (clickedDayCell) {
+        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
+        if (clickedInsideEvents) return;
+        return;
+    }
+    
+    closeSidePanel();
+    closeDayPanel();
+}
+
 // Инициализация обработчиков
 function initializeEventListeners() {
     closePanelBtn.addEventListener('click', closeSidePanel);
@@ -127,62 +208,10 @@ function initializeEventListeners() {
     resetFilterBtn.addEventListener('click', resetFilter);
     citySelect.addEventListener('change', handleCityChange);
     
-    document.addEventListener('click', handleOutsideClick);
+    // ИСПРАВЛЕНО: Используем единый обработчик кликов
+    document.addEventListener('click', handleGlobalClick);
     document.addEventListener('contextmenu', handleRightClick);
 }
-
-// ИЗМЕНЕНО: Используем делегирование через document для динамически созданных элементов
-document.addEventListener('click', function(e) {
-    // Проверяем, что клик внутри dayPanel
-    if (!dayPanel.contains(e.target)) return;
-    
-    // Обработка клика по хедеру карточки олимпиады
-    const header = e.target.closest('.day-olympiad-header');
-    if (header) {
-        e.stopPropagation();
-        const card = header.closest('.day-olympiad-card');
-        if (card) {
-            const olympiadId = parseInt(card.dataset.olympiadId);
-            toggleOlympiadDetails(olympiadId);
-        }
-        return;
-    }
-    
-    // Обработка кнопки регистрации
-    if (e.target.classList.contains('register-btn-compact')) {
-        e.stopPropagation();
-        handleRegistration();
-        return;
-    }
-    
-    // Обработка кнопки редактирования
-    if (e.target.classList.contains('edit-btn-compact')) {
-        e.stopPropagation();
-        const card = e.target.closest('.day-olympiad-card');
-        if (card) {
-            const olympiadId = parseInt(card.dataset.olympiadId);
-            handleEditFromDay(olympiadId);
-        }
-        return;
-    }
-    
-    // Обработка кнопки удаления
-    if (e.target.classList.contains('delete-btn-compact')) {
-        e.stopPropagation();
-        const card = e.target.closest('.day-olympiad-card');
-        if (card) {
-            const olympiadId = parseInt(card.dataset.olympiadId);
-            handleDeleteFromDay(olympiadId);
-        }
-        return;
-    }
-    
-    // Обработка ссылок - не блокируем
-    if (e.target.tagName === 'A') {
-        e.stopPropagation();
-        return;
-    }
-});
 
 // Фильтрация олимпиад
 function getFilteredOlympiads() {
@@ -315,31 +344,6 @@ function exitFocusMode() {
     focusedOlympiadId = null;
     focusHint.classList.add('hidden');
     renderAllMonths();
-}
-
-function handleOutsideClick(e) {
-    const isSidePanelOpen = sidePanel.classList.contains('active');
-    const isDayPanelOpen = dayPanel.classList.contains('active');
-    
-    if (!isSidePanelOpen && !isDayPanelOpen) return;
-    
-    const clickedInsideSidePanel = sidePanel.contains(e.target);
-    const clickedInsideDayPanel = dayPanel.contains(e.target);
-    
-    if (clickedInsideSidePanel || clickedInsideDayPanel) return;
-    
-    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
-    if (clickedOnOlympiadEvent) return;
-    
-    const clickedDayCell = e.target.closest('.day-cell:not(.empty-cell)');
-    if (clickedDayCell) {
-        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
-        if (clickedInsideEvents) return;
-        return;
-    }
-    
-    closeSidePanel();
-    closeDayPanel();
 }
 
 function openAdminModal() {
@@ -630,22 +634,28 @@ function getOlympiadWord(count) {
 }
 
 function toggleOlympiadDetails(olympiadId) {
+    console.log('toggleOlympiadDetails вызван для ID:', olympiadId);
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
+    console.log('Найдена карточка:', card);
     if (!card) return;
     
     const details = card.querySelector('.day-olympiad-details');
     const icon = card.querySelector('.expand-icon');
+    console.log('Details элемент:', details, 'Icon элемент:', icon);
     
     const isCurrentlyHidden = details.classList.contains('hidden');
+    console.log('Текущее состояние hidden:', isCurrentlyHidden);
     
     if (isCurrentlyHidden) {
         details.classList.remove('hidden');
         icon.style.transform = 'rotate(180deg)';
         expandedOlympiads.add(olympiadId);
+        console.log('Раскрыто, expandedOlympiads:', expandedOlympiads);
     } else {
         details.classList.add('hidden');
         icon.style.transform = 'rotate(0deg)';
         expandedOlympiads.delete(olympiadId);
+        console.log('Свернуто, expandedOlympiads:', expandedOlympiads);
     }
 }
 
