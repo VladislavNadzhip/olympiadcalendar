@@ -70,9 +70,26 @@
         <!-- Month View: календарь выбранного месяца -->
         <div id="monthView" class="month-view hidden">
             <div class="month-header">
-                <button id="backBtn" class="back-btn">← Назад к году</button>
-                <h2 id="currentMonthTitle"></h2>
-                <button id="addOlympiadBtn" class="add-btn admin-only hidden">+ Добавить олимпиаду</button>
+                <div class="header-left">
+                    <button id="backBtn" class="back-btn">← Назад к году</button>
+                    <h2 id="currentMonthTitle"></h2>
+                </div>
+                <div class="header-center">
+                    <div class="city-selector">
+                        <label for="citySelect">🏙️ Город:</label>
+                        <select id="citySelect">
+                            <option value="Москва">Москва</option>
+                            <option value="Санкт-Петербург">Санкт-Петербург</option>
+                            <option value="Казань">Казань</option>
+                            <option value="Новосибирск">Новосибирск</option>
+                            <option value="Екатеринбург">Екатеринбург</option>
+                        </select>
+                    </div>
+                    <button id="filterBtn" class="filter-btn">📊 Фильтр</button>
+                </div>
+                <div class="header-right">
+                    <button id="addOlympiadBtn" class="add-btn admin-only hidden">+ Добавить олимпиаду</button>
+                </div>
             </div>
             <!-- Подсказка для выхода из режима фокуса -->
             <div id="focusHint" class="focus-hint hidden">
@@ -130,7 +147,7 @@
                     <label>Задачи прошлых лет:</label>
                     <a id="olympiadArchive" href="#" target="_blank">Скачать</a>
                 </div>
-                <button id="registerBtn" class="register-btn">Записаться на олимпиаду</button>
+                <button id="registerBtn" class="register-btn">Регистрация на олимпиаду</button>
                 <button id="editOlympiadBtn" class="edit-btn admin-only hidden">Редактировать</button>
                 <button id="deleteOlympiadBtn" class="delete-btn admin-only hidden">Удалить</button>
             </div>
@@ -145,6 +162,47 @@
         </div>
         <div class="panel-content" id="dayPanelContent">
             <!-- Олимпиады будут рендериться здесь -->
+        </div>
+    </div>
+
+    <!-- Modal для фильтра -->
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Фильтр олимпиад</h3>
+                <button id="closeFilterModalBtn" class="close-btn">×</button>
+            </div>
+            <div class="filter-form">
+                <div class="form-group">
+                    <label>Сложность:</label>
+                    <div class="filter-range">
+                        <select id="difficultyFromSelect">
+                            <option value="">Любая</option>
+                            <option value="Легкая">Легкая</option>
+                            <option value="Средняя">Средняя</option>
+                            <option value="Сложная">Сложная</option>
+                            <option value="Очень сложная">Очень сложная</option>
+                        </select>
+                        <span>—</span>
+                        <select id="difficultyToSelect">
+                            <option value="">Любая</option>
+                            <option value="Легкая">Легкая</option>
+                            <option value="Средняя">Средняя</option>
+                            <option value="Сложная">Сложная</option>
+                            <option value="Очень сложная">Очень сложная</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="gradeFilterInput">Класс школьника:</label>
+                    <input type="number" id="gradeFilterInput" placeholder="Например: 9" min="1" max="11">
+                    <small>Оставьте пустым для показа всех</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="resetFilterBtn" class="cancel-btn">Сбросить</button>
+                    <button type="button" id="applyFilterBtn" class="submit-btn">Применить</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -203,7 +261,7 @@
                     <input type="url" id="archiveInput" placeholder="https://example.com/archive">
                 </div>
                 <div class="form-group">
-                    <label for="colorInput">Цвет метки:</label>
+                    <label for="colorInput">Цвет плашки олимпиады:</label>
                     <input type="color" id="colorInput" value="#4A90E2">
                 </div>
                 <div class="form-actions">
