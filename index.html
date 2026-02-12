@@ -74,6 +74,11 @@
                 <h2 id="currentMonthTitle"></h2>
                 <button id="addOlympiadBtn" class="add-btn admin-only hidden">+ Добавить олимпиаду</button>
             </div>
+            <!-- Подсказка для выхода из режима фокуса -->
+            <div id="focusHint" class="focus-hint hidden">
+                <span>📍 Режим фокуса на олимпиаде</span>
+                <span class="hint-text">Нажмите ПКМ для выхода</span>
+            </div>
             <div id="monthsScrollContainer" class="months-scroll-container">
                 <!-- Месяцы будут рендериться здесь -->
             </div>
@@ -108,6 +113,14 @@
                 <div class="info-field">
                     <label>Место проведения:</label>
                     <span id="olympiadLocation"></span>
+                </div>
+                <div class="info-field">
+                    <label>Начало регистрации:</label>
+                    <span id="olympiadRegStart"></span>
+                </div>
+                <div class="info-field">
+                    <label>Конец регистрации:</label>
+                    <span id="olympiadRegEnd"></span>
                 </div>
                 <div class="info-field">
                     <label>Сайт олимпиады:</label>
@@ -148,12 +161,20 @@
                     <input type="text" id="nameInput" required>
                 </div>
                 <div class="form-group">
-                    <label for="dateInput">Дата:</label>
+                    <label for="dateInput">Дата олимпиады:</label>
                     <input type="date" id="dateInput" required>
                 </div>
                 <div class="form-group">
                     <label for="timeInput">Время:</label>
                     <input type="time" id="timeInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="regStartInput">Начало регистрации:</label>
+                    <input type="date" id="regStartInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEndInput">Конец регистрации:</label>
+                    <input type="date" id="regEndInput" required>
                 </div>
                 <div class="form-group">
                     <label for="difficultyInput">Сложность:</label>
