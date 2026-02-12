@@ -35,9 +35,7 @@ const difficultyLevels = {
 };
 
 // DOM элементы
-const yearView = document.getElementById('yearView');
 const monthView = document.getElementById('monthView');
-const backBtn = document.getElementById('backBtn');
 const currentMonthTitle = document.getElementById('currentMonthTitle');
 const monthsScrollContainer = document.getElementById('monthsScrollContainer');
 const sidePanel = document.getElementById('sidePanel');
@@ -76,10 +74,9 @@ const citySelect = document.getElementById('citySelect');
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
-    initializeMonthCards();
     initializeEventListeners();
-    updateMonthHeatMap();
     updateAdminUI();
+    renderAllMonths();
     
     // Устанавливаем текущий город
     citySelect.value = currentCity;
@@ -100,50 +97,8 @@ function updateAdminUI() {
     }
 }
 
-// Инициализация карточек месяцев
-function initializeMonthCards() {
-    const monthCards = document.querySelectorAll('.month-card');
-    monthCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const month = parseInt(card.dataset.month);
-            openMonthView(month);
-        });
-    });
-}
-
-// Обновление тепловой карты
-function updateMonthHeatMap() {
-    const monthCards = document.querySelectorAll('.month-card');
-    
-    monthCards.forEach(card => {
-        const month = parseInt(card.dataset.month);
-        const monthOlympiads = olympiads.filter(o => {
-            const olympiadDate = new Date(o.date + 'T00:00:00');
-            return olympiadDate.getMonth() === month && olympiadDate.getFullYear() === currentYear;
-        });
-        
-        const count = monthOlympiads.length;
-        
-        card.classList.remove('heat-1', 'heat-2', 'heat-3', 'heat-4', 'heat-5');
-        
-        if (count > 0) {
-            const heatLevel = Math.min(5, Math.ceil(count / 2));
-            card.classList.add(`heat-${heatLevel}`);
-        }
-        
-        let countElement = card.querySelector('.month-count');
-        if (!countElement) {
-            countElement = document.createElement('div');
-            countElement.className = 'month-count';
-            card.appendChild(countElement);
-        }
-        countElement.textContent = count > 0 ? `Олимпиад: ${count}` : '';
-    });
-}
-
 // Инициализация обработчиков
 function initializeEventListeners() {
-    backBtn.addEventListener('click', closeMonthView);
     closePanelBtn.addEventListener('click', closeSidePanel);
     closeDayPanelBtn.addEventListener('click', closeDayPanel);
     addOlympiadBtn.addEventListener('click', () => openOlympiadModal());
@@ -190,7 +145,6 @@ function getFilteredOlympiads() {
             const gradeStr = olympiad.grade.toLowerCase();
             const targetGrade = currentFilter.grade;
             
-            // Проверяем разные форматы: "9 класс", "9-11", "9,10,11" и т.д.
             if (!gradeStr.includes(targetGrade.toString())) {
                 return false;
             }
@@ -201,7 +155,6 @@ function getFilteredOlympiads() {
 }
 
 function openFilterModal() {
-    // Восстанавливаем текущие значения
     difficultyFromSelect.value = currentFilter.difficultyFrom;
     difficultyToSelect.value = currentFilter.difficultyTo;
     gradeFilterInput.value = currentFilter.grade || '';
@@ -220,7 +173,6 @@ function applyFilter() {
     
     closeFilterModal();
     renderAllMonths();
-    updateMonthHeatMap();
 }
 
 function resetFilter() {
@@ -236,7 +188,6 @@ function resetFilter() {
     
     closeFilterModal();
     renderAllMonths();
-    updateMonthHeatMap();
 }
 
 // Смена города
@@ -244,24 +195,18 @@ function handleCityChange() {
     const newCity = citySelect.value;
     
     if (newCity !== currentCity) {
-        // Сохраняем текущие олимпиады
         localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
         
-        // Переключаемся на новый город
         currentCity = newCity;
         localStorage.setItem('currentCity', currentCity);
         
-        // Загружаем олимпиады нового города
         olympiads = JSON.parse(localStorage.getItem(`olympiads_${currentCity}`)) || [];
         
-        // Сбрасываем фокус и панели
         exitFocusMode();
         closeSidePanel();
         closeDayPanel();
         
-        // Обновляем календарь
         renderAllMonths();
-        updateMonthHeatMap();
     }
 }
 
@@ -349,34 +294,9 @@ function handleLogout() {
     renderAllMonths();
 }
 
-function openMonthView(month) {
-    currentMonth = month;
-    yearView.classList.add('hidden');
-    monthView.classList.remove('hidden');
-    currentMonthTitle.textContent = `${monthNames[month]} ${currentYear}`;
-    renderAllMonths();
-    
-    setTimeout(() => {
-        const monthWrapper = document.getElementById(`month-${month}`);
-        if (monthWrapper) {
-            monthWrapper.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, 100);
-}
-
-function closeMonthView() {
-    monthView.classList.add('hidden');
-    yearView.classList.remove('hidden');
-    closeSidePanel();
-    closeDayPanel();
-    exitFocusMode();
-    updateMonthHeatMap();
-}
-
 function renderAllMonths() {
     monthsScrollContainer.innerHTML = '';
     
-    // Получаем отфильтрованные олимпиады
     const filteredOlympiads = getFilteredOlympiads();
     
     for (let month = 0; month < 12; month++) {
@@ -520,6 +440,9 @@ function showDayPanel(dateStr) {
                 </div>` : ''}
             </div>
             <div class="day-olympiad-details hidden">
+                ${olympiad.description ? `<div class="detail-item">
+                    <strong>Описание:</strong> ${olympiad.description}
+                </div>` : ''}
                 <div class="detail-item">
                     <strong>Время:</strong> ${olympiad.time}
                 </div>
@@ -571,7 +494,8 @@ function getOlympiadWord(count) {
     return 'олимпиад';
 }
 
-function toggleOlympiadDetails(olympiadId) {
+// ИСПРАВЛЕНО: используем window для глобального доступа
+window.toggleOlympiadDetails = function(olympiadId) {
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     if (!card) return;
     
@@ -593,6 +517,7 @@ function handleEditFromDay(olympiadId) {
         editingOlympiadId = olympiadId;
         document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
         document.getElementById('nameInput').value = olympiad.name;
+        document.getElementById('descriptionInput').value = olympiad.description || '';
         document.getElementById('dateInput').value = olympiad.date;
         document.getElementById('timeInput').value = olympiad.time;
         document.getElementById('regStartInput').value = olympiad.regStart || '';
@@ -626,7 +551,6 @@ function handleDeleteFromDay(olympiadId) {
         }
         
         renderAllMonths();
-        updateMonthHeatMap();
     }
 }
 
@@ -641,6 +565,7 @@ function showOlympiadDetails(olympiad) {
     closeDayPanel();
     
     document.getElementById('olympiadName').textContent = olympiad.name;
+    document.getElementById('olympiadDescription').textContent = olympiad.description || 'Нет описания';
     document.getElementById('olympiadDate').textContent = formatDate(olympiad.date);
     document.getElementById('olympiadTime').textContent = olympiad.time;
     document.getElementById('olympiadDifficulty').textContent = olympiad.difficulty;
@@ -702,6 +627,7 @@ function handleFormSubmit(e) {
     const olympiad = {
         id: editingOlympiadId || Date.now(),
         name: document.getElementById('nameInput').value,
+        description: document.getElementById('descriptionInput').value,
         date: document.getElementById('dateInput').value,
         time: document.getElementById('timeInput').value,
         regStart: document.getElementById('regStartInput').value,
@@ -724,7 +650,6 @@ function handleFormSubmit(e) {
     localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
     closeOlympiadModal();
     renderAllMonths();
-    updateMonthHeatMap();
 }
 
 function handleRegistration() {
@@ -741,6 +666,7 @@ function handleEdit() {
         editingOlympiadId = olympiadId;
         document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
         document.getElementById('nameInput').value = olympiad.name;
+        document.getElementById('descriptionInput').value = olympiad.description || '';
         document.getElementById('dateInput').value = olympiad.date;
         document.getElementById('timeInput').value = olympiad.time;
         document.getElementById('regStartInput').value = olympiad.regStart || '';
@@ -772,7 +698,6 @@ function handleDelete() {
         
         closeSidePanel();
         renderAllMonths();
-        updateMonthHeatMap();
     }
 }
 
