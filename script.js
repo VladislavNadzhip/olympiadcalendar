@@ -124,6 +124,59 @@ function initializeEventListeners() {
     
     document.addEventListener('click', handleOutsideClick);
     document.addEventListener('contextmenu', handleRightClick);
+    
+    // НОВОЕ: Делегирование событий для Day Panel
+    dayPanel.addEventListener('click', handleDayPanelClick);
+}
+
+// НОВОЕ: Обработчик кликов внутри Day Panel
+function handleDayPanelClick(e) {
+    // Обработка клика по хедеру карточки олимпиады
+    const header = e.target.closest('.day-olympiad-header');
+    if (header) {
+        e.stopPropagation();
+        const card = header.closest('.day-olympiad-card');
+        if (card) {
+            const olympiadId = parseInt(card.dataset.olympiadId);
+            toggleOlympiadDetails(olympiadId);
+        }
+        return;
+    }
+    
+    // Обработка кнопки регистрации
+    if (e.target.classList.contains('register-btn-compact')) {
+        e.stopPropagation();
+        handleRegistration();
+        return;
+    }
+    
+    // Обработка кнопки редактирования
+    if (e.target.classList.contains('edit-btn-compact')) {
+        e.stopPropagation();
+        const card = e.target.closest('.day-olympiad-card');
+        if (card) {
+            const olympiadId = parseInt(card.dataset.olympiadId);
+            handleEditFromDay(olympiadId);
+        }
+        return;
+    }
+    
+    // Обработка кнопки удаления
+    if (e.target.classList.contains('delete-btn-compact')) {
+        e.stopPropagation();
+        const card = e.target.closest('.day-olympiad-card');
+        if (card) {
+            const olympiadId = parseInt(card.dataset.olympiadId);
+            handleDeleteFromDay(olympiadId);
+        }
+        return;
+    }
+    
+    // Обработка ссылок - не блокируем
+    if (e.target.tagName === 'A') {
+        e.stopPropagation();
+        return;
+    }
 }
 
 // Фильтрация олимпиад
@@ -422,9 +475,10 @@ function showDayPanel(dateStr) {
     
     document.getElementById('dayPanelTitle').innerHTML = `${day} ${monthGenitive} ${year}<br><small style="font-size: 0.7em; font-weight: 400; opacity: 0.9;">${dayOlympiads.length} ${olympiadWord}</small>`;
     
+    // ИЗМЕНЕНО: убраны все inline onclick обработчики
     dayPanelContent.innerHTML = dayOlympiads.map(olympiad => `
         <div class="day-olympiad-card" data-olympiad-id="${olympiad.id}">
-            <div class="day-olympiad-header" onclick="event.stopPropagation(); toggleOlympiadDetails(${olympiad.id})">
+            <div class="day-olympiad-header">
                 <div class="day-olympiad-title">
                     <div class="day-olympiad-color" style="background-color: ${olympiad.color || '#4a5ab3'}"></div>
                     <span>${olympiad.name}</span>
@@ -436,7 +490,7 @@ function showDayPanel(dateStr) {
                     <strong>Сложность:</strong> ${olympiad.difficulty}
                 </div>
                 ${olympiad.website ? `<div class="preview-item">
-                    <strong>Сайт:</strong> <a href="${olympiad.website}" target="_blank" onclick="event.stopPropagation()">${olympiad.website}</a>
+                    <strong>Сайт:</strong> <a href="${olympiad.website}" target="_blank">${olympiad.website}</a>
                 </div>` : ''}
             </div>
             <div class="day-olympiad-details hidden">
@@ -459,13 +513,13 @@ function showDayPanel(dateStr) {
                     <strong>Конец регистрации:</strong> ${formatDate(olympiad.regEnd)}
                 </div>` : ''}
                 ${olympiad.archive ? `<div class="detail-item">
-                    <strong>Архив задач:</strong> <a href="${olympiad.archive}" target="_blank" onclick="event.stopPropagation()">Скачать</a>
+                    <strong>Архив задач:</strong> <a href="${olympiad.archive}" target="_blank">Скачать</a>
                 </div>` : ''}
-                <button class="register-btn-compact" onclick="event.stopPropagation(); handleRegistration()">Регистрация на олимпиаду</button>
+                <button class="register-btn-compact">Регистрация на олимпиаду</button>
                 ${isAdmin ? `
                     <div class="admin-actions-compact">
-                        <button class="edit-btn-compact" onclick="event.stopPropagation(); handleEditFromDay(${olympiad.id})">Редактировать</button>
-                        <button class="delete-btn-compact" onclick="event.stopPropagation(); handleDeleteFromDay(${olympiad.id})">Удалить</button>
+                        <button class="edit-btn-compact">Редактировать</button>
+                        <button class="delete-btn-compact">Удалить</button>
                     </div>
                 ` : ''}
             </div>
@@ -494,8 +548,8 @@ function getOlympiadWord(count) {
     return 'олимпиад';
 }
 
-// ИСПРАВЛЕНО: добавлен event.stopPropagation в onclick хедера
-window.toggleOlympiadDetails = function(olympiadId) {
+// ИЗМЕНЕНО: упрощена функция, убран window
+function toggleOlympiadDetails(olympiadId) {
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     if (!card) return;
     
