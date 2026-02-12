@@ -159,7 +159,7 @@
             </div>
             <form id="olympiadForm">
                 <div class="form-group">
-                    <label for="nameInput">Название олимпиады:</label>
+                    <label for="nameInput">Название олимпиады: <span class="required">*</span></label>
                     <input type="text" id="nameInput" required>
                 </div>
                 <div class="form-group">
@@ -167,23 +167,26 @@
                     <textarea id="descriptionInput" rows="4" placeholder="Краткое описание олимпиады..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dateInput">Дата олимпиады:</label>
+                    <label for="dateInput">Дата олимпиады: <span class="required">*</span></label>
                     <input type="date" id="dateInput" required>
                 </div>
                 <div class="form-group">
                     <label for="timeInput">Время:</label>
-                    <input type="time" id="timeInput" required>
+                    <input type="time" id="timeInput">
+                    <small>Оставьте пустым, если не установлено</small>
                 </div>
                 <div class="form-group">
                     <label for="regStartInput">Начало регистрации:</label>
-                    <input type="date" id="regStartInput" required>
+                    <input type="date" id="regStartInput">
+                    <small>Оставьте пустым, если не установлено</small>
                 </div>
                 <div class="form-group">
                     <label for="regEndInput">Конец регистрации:</label>
-                    <input type="date" id="regEndInput" required>
+                    <input type="date" id="regEndInput">
+                    <small>Оставьте пустым, если не установлено</small>
                 </div>
                 <div class="form-group">
-                    <label for="difficultyInput">Сложность:</label>
+                    <label for="difficultyInput">Сложность: <span class="required">*</span></label>
                     <select id="difficultyInput" required>
                         <option value="">Выберите сложность</option>
                         <option value="Легкая">Легкая</option>
@@ -193,12 +196,13 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="gradeInput">Класс:</label>
+                    <label for="gradeInput">Класс: <span class="required">*</span></label>
                     <input type="text" id="gradeInput" placeholder="Например: 9-11 класс" required>
                 </div>
                 <div class="form-group">
                     <label for="locationInput">Место проведения:</label>
-                    <input type="text" id="locationInput" required>
+                    <input type="text" id="locationInput">
+                    <small>Оставьте пустым, если не установлено</small>
                 </div>
                 <div class="form-group">
                     <label for="websiteInput">Сайт олимпиады:</label>
