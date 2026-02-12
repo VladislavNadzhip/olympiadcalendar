@@ -6,7 +6,7 @@ let olympiads = JSON.parse(localStorage.getItem(`olympiads_${currentCity}`)) || 
 let editingOlympiadId = null;
 let isAdmin = localStorage.getItem('isAdmin') === 'true';
 let focusedOlympiadId = null;
-let expandedOlympiads = new Set(); // НОВОЕ: хранение раскрытых олимпиад
+let expandedOlympiads = new Set();
 
 // Фильтры
 let currentFilter = {
@@ -264,7 +264,33 @@ function handleCityChange() {
     }
 }
 
+// ИЗМЕНЕНО: Обработчик ПКМ - переключает режим фокуса или выключает его
 function handleRightClick(e) {
+    // Проверяем, был ли клик по элементу олимпиады в календаре
+    const olympiadEvent = e.target.closest('.olympiad-event');
+    
+    if (olympiadEvent) {
+        e.preventDefault();
+        
+        // Извлекаем olympiadId из onclick атрибута или через другой способ
+        const onclickAttr = olympiadEvent.getAttribute('onclick');
+        const match = onclickAttr.match(/showOlympiadDetailsById\((\d+)\)/);
+        
+        if (match) {
+            const olympiadId = parseInt(match[1]);
+            
+            // Если уже в режиме фокуса на этой олимпиаде - выключаем
+            if (focusedOlympiadId === olympiadId) {
+                exitFocusMode();
+            } else {
+                // Включаем режим фокуса
+                enterFocusMode(olympiadId);
+            }
+        }
+        return;
+    }
+    
+    // Если клик ПКМ не по олимпиаде, но режим фокуса активен - выключаем
     if (focusedOlympiadId !== null) {
         e.preventDefault();
         exitFocusMode();
@@ -430,7 +456,8 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})" ondblclick="event.stopPropagation(); enterFocusMode(${olympiad.id})">${olympiad.name}</div>`;
+        // ИЗМЕНЕНО: убран ondblclick, оставлен только onclick для открытия деталей
+        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
     });
     
     let focusClass = '';
@@ -476,7 +503,6 @@ function showDayPanel(dateStr) {
     
     document.getElementById('dayPanelTitle').innerHTML = `${day} ${monthGenitive} ${year}<br><small style="font-size: 0.7em; font-weight: 400; opacity: 0.9;">${dayOlympiads.length} ${olympiadWord}</small>`;
     
-    // ИЗМЕНЕНО: учитываем состояние раскрытия из expandedOlympiads
     dayPanelContent.innerHTML = dayOlympiads.map(olympiad => {
         const isExpanded = expandedOlympiads.has(olympiad.id);
         const detailsClass = isExpanded ? '' : 'hidden';
@@ -555,7 +581,6 @@ function getOlympiadWord(count) {
     return 'олимпиад';
 }
 
-// ИЗМЕНЕНО: сохранение состояния в expandedOlympiads
 function toggleOlympiadDetails(olympiadId) {
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     if (!card) return;
@@ -578,7 +603,6 @@ function toggleOlympiadDetails(olympiadId) {
 
 function closeDayPanel() {
     dayPanel.classList.remove('active');
-    // ИЗМЕНЕНО: очищаем expandedOlympiads при закрытии панели
     expandedOlympiads.clear();
 }
 
