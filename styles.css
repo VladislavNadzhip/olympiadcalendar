@@ -128,7 +128,7 @@ body {
 }
 
 .month-card.heat-4::before {
-    background: linear-gradient(135deg, rgba(150, 60, 40, 0.65) 0%, rgba(150, 40, 40, 0.65) 100());
+    background: linear-gradient(135deg, rgba(150, 60, 40, 0.65) 0%, rgba(150, 40, 40, 0.65) 100%);
 }
 
 .month-card.heat-5::before {
@@ -268,7 +268,7 @@ body {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: auto;
+    grid-template-rows: auto repeat(6, 180px);
     gap: 10px;
     width: 100%;
 }
@@ -297,7 +297,7 @@ body {
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    min-height: 150px;
+    height: 180px;
     overflow: hidden;
 }
 
@@ -312,7 +312,7 @@ body {
     background: transparent;
     border: none;
     cursor: default;
-    min-height: 150px;
+    height: 180px;
 }
 
 .day-cell.empty-cell:hover {
@@ -342,30 +342,30 @@ body {
     min-height: 0;
 }
 
-/* Кастомный скроллбар */
+/* Кастомный скроллбар для событий внутри ячеек */
 .olympiad-events-container::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
 }
 
 .olympiad-events-container::-webkit-scrollbar-track {
-    background: rgba(61, 61, 84, 0.3);
+    background: rgba(61, 61, 84, 0.2);
     border-radius: 10px;
 }
 
 .olympiad-events-container::-webkit-scrollbar-thumb {
-    background: #667eea;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
     transition: background 0.3s ease;
 }
 
 .olympiad-events-container::-webkit-scrollbar-thumb:hover {
-    background: #5568d3;
+    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
 }
 
 /* Для Firefox */
 .olympiad-events-container {
     scrollbar-width: thin;
-    scrollbar-color: #667eea rgba(61, 61, 84, 0.3);
+    scrollbar-color: #667eea rgba(61, 61, 84, 0.2);
 }
 
 .olympiad-event {
@@ -673,11 +673,16 @@ body {
     
     .calendar-grid {
         gap: 8px;
+        grid-template-rows: auto repeat(6, 140px);
     }
     
     .day-cell {
-        min-height: 120px;
+        height: 140px;
         padding: 10px;
+    }
+    
+    .day-cell.empty-cell {
+        height: 140px;
     }
     
     .header-controls {
