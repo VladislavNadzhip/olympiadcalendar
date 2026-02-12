@@ -8,6 +8,10 @@ let isAdmin = localStorage.getItem('isAdmin') === 'true';
 let focusedOlympiadId = null;
 let expandedOlympiads = new Set();
 
+// Переменные для отслеживания текущих открытых панелей
+let currentOpenDate = null;
+let currentOpenOlympiadId = null;
+
 // Фильтры
 let currentFilter = {
     difficultyFrom: '',
@@ -517,7 +521,14 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     `;
 }
 
+// ИЗМЕНЕНО: Добавлена проверка на повторный клик
 function handleDayCellClick(dateStr, event) {
+    // Если кликнули на тот же день, что и открыт сейчас - закрываем панель
+    if (dayPanel.classList.contains('active') && currentOpenDate === dateStr) {
+        closeDayPanel();
+        return;
+    }
+    
     showDayPanel(dateStr);
 }
 
@@ -528,6 +539,9 @@ function showDayPanel(dateStr) {
     if (dayOlympiads.length === 0) return;
     
     closeSidePanel();
+    
+    // Сохраняем текущую открытую дату
+    currentOpenDate = dateStr;
     
     const date = new Date(dateStr + 'T00:00:00');
     const day = date.getDate();
@@ -638,6 +652,7 @@ function toggleOlympiadDetails(olympiadId) {
 function closeDayPanel() {
     dayPanel.classList.remove('active');
     expandedOlympiads.clear();
+    currentOpenDate = null;
 }
 
 function handleEditFromDay(olympiadId) {
@@ -670,7 +685,14 @@ function handleDeleteFromDay(olympiadId) {
     }
 }
 
+// ИЗМЕНЕНО: Добавлена проверка на повторный клик
 function showOlympiadDetailsById(olympiadId) {
+    // Если кликнули на ту же олимпиаду, что и открыта сейчас - закрываем панель
+    if (sidePanel.classList.contains('active') && currentOpenOlympiadId === olympiadId) {
+        closeSidePanel();
+        return;
+    }
+    
     const olympiad = olympiads.find(o => o.id === olympiadId);
     if (olympiad) {
         showOlympiadDetails(olympiad);
@@ -679,6 +701,9 @@ function showOlympiadDetailsById(olympiadId) {
 
 function showOlympiadDetails(olympiad) {
     closeDayPanel();
+    
+    // Сохраняем текущую открытую олимпиаду
+    currentOpenOlympiadId = olympiad.id;
     
     document.getElementById('olympiadName').textContent = olympiad.name;
     document.getElementById('olympiadDescription').textContent = olympiad.description || 'Нет описания';
@@ -714,6 +739,7 @@ function showOlympiadDetails(olympiad) {
 
 function closeSidePanel() {
     sidePanel.classList.remove('active');
+    currentOpenOlympiadId = null;
 }
 
 function openOlympiadModal(dateStr = null) {
