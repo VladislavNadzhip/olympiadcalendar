@@ -174,29 +174,116 @@ body {
     flex-direction: column;
 }
 
+/* EXPANDED HEADER - УВЕЛИЧЕННЫЙ ХЕДЕР (100px) */
 .month-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin: 0;
-    padding: 8px 16px;
-    border-bottom: 1px solid #2d2d44;
+    padding: 16px 24px;
+    border-bottom: 2px solid #2d2d44;
     flex-shrink: 0;
-    height: 50px;
+    height: 100px;
+    background: linear-gradient(to bottom, #1a1a2e 0%, #242438 100%);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    justify-content: center;
+}
+
+.header-right {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
 }
 
 .month-header h2 {
     color: #eaeaea;
-    font-size: 1.4em;
+    font-size: 1.6em;
     line-height: 1;
 }
 
-.back-btn, .add-btn {
-    padding: 8px 16px;
-    border: none;
+/* City Selector */
+.city-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #2d2d44;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 2px solid #3d3d54;
+    transition: all 0.3s ease;
+}
+
+.city-selector:hover {
+    border-color: #667eea;
+}
+
+.city-selector label {
+    color: #999;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+#citySelect {
+    background: #1a1a2e;
+    color: #eaeaea;
+    border: 1px solid #3d3d54;
+    padding: 8px 12px;
     border-radius: 6px;
+    font-size: 0.95em;
     cursor: pointer;
-    font-size: 0.9em;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+#citySelect:hover {
+    border-color: #667eea;
+}
+
+#citySelect:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Filter Button */
+.filter-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    background: #2d2d44;
+    color: #eaeaea;
+    border: 2px solid #3d3d54;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: #3d3d54;
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.back-btn, .add-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
     transition: all 0.3s ease;
     line-height: 1;
     font-weight: 600;
@@ -205,7 +292,7 @@ body {
 .back-btn {
     background: #2d2d44;
     color: #eaeaea;
-    border: 1px solid #3d3d54;
+    border: 2px solid #3d3d54;
 }
 
 .back-btn:hover {
@@ -224,10 +311,50 @@ body {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
+/* Filter Modal Content */
+.filter-form {
+    padding: 30px;
+}
+
+.filter-range {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-range select {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #3d3d54;
+    border-radius: 8px;
+    font-size: 1em;
+    background: #1a1a2e;
+    color: #eaeaea;
+    transition: border-color 0.3s ease;
+}
+
+.filter-range select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.filter-range span {
+    color: #999;
+    font-weight: 600;
+    font-size: 1.2em;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #999;
+    font-size: 0.85em;
+}
+
 /* Focus Hint */
 .focus-hint {
     position: absolute;
-    top: 60px;
+    top: 110px;
     left: 50%;
     transform: translateX(-50%);
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
@@ -971,5 +1098,17 @@ body {
     .header-controls {
         top: 10px;
         right: 20px;
+    }
+    
+    .month-header {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+        gap: 10px;
+    }
+    
+    .header-left, .header-center, .header-right {
+        width: 100%;
+        justify-content: center;
     }
 }
