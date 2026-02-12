@@ -19,6 +19,46 @@ body {
     margin: 0;
 }
 
+/* Header Controls */
+.header-controls {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.admin-btn, .logout-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.admin-btn {
+    background: #667eea;
+    color: white;
+}
+
+.admin-btn:hover {
+    background: #5568d3;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.logout-btn {
+    background: #ff4757;
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #ee3344;
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+}
+
 /* Year View - 12 месяцев в виде календарной сетки */
 .year-view {
     width: 100%;
@@ -26,6 +66,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    position: relative;
 }
 
 .year-view h1 {
@@ -263,6 +304,18 @@ body {
     border-color: #667eea;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.day-cell.empty-cell {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.day-cell.empty-cell:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
 }
 
 .day-number {
@@ -504,7 +557,7 @@ body {
     color: white;
 }
 
-#olympiadForm {
+#olympiadForm, #adminForm {
     padding: 30px;
 }
 
@@ -533,6 +586,16 @@ body {
 .form-group input:focus, .form-group select:focus {
     outline: none;
     border-color: #667eea;
+}
+
+.error-message {
+    color: #ff4757;
+    background: rgba(255, 71, 87, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
 }
 
 .form-actions {
@@ -607,5 +670,10 @@ body {
     
     .calendar-grid {
         gap: 10px;
+    }
+    
+    .header-controls {
+        top: 10px;
+        right: 20px;
     }
 }
