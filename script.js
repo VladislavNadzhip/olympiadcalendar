@@ -424,7 +424,7 @@ function showDayPanel(dateStr) {
     
     dayPanelContent.innerHTML = dayOlympiads.map(olympiad => `
         <div class="day-olympiad-card" data-olympiad-id="${olympiad.id}">
-            <div class="day-olympiad-header" onclick="toggleOlympiadDetails(${olympiad.id})">
+            <div class="day-olympiad-header" onclick="event.stopPropagation(); toggleOlympiadDetails(${olympiad.id})">
                 <div class="day-olympiad-title">
                     <div class="day-olympiad-color" style="background-color: ${olympiad.color || '#4a5ab3'}"></div>
                     <span>${olympiad.name}</span>
@@ -494,7 +494,7 @@ function getOlympiadWord(count) {
     return 'олимпиад';
 }
 
-// ИСПРАВЛЕНО: используем window для глобального доступа
+// ИСПРАВЛЕНО: добавлен event.stopPropagation в onclick хедера
 window.toggleOlympiadDetails = function(olympiadId) {
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     if (!card) return;
