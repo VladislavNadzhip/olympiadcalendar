@@ -80,7 +80,7 @@
         </div>
     </div>
 
-    <!-- Side Panel для информации об олимпиаде -->
+    <!-- Side Panel для одной олимпиады -->
     <div id="sidePanel" class="side-panel">
         <div class="panel-header">
             <h3 id="panelTitle">Информация об олимпиаде</h3>
@@ -121,6 +121,17 @@
                 <button id="editOlympiadBtn" class="edit-btn admin-only hidden">Редактировать</button>
                 <button id="deleteOlympiadBtn" class="delete-btn admin-only hidden">Удалить</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Day Panel для всех олимпиад дня -->
+    <div id="dayPanel" class="side-panel">
+        <div class="panel-header">
+            <h3 id="dayPanelTitle">Олимпиады дня</h3>
+            <button id="closeDayPanelBtn" class="close-btn">×</button>
+        </div>
+        <div class="panel-content" id="dayPanelContent">
+            <!-- Олимпиады будут рендериться здесь -->
         </div>
     </div>
 
