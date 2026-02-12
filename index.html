@@ -8,73 +8,13 @@
 </head>
 <body>
     <div class="container">
-        <!-- Year View: 12 месяцев -->
-        <div id="yearView" class="year-view">
-            <div class="header-controls">
-                <button id="adminBtn" class="admin-btn">Админ</button>
-                <button id="logoutBtn" class="logout-btn hidden">Выйти</button>
-            </div>
-            <h1>Календарь математических олимпиад</h1>
-            <div class="months-grid">
-                <div class="month-card" data-month="0">
-                    <h3>Январь</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="1">
-                    <h3>Февраль</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="2">
-                    <h3>Март</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="3">
-                    <h3>Апрель</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="4">
-                    <h3>Май</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="5">
-                    <h3>Июнь</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="6">
-                    <h3>Июль</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="7">
-                    <h3>Август</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="8">
-                    <h3>Сентябрь</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="9">
-                    <h3>Октябрь</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="10">
-                    <h3>Ноябрь</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-                <div class="month-card" data-month="11">
-                    <h3>Декабрь</h3>
-                    <div class="month-preview">2026</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Month View: календарь выбранного месяца -->
-        <div id="monthView" class="month-view hidden">
+        <!-- Month View: календарь (убрали Year View) -->
+        <div id="monthView" class="month-view">
             <div class="month-header">
                 <div class="header-left">
-                    <button id="backBtn" class="back-btn">← Назад к году</button>
-                    <h2 id="currentMonthTitle"></h2>
+                    <h2 id="currentMonthTitle">Календарь математических олимпиад 2026</h2>
                 </div>
-                <div class="header-center">
+                <div class="header-right">
                     <div class="city-selector">
                         <label for="citySelect">🏙️ Город:</label>
                         <select id="citySelect">
@@ -86,9 +26,9 @@
                         </select>
                     </div>
                     <button id="filterBtn" class="filter-btn">📊 Фильтр</button>
-                </div>
-                <div class="header-right">
                     <button id="addOlympiadBtn" class="add-btn admin-only hidden">+ Добавить олимпиаду</button>
+                    <button id="adminBtn" class="admin-btn">Админ</button>
+                    <button id="logoutBtn" class="logout-btn hidden">Выйти</button>
                 </div>
             </div>
             <!-- Подсказка для выхода из режима фокуса -->
@@ -111,6 +51,10 @@
         <div class="panel-content" id="panelContent">
             <div class="olympiad-info">
                 <h4 id="olympiadName"></h4>
+                <div class="info-field">
+                    <label>Описание:</label>
+                    <p id="olympiadDescription" class="description-text"></p>
+                </div>
                 <div class="info-field">
                     <label>Дата:</label>
                     <span id="olympiadDate"></span>
@@ -217,6 +161,10 @@
                 <div class="form-group">
                     <label for="nameInput">Название олимпиады:</label>
                     <input type="text" id="nameInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="descriptionInput">Описание:</label>
+                    <textarea id="descriptionInput" rows="4" placeholder="Краткое описание олимпиады..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="dateInput">Дата олимпиады:</label>
