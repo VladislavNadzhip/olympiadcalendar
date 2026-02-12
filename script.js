@@ -163,52 +163,39 @@ function renderMonthDays(month) {
     
     const firstDay = new Date(currentYear, month, 1);
     const lastDay = new Date(currentYear, month + 1, 0);
-    const prevLastDay = new Date(currentYear, month, 0);
     
     const firstDayWeek = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
     const lastDayDate = lastDay.getDate();
-    const prevLastDayDate = prevLastDay.getDate();
     
-    // Дни предыдущего месяца
-    for (let i = firstDayWeek - 1; i > 0; i--) {
-        html += createDayCellHTML(prevLastDayDate - i + 1, true, month);
+    // Пустые ячейки для выравнивания первого дня месяца
+    for (let i = 1; i < firstDayWeek; i++) {
+        html += '<div class="day-cell empty-cell"></div>';
     }
     
     // Дни текущего месяца
     for (let day = 1; day <= lastDayDate; day++) {
-        html += createDayCellHTML(day, false, month);
-    }
-    
-    // Дни следующего месяца
-    const totalCells = firstDayWeek - 1 + lastDayDate;
-    const remainingCells = 35 - totalCells;
-    for (let day = 1; day <= remainingCells; day++) {
-        html += createDayCellHTML(day, true, month);
+        html += createDayCellHTML(day, month);
     }
     
     return html;
 }
 
 // Создать HTML ячейки дня
-function createDayCellHTML(day, isOtherMonth, month) {
-    const otherMonthClass = isOtherMonth ? ' other-month' : '';
+function createDayCellHTML(day, month) {
     let eventsHTML = '';
     
-    if (!isOtherMonth) {
-        const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayOlympiads = olympiads.filter(o => o.date === dateStr);
-        
-        dayOlympiads.forEach(olympiad => {
-            const bgColor = olympiad.color || '#4a5ab3';
-            eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
-        });
-    }
+    const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayOlympiads = olympiads.filter(o => o.date === dateStr);
     
-    const dateStr = !isOtherMonth ? `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` : '';
-    const clickHandler = !isOtherMonth ? `onclick="openOlympiadModal('${dateStr}')"` : '';
+    dayOlympiads.forEach(olympiad => {
+        const bgColor = olympiad.color || '#4a5ab3';
+        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
+    });
+    
+    const clickHandler = `onclick="openOlympiadModal('${dateStr}')"`;
     
     return `
-        <div class="day-cell${otherMonthClass}" ${clickHandler}>
+        <div class="day-cell" ${clickHandler}>
             <div class="day-number">${day}</div>
             <div class="olympiad-events-container">
                 ${eventsHTML}
