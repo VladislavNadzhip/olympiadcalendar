@@ -19,152 +19,7 @@ body {
     margin: 0;
 }
 
-/* Header Controls */
-.header-controls {
-    position: absolute;
-    top: 20px;
-    right: 40px;
-    display: flex;
-    gap: 10px;
-    z-index: 100;
-}
-
-.admin-btn, .logout-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.admin-btn {
-    background: #667eea;
-    color: white;
-}
-
-.admin-btn:hover {
-    background: #5568d3;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.logout-btn {
-    background: #ff4757;
-    color: white;
-}
-
-.logout-btn:hover {
-    background: #ee3344;
-    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
-}
-
-/* Year View - 12 месяцев в виде календарной сетки */
-.year-view {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    position: relative;
-}
-
-.year-view h1 {
-    text-align: center;
-    color: #eaeaea;
-    margin-bottom: 30px;
-    font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.months-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 20px;
-    flex: 1;
-    padding: 0 40px 40px 40px;
-}
-
-.month-card {
-    background: #2d2d44;
-    border-radius: 15px;
-    padding: 30px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border: 2px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.month-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 50, 50, 0) 0%, rgba(255, 50, 50, 0) 100%);
-    transition: all 0.3s ease;
-    z-index: 0;
-}
-
-.month-card.heat-1::before {
-    background: linear-gradient(135deg, rgba(180, 100, 70, 0.2) 0%, rgba(180, 70, 70, 0.2) 100%);
-}
-
-.month-card.heat-2::before {
-    background: linear-gradient(135deg, rgba(170, 80, 60, 0.35) 0%, rgba(170, 60, 60, 0.35) 100%);
-}
-
-.month-card.heat-3::before {
-    background: linear-gradient(135deg, rgba(160, 70, 50, 0.5) 0%, rgba(160, 50, 50, 0.5) 100%);
-}
-
-.month-card.heat-4::before {
-    background: linear-gradient(135deg, rgba(150, 60, 40, 0.65) 0%, rgba(150, 40, 40, 0.65) 100%);
-}
-
-.month-card.heat-5::before {
-    background: linear-gradient(135deg, rgba(140, 50, 30, 0.8) 0%, rgba(140, 30, 30, 0.8) 100());
-}
-
-.month-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    border-color: #667eea;
-}
-
-.month-card h3 {
-    color: #eaeaea;
-    font-size: 2em;
-    margin-bottom: 15px;
-    position: relative;
-    z-index: 1;
-}
-
-.month-preview {
-    color: #999;
-    font-size: 1em;
-    position: relative;
-    z-index: 1;
-}
-
-.month-count {
-    color: #667eea;
-    font-size: 0.9em;
-    margin-top: 10px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Month View - календарь месяца на всю страницу */
+/* Month View - календарь на всю страницу */
 .month-view {
     width: 100vw;
     height: 100vh;
@@ -174,7 +29,7 @@ body {
     flex-direction: column;
 }
 
-/* EXPANDED HEADER - УВЕЛИЧЕННЫЙ ХЕДЕР (100px) */
+/* HEADER - ХЕДЕР (100px) */
 .month-header {
     display: flex;
     justify-content: space-between;
@@ -190,22 +45,14 @@ body {
 .header-left {
     display: flex;
     align-items: center;
-    gap: 20px;
     flex: 1;
-}
-
-.header-center {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex: 1;
-    justify-content: center;
 }
 
 .header-right {
     display: flex;
-    justify-content: flex-end;
-    flex: 1;
+    align-items: center;
+    gap: 15px;
+    flex: 0 0 auto;
 }
 
 .month-header h2 {
@@ -259,17 +106,20 @@ body {
 }
 
 /* Filter Button */
-.filter-btn {
+.filter-btn, .add-btn, .admin-btn, .logout-btn {
     padding: 10px 20px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     font-size: 0.95em;
     font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.filter-btn {
     background: #2d2d44;
     color: #eaeaea;
     border: 2px solid #3d3d54;
-    transition: all 0.3s ease;
 }
 
 .filter-btn:hover {
@@ -278,37 +128,34 @@ body {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
-.back-btn, .add-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.95em;
-    transition: all 0.3s ease;
-    line-height: 1;
-    font-weight: 600;
-}
-
-.back-btn {
-    background: #2d2d44;
-    color: #eaeaea;
-    border: 2px solid #3d3d54;
-}
-
-.back-btn:hover {
-    background: #3d3d54;
-    border-color: #667eea;
-}
-
 .add-btn {
     background: #667eea;
     color: white;
-    font-weight: 600;
 }
 
 .add-btn:hover {
     background: #5568d3;
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.admin-btn {
+    background: #667eea;
+    color: white;
+}
+
+.admin-btn:hover {
+    background: #5568d3;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.logout-btn {
+    background: #ff4757;
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #ee3344;
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
 }
 
 /* Filter Modal Content */
@@ -349,6 +196,34 @@ body {
     margin-top: 5px;
     color: #999;
     font-size: 0.85em;
+}
+
+/* Textarea styling */
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #3d3d54;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+    background: #1a1a2e;
+    color: #eaeaea;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Description text in panel */
+.description-text {
+    color: #eaeaea !important;
+    font-size: 1em !important;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 /* Focus Hint */
@@ -1053,32 +928,10 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-    .months-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-    }
-}
-
 @media (max-width: 768px) {
     .side-panel {
         width: 100%;
         right: -100%;
-    }
-    
-    .months-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(6, 1fr);
-        gap: 15px;
-        padding: 0 20px 20px 20px;
-    }
-    
-    .month-card {
-        padding: 20px;
-    }
-    
-    .month-card h3 {
-        font-size: 1.5em;
     }
     
     .calendar-grid {
@@ -1095,11 +948,6 @@ body {
         height: 140px;
     }
     
-    .header-controls {
-        top: 10px;
-        right: 20px;
-    }
-    
     .month-header {
         flex-direction: column;
         height: auto;
@@ -1107,8 +955,12 @@ body {
         gap: 10px;
     }
     
-    .header-left, .header-center, .header-right {
+    .header-left, .header-right {
         width: 100%;
         justify-content: center;
+    }
+    
+    .header-right {
+        flex-wrap: wrap;
     }
 }
