@@ -4,6 +4,7 @@ let currentMonth = 0;
 let olympiads = JSON.parse(localStorage.getItem('olympiads')) || [];
 let editingOlympiadId = null;
 let isAdmin = localStorage.getItem('isAdmin') === 'true';
+let focusedOlympiadId = null; // Для режима фокуса
 
 // Пароль админа (в реальном проекте хранить на сервере)
 const ADMIN_PASSWORD = 'admin123';
@@ -45,6 +46,7 @@ const adminForm = document.getElementById('adminForm');
 const cancelAdminBtn = document.getElementById('cancelAdminBtn');
 const adminPasswordInput = document.getElementById('adminPasswordInput');
 const adminError = document.getElementById('adminError');
+const focusHint = document.getElementById('focusHint');
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
@@ -135,6 +137,42 @@ function initializeEventListeners() {
     
     // Закрытие панелей при клике вне их
     document.addEventListener('click', handleOutsideClick);
+    
+    // Выход из режима фокуса по ПКМ
+    document.addEventListener('contextmenu', handleRightClick);
+}
+
+// Обработка правого клика (ПКМ)
+function handleRightClick(e) {
+    if (focusedOlympiadId !== null) {
+        e.preventDefault();
+        exitFocusMode();
+    }
+}
+
+// Вход в режим фокуса
+function enterFocusMode(olympiadId) {
+    focusedOlympiadId = olympiadId;
+    const focusedOlympiad = olympiads.find(o => o.id === olympiadId);
+    
+    if (!focusedOlympiad) return;
+    
+    // Показываем подсказку
+    focusHint.classList.remove('hidden');
+    
+    // Перерисовываем календарь с режимом фокуса
+    renderAllMonths();
+}
+
+// Выход из режима фокуса
+function exitFocusMode() {
+    focusedOlympiadId = null;
+    
+    // Скрываем подсказку
+    focusHint.classList.add('hidden');
+    
+    // Перерисовываем календарь
+    renderAllMonths();
 }
 
 // Обработка клика вне панелей
@@ -207,6 +245,7 @@ function handleLogout() {
     updateAdminUI();
     closeSidePanel();
     closeDayPanel();
+    exitFocusMode();
     renderAllMonths(); // Перерисовка для обновления кликов на ячейки
 }
 
@@ -233,6 +272,7 @@ function closeMonthView() {
     yearView.classList.remove('hidden');
     closeSidePanel();
     closeDayPanel();
+    exitFocusMode();
     updateMonthHeatMap();
 }
 
@@ -303,21 +343,49 @@ function renderMonthDays(month) {
 
 // Создать HTML ячейки дня
 function createDayCellHTML(day, month) {
-    let eventsHTML = '';
-    
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = olympiads.filter(o => o.date === dateStr);
     
+    // Проверяем, является ли этот день датой регистрации в фокусе
+    let regLabel = '';
+    let regClass = '';
+    
+    if (focusedOlympiadId !== null) {
+        const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
+        if (focusedOlympiad) {
+            if (focusedOlympiad.regStart === dateStr) {
+                regLabel = '<div class="reg-label">Начало регистрации</div>';
+                regClass = ' reg-start';
+            } else if (focusedOlympiad.regEnd === dateStr) {
+                regLabel = '<div class="reg-label">Конец регистрации</div>';
+                regClass = ' reg-end';
+            }
+        }
+    }
+    
+    // Генерируем HTML для олимпиад
+    let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
+        // Двойной клик для входа в режим фокуса
+        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="showOlympiadDetailsById(${olympiad.id})" ondblclick="event.stopPropagation(); enterFocusMode(${olympiad.id})">${olympiad.name}</div>`;
     });
+    
+    // Определяем класс для скрытия в режиме фокуса
+    let focusClass = '';
+    if (focusedOlympiadId !== null) {
+        const hasFocusedOlympiad = dayOlympiads.some(o => o.id === focusedOlympiadId);
+        if (!hasFocusedOlympiad && dayOlympiads.length > 0) {
+            focusClass = ' focus-hidden';
+        }
+    }
     
     // Клик по ячейке открывает панель дня или модальное окно для админа
     const clickHandler = isAdmin ? `onclick="handleDayCellClick('${dateStr}', event)"` : `onclick="showDayPanel('${dateStr}')"`;
     
     return `
-        <div class="day-cell" ${clickHandler}>
+        <div class="day-cell${regClass}${focusClass}" ${clickHandler}>
+            ${regLabel}
             <div class="day-number">${day}</div>
             <div class="olympiad-events-container">
                 ${eventsHTML}
@@ -450,6 +518,8 @@ function handleEditFromDay(olympiadId) {
         document.getElementById('nameInput').value = olympiad.name;
         document.getElementById('dateInput').value = olympiad.date;
         document.getElementById('timeInput').value = olympiad.time;
+        document.getElementById('regStartInput').value = olympiad.regStart || '';
+        document.getElementById('regEndInput').value = olympiad.regEnd || '';
         document.getElementById('difficultyInput').value = olympiad.difficulty;
         document.getElementById('gradeInput').value = olympiad.grade;
         document.getElementById('locationInput').value = olympiad.location;
@@ -467,6 +537,11 @@ function handleDeleteFromDay(olympiadId) {
         const dateStr = olympiads.find(o => o.id === olympiadId)?.date;
         olympiads = olympiads.filter(o => o.id !== olympiadId);
         localStorage.setItem('olympiads', JSON.stringify(olympiads));
+        
+        // Выходим из режима фокуса если удалили фокусированную олимпиаду
+        if (focusedOlympiadId === olympiadId) {
+            exitFocusMode();
+        }
         
         // Обновляем панель дня
         const remainingOlympiads = olympiads.filter(o => o.date === dateStr);
@@ -500,6 +575,10 @@ function showOlympiadDetails(olympiad) {
     document.getElementById('olympiadDifficulty').textContent = olympiad.difficulty;
     document.getElementById('olympiadGrade').textContent = olympiad.grade;
     document.getElementById('olympiadLocation').textContent = olympiad.location;
+    
+    // Даты регистрации
+    document.getElementById('olympiadRegStart').textContent = olympiad.regStart ? formatDate(olympiad.regStart) : 'Не указано';
+    document.getElementById('olympiadRegEnd').textContent = olympiad.regEnd ? formatDate(olympiad.regEnd) : 'Не указано';
     
     const websiteLink = document.getElementById('olympiadWebsite');
     if (olympiad.website) {
@@ -561,6 +640,8 @@ function handleFormSubmit(e) {
         name: document.getElementById('nameInput').value,
         date: document.getElementById('dateInput').value,
         time: document.getElementById('timeInput').value,
+        regStart: document.getElementById('regStartInput').value,
+        regEnd: document.getElementById('regEndInput').value,
         difficulty: document.getElementById('difficultyInput').value,
         grade: document.getElementById('gradeInput').value,
         location: document.getElementById('locationInput').value,
@@ -602,6 +683,8 @@ function handleEdit() {
         document.getElementById('nameInput').value = olympiad.name;
         document.getElementById('dateInput').value = olympiad.date;
         document.getElementById('timeInput').value = olympiad.time;
+        document.getElementById('regStartInput').value = olympiad.regStart || '';
+        document.getElementById('regEndInput').value = olympiad.regEnd || '';
         document.getElementById('difficultyInput').value = olympiad.difficulty;
         document.getElementById('gradeInput').value = olympiad.grade;
         document.getElementById('locationInput').value = olympiad.location;
@@ -623,6 +706,12 @@ function handleDelete() {
     if (confirm('Вы уверены, что хотите удалить эту олимпиаду?')) {
         olympiads = olympiads.filter(o => o.id !== olympiadId);
         localStorage.setItem('olympiads', JSON.stringify(olympiads));
+        
+        // Выходим из режима фокуса если удалили фокусированную олимпиаду
+        if (focusedOlympiadId === olympiadId) {
+            exitFocusMode();
+        }
+        
         closeSidePanel();
         renderAllMonths();
         updateMonthHeatMap();
