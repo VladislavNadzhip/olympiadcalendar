@@ -188,8 +188,6 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
     padding-right: 15px;
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
 }
 
 /* Кастомный скроллбар для контейнера месяцев */
@@ -222,7 +220,6 @@ body {
 /* Каждый месяц в скролле */
 .month-calendar-wrapper {
     height: 100vh;
-    scroll-snap-align: start;
     padding: 3px 3px 3px 3px;
 }
 
