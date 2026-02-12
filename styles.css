@@ -208,9 +208,9 @@ body {
 
 .day-cell {
     background: #2d2d44;
-    border: 2px solid #3d3d54;
+    border: 1px solid #3d3d54;
     border-radius: 6px;
-    padding: 6px;
+    padding: 5px;
     transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
@@ -228,7 +228,7 @@ body {
 .day-number {
     font-weight: 600;
     color: #eaeaea;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     font-size: 0.9em;
     flex-shrink: 0;
     line-height: 1;
@@ -242,13 +242,13 @@ body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 3px;
+    padding-right: 2px;
     min-height: 0;
 }
 
 /* Кастомный скроллбар */
 .olympiad-events-container::-webkit-scrollbar {
-    width:  4px;
+    width:  3px;
 }
 
 .olympiad-events-container::-webkit-scrollbar-track {
