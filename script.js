@@ -129,13 +129,13 @@ function initializeEventListeners() {
     
     document.addEventListener('click', handleOutsideClick);
     document.addEventListener('contextmenu', handleRightClick);
-    
-    // Делегирование событий для Day Panel
-    dayPanel.addEventListener('click', handleDayPanelClick);
 }
 
-// Обработчик кликов внутри Day Panel
-function handleDayPanelClick(e) {
+// ИЗМЕНЕНО: Используем делегирование через document для динамически созданных элементов
+document.addEventListener('click', function(e) {
+    // Проверяем, что клик внутри dayPanel
+    if (!dayPanel.contains(e.target)) return;
+    
     // Обработка клика по хедеру карточки олимпиады
     const header = e.target.closest('.day-olympiad-header');
     if (header) {
@@ -182,7 +182,7 @@ function handleDayPanelClick(e) {
         e.stopPropagation();
         return;
     }
-}
+});
 
 // Фильтрация олимпиад
 function getFilteredOlympiads() {
@@ -651,7 +651,7 @@ function toggleOlympiadDetails(olympiadId) {
 
 function closeDayPanel() {
     dayPanel.classList.remove('active');
-    expandedOlympiads.clear();
+    // НЕ очищаем expandedOlympiads, чтобы сохранить состояние раскрытия
     currentOpenDate = null;
 }
 
@@ -673,6 +673,9 @@ function handleDeleteFromDay(olympiadId) {
         if (focusedOlympiadId === olympiadId) {
             exitFocusMode();
         }
+        
+        // Удаляем из expandedOlympiads при удалении
+        expandedOlympiads.delete(olympiadId);
         
         const remainingOlympiads = olympiads.filter(o => o.date === dateStr);
         if (remainingOlympiads.length > 0) {
@@ -856,6 +859,9 @@ function handleDelete() {
         if (focusedOlympiadId === olympiadId) {
             exitFocusMode();
         }
+        
+        // Удаляем из expandedOlympiads при удалении
+        expandedOlympiads.delete(olympiadId);
         
         closeSidePanel();
         renderAllMonths();
