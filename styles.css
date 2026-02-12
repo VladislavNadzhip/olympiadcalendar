@@ -186,9 +186,9 @@ body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: auto repeat(6, 1fr);
-    gap: 5px;
+    gap: 3px;
     flex: 1;
-    padding: 5px;
+    padding: 3px;
 }
 
 .weekday {
@@ -209,8 +209,8 @@ body {
 .day-cell {
     background: #2d2d44;
     border: 2px solid #3d3d54;
-    border-radius: 8px;
-    padding: 8px;
+    border-radius: 6px;
+    padding: 6px;
     transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
@@ -228,8 +228,8 @@ body {
 .day-number {
     font-weight: 600;
     color: #eaeaea;
-    margin-bottom: 5px;
-    font-size: 0.95em;
+    margin-bottom: 4px;
+    font-size: 0.9em;
     flex-shrink: 0;
     line-height: 1;
 }
@@ -275,10 +275,10 @@ body {
 .olympiad-event {
     background: #667eea;
     color: white;
-    padding: 5px 7px;
-    border-radius: 5px;
-    font-size: 0.7em;
-    margin-bottom: 3px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.65em;
+    margin-bottom: 2px;
     cursor: pointer;
     transition: all 0.2s ease;
     overflow: hidden;
