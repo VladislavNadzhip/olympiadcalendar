@@ -145,17 +145,30 @@ function handleOutsideClick(e) {
     
     if (!isSidePanelOpen && !isDayPanelOpen) return;
     
-    // Проверяем, что клик не по панелям и не по элементам, которые открывают панели
+    // Проверяем, что клик не по панелям
     const clickedInsideSidePanel = sidePanel.contains(e.target);
     const clickedInsideDayPanel = dayPanel.contains(e.target);
-    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
-    const clickedOnDayCell = e.target.closest('.day-cell');
     
-    // Если клик вне панелей и не по триггерам - закрываем
-    if (!clickedInsideSidePanel && !clickedInsideDayPanel && !clickedOnOlympiadEvent && !clickedOnDayCell) {
-        closeSidePanel();
-        closeDayPanel();
+    if (clickedInsideSidePanel || clickedInsideDayPanel) return;
+    
+    // Проверяем, что клик не по элементам олимпиад (которые открывают панели)
+    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
+    if (clickedOnOlympiadEvent) return;
+    
+    // Проверяем, что клик по непустой ячейке дня с олимпиадами
+    const clickedDayCell = e.target.closest('.day-cell:not(.empty-cell)');
+    if (clickedDayCell) {
+        // Если кликнули внутри контейнера событий, не закрываем
+        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
+        if (clickedInsideEvents) return;
+        
+        // Если кликнули на номер дня или пустое место в ячейке - не закрываем (откроется панель дня)
+        return;
     }
+    
+    // Во всех остальных случаях (клик по фону, пустым ячейкам, промежуткам) - закрываем
+    closeSidePanel();
+    closeDayPanel();
 }
 
 // Открыть модальное окно авторизации
