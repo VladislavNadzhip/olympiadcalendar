@@ -13,12 +13,10 @@ body {
 }
 
 .container {
-    width: 125vw;
+    width: 100vw;
     height: 100vh;
     padding: 0;
     margin: 0;
-    transform: scale(0.8);
-    transform-origin: top left;
 }
 
 /* Year View - 12 месяцев в виде календарной сетки */
@@ -130,7 +128,7 @@ body {
     width: 100%;
     height: 100vh;
     background: #1a1a2e;
-    padding: 15px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
 }
@@ -139,23 +137,23 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
     border-bottom: 2px solid #2d2d44;
     flex-shrink: 0;
 }
 
 .month-header h2 {
     color: #eaeaea;
-    font-size: 2em;
+    font-size: 1.5em;
 }
 
 .back-btn, .add-btn {
-    padding: 12px 24px;
+    padding: 8px 16px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 0.85em;
     transition: all 0.3s ease;
 }
 
@@ -194,10 +192,10 @@ body {
     text-align: center;
     font-weight: 600;
     color: #667eea;
-    padding: 8px;
-    font-size: 1em;
+    padding: 6px;
+    font-size: 0.85em;
     background: #2d2d44;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .days-container {
@@ -207,8 +205,8 @@ body {
 .day-cell {
     background: #2d2d44;
     border: 2px solid #3d3d54;
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 10px;
+    padding: 10px;
     transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
@@ -226,8 +224,8 @@ body {
 .day-number {
     font-weight: 600;
     color: #eaeaea;
-    margin-bottom: 8px;
-    font-size: 1.2em;
+    margin-bottom: 6px;
+    font-size: 1em;
     flex-shrink: 0;
 }
 
@@ -245,7 +243,7 @@ body {
 
 /* Кастомный скроллбар */
 .olympiad-events-container::-webkit-scrollbar {
-    width:  6px;
+    width:  5px;
 }
 
 .olympiad-events-container::-webkit-scrollbar-track {
@@ -272,10 +270,10 @@ body {
 .olympiad-event {
     background: #667eea;
     color: white;
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 0.85em;
-    margin-bottom: 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 0.75em;
+    margin-bottom: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
     overflow: hidden;
