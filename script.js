@@ -102,72 +102,86 @@ function updateAdminUI() {
     }
 }
 
-// Единый обработчик кликов
+// ИСПРАВЛЕНО: Единый обработчик кликов с правильным порядком проверок
 function handleGlobalClick(e) {
-    // 1) Клики внутри dayPanel (стрелочки, кнопки)
+    // ПРИОРИТЕТ 1: Обработка кликов внутри dayPanel (для динамически созданных элементов)
     if (dayPanel.classList.contains('active') && dayPanel.contains(e.target)) {
+        // Обработка клика по хедеру карточки олимпиады
         const header = e.target.closest('.day-olympiad-header');
         if (header) {
             e.preventDefault();
             e.stopPropagation();
             const card = header.closest('.day-olympiad-card');
             // ВАЖНО: работаем только с карточками внутри dayPanel
-            if (!card || !dayPanel.contains(card)) return;
-            const olympiadId = parseInt(card.dataset.olympiadId);
-            toggleOlympiadDetails(olympiadId);
+            if (card && dayPanel.contains(card)) {
+                const olympiadId = parseInt(card.dataset.olympiadId);
+                toggleOlympiadDetails(olympiadId);
+            }
             return;
         }
-
+        
+        // Обработка кнопки регистрации
         if (e.target.classList.contains('register-btn-compact')) {
             e.preventDefault();
             e.stopPropagation();
             handleRegistration();
             return;
         }
-
+        
+        // Обработка кнопки редактирования
         if (e.target.classList.contains('edit-btn-compact')) {
             e.preventDefault();
             e.stopPropagation();
             const card = e.target.closest('.day-olympiad-card');
-            if (!card || !dayPanel.contains(card)) return;
-            const olympiadId = parseInt(card.dataset.olympiadId);
-            handleEditFromDay(olympiadId);
+            if (card && dayPanel.contains(card)) {
+                const olympiadId = parseInt(card.dataset.olympiadId);
+                handleEditFromDay(olympiadId);
+            }
             return;
         }
-
+        
+        // Обработка кнопки удаления
         if (e.target.classList.contains('delete-btn-compact')) {
             e.preventDefault();
             e.stopPropagation();
             const card = e.target.closest('.day-olympiad-card');
-            if (!card || !dayPanel.contains(card)) return;
-            const olympiadId = parseInt(card.dataset.olympiadId);
-            handleDeleteFromDay(olympiadId);
+            if (card && dayPanel.contains(card)) {
+                const olympiadId = parseInt(card.dataset.olympiadId);
+                handleDeleteFromDay(olympiadId);
+            }
             return;
         }
-
-        if (e.target.tagName === 'A') return;
+        
+        // Обработка ссылок - не блокируем
+        if (e.target.tagName === 'A') {
+            return;
+        }
+        
+        // Если клик внутри dayPanel, но не обработан выше - не закрываем панель
         return;
     }
-
-    // 2) Клики вне панелей — логика закрытия
+    
+    // ПРИОРИТЕТ 2: Проверка кликов вне панелей (handleOutsideClick)
     const isSidePanelOpen = sidePanel.classList.contains('active');
     const isDayPanelOpen = dayPanel.classList.contains('active');
+    
     if (!isSidePanelOpen && !isDayPanelOpen) return;
-
+    
     const clickedInsideSidePanel = sidePanel.contains(e.target);
     const clickedInsideDayPanel = dayPanel.contains(e.target);
+    
     if (clickedInsideSidePanel || clickedInsideDayPanel) return;
-
+    
     const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
     if (clickedOnOlympiadEvent) return;
-
+    
     const clickedDayCell = e.target.closest('.day-cell:not(.empty-cell)');
     if (clickedDayCell) {
         const clickedInsideEvents = e.target.closest('.olympiad-events-container');
         if (clickedInsideEvents) return;
         return;
     }
-
+    
     closeSidePanel();
     closeDayPanel();
 }
@@ -183,19 +197,21 @@ function initializeEventListeners() {
     registerBtn.addEventListener('click', handleRegistration);
     editOlympiadBtn.addEventListener('click', handleEdit);
     deleteOlympiadBtn.addEventListener('click', handleDelete);
-
+    
     adminBtn.addEventListener('click', openAdminModal);
     logoutBtn.addEventListener('click', handleLogout);
     closeAdminModalBtn.addEventListener('click', closeAdminModal);
     cancelAdminBtn.addEventListener('click', closeAdminModal);
     adminForm.addEventListener('submit', handleAdminLogin);
-
+    
+    // Фильтр и город
     filterBtn.addEventListener('click', openFilterModal);
     closeFilterModalBtn.addEventListener('click', closeFilterModal);
     applyFilterBtn.addEventListener('click', applyFilter);
     resetFilterBtn.addEventListener('click', resetFilter);
     citySelect.addEventListener('change', handleCityChange);
-
+    
+    // ИСПРАВЛЕНО: Используем единый обработчик кликов
     document.addEventListener('click', handleGlobalClick);
     document.addEventListener('contextmenu', handleRightClick);
 }
@@ -203,19 +219,27 @@ function initializeEventListeners() {
 // Фильтрация олимпиад
 function getFilteredOlympiads() {
     return olympiads.filter(olympiad => {
+        // Фильтр по сложности
         if (currentFilter.difficultyFrom || currentFilter.difficultyTo) {
             const olympiadLevel = difficultyLevels[olympiad.difficulty];
             const fromLevel = currentFilter.difficultyFrom ? difficultyLevels[currentFilter.difficultyFrom] : 1;
             const toLevel = currentFilter.difficultyTo ? difficultyLevels[currentFilter.difficultyTo] : 4;
-            if (olympiadLevel < fromLevel || olympiadLevel > toLevel) return false;
+            
+            if (olympiadLevel < fromLevel || olympiadLevel > toLevel) {
+                return false;
+            }
         }
-
+        
+        // Фильтр по классу
         if (currentFilter.grade) {
             const gradeStr = olympiad.grade.toLowerCase();
             const targetGrade = currentFilter.grade;
-            if (!gradeStr.includes(targetGrade.toString())) return false;
+            
+            if (!gradeStr.includes(targetGrade.toString())) {
+                return false;
+            }
         }
-
+        
         return true;
     });
 }
@@ -224,6 +248,7 @@ function openFilterModal() {
     difficultyFromSelect.value = currentFilter.difficultyFrom;
     difficultyToSelect.value = currentFilter.difficultyTo;
     gradeFilterInput.value = currentFilter.grade || '';
+    
     filterModal.classList.add('active');
 }
 
@@ -235,49 +260,73 @@ function applyFilter() {
     currentFilter.difficultyFrom = difficultyFromSelect.value;
     currentFilter.difficultyTo = difficultyToSelect.value;
     currentFilter.grade = gradeFilterInput.value ? parseInt(gradeFilterInput.value) : null;
+    
     closeFilterModal();
     renderAllMonths();
 }
 
 function resetFilter() {
-    currentFilter = { difficultyFrom: '', difficultyTo: '', grade: null };
+    currentFilter = {
+        difficultyFrom: '',
+        difficultyTo: '',
+        grade: null
+    };
+    
     difficultyFromSelect.value = '';
     difficultyToSelect.value = '';
     gradeFilterInput.value = '';
+    
     closeFilterModal();
     renderAllMonths();
 }
 
+// Смена города
 function handleCityChange() {
     const newCity = citySelect.value;
+    
     if (newCity !== currentCity) {
         localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
+        
         currentCity = newCity;
         localStorage.setItem('currentCity', currentCity);
+        
         olympiads = JSON.parse(localStorage.getItem(`olympiads_${currentCity}`)) || [];
+        
         exitFocusMode();
         closeSidePanel();
         closeDayPanel();
+        
         renderAllMonths();
     }
 }
 
+// Обработчик ПКМ - переключает режим фокуса или выключает его
 function handleRightClick(e) {
+    // Проверяем, был ли клик по элементу олимпиады в календаре
     const olympiadEvent = e.target.closest('.olympiad-event');
+    
     if (olympiadEvent) {
         e.preventDefault();
+        
+        // Извлекаем olympiadId из onclick атрибута или через другой способ
         const onclickAttr = olympiadEvent.getAttribute('onclick');
-        const match = onclickAttr && onclickAttr.match(/showOlympiadDetailsById\((\d+)\)/);
+        const match = onclickAttr.match(/showOlympiadDetailsById\((\d+)\)/);
+        
         if (match) {
             const olympiadId = parseInt(match[1]);
+            
+            // Если уже в режиме фокуса на этой олимпиаде - выключаем
             if (focusedOlympiadId === olympiadId) {
                 exitFocusMode();
             } else {
+                // Включаем режим фокуса
                 enterFocusMode(olympiadId);
             }
         }
         return;
     }
+    
+    // Если клик ПКМ не по олимпиаде, но режим фокуса активен - выключаем
     if (focusedOlympiadId !== null) {
         e.preventDefault();
         exitFocusMode();
@@ -287,7 +336,9 @@ function handleRightClick(e) {
 function enterFocusMode(olympiadId) {
     focusedOlympiadId = olympiadId;
     const focusedOlympiad = olympiads.find(o => o.id === olympiadId);
+    
     if (!focusedOlympiad) return;
+    
     focusHint.classList.remove('hidden');
     renderAllMonths();
 }
@@ -298,15 +349,55 @@ function exitFocusMode() {
     renderAllMonths();
 }
 
+function openAdminModal() {
+    adminModal.classList.add('active');
+    adminPasswordInput.value = '';
+    adminError.classList.add('hidden');
+}
+
+function closeAdminModal() {
+    adminModal.classList.remove('active');
+}
+
+function handleAdminLogin(e) {
+    e.preventDefault();
+    
+    const password = adminPasswordInput.value;
+    
+    if (password === ADMIN_PASSWORD) {
+        isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        closeAdminModal();
+        updateAdminUI();
+        renderAllMonths();
+    } else {
+        adminError.classList.remove('hidden');
+    }
+}
+
+function handleLogout() {
+    isAdmin = false;
+    localStorage.setItem('isAdmin', 'false');
+    updateAdminUI();
+    closeSidePanel();
+    closeDayPanel();
+    exitFocusMode();
+    renderAllMonths();
+}
+
 function renderAllMonths() {
     monthsScrollContainer.innerHTML = '';
+    
     const filteredOlympiads = getFilteredOlympiads();
+    
     for (let month = 0; month < 12; month++) {
         const monthWrapper = document.createElement('div');
         monthWrapper.className = 'month-calendar-wrapper';
         monthWrapper.id = `month-${month}`;
+        
         const calendarGrid = document.createElement('div');
         calendarGrid.className = 'calendar-grid';
+        
         const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         weekdays.forEach(day => {
             const weekdayDiv = document.createElement('div');
@@ -314,13 +405,16 @@ function renderAllMonths() {
             weekdayDiv.textContent = day;
             calendarGrid.appendChild(weekdayDiv);
         });
+        
         const daysContainer = document.createElement('div');
         daysContainer.className = 'days-container';
         daysContainer.innerHTML = renderMonthDays(month, filteredOlympiads);
         calendarGrid.appendChild(daysContainer);
+        
         monthWrapper.appendChild(calendarGrid);
         monthsScrollContainer.appendChild(monthWrapper);
     }
+    
     monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
 }
 
@@ -332,15 +426,25 @@ function updateCurrentMonthTitle() {
 
 function renderMonthDays(month, filteredOlympiads) {
     let html = '';
+    
     const firstDay = new Date(currentYear, month, 1);
     const lastDay = new Date(currentYear, month + 1, 0);
+    
     const firstDayWeek = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
     const lastDayDate = lastDay.getDate();
-    for (let i = 1; i < firstDayWeek; i++) html += '<div class="day-cell empty-cell"></div>';
-    for (let day = 1; day <= lastDayDate; day++) html += createDayCellHTML(day, month, filteredOlympiads);
+    
+    for (let i = 1; i < firstDayWeek; i++) {
+        html += '<div class="day-cell empty-cell"></div>';
+    }
+    
+    for (let day = 1; day <= lastDayDate; day++) {
+        html += createDayCellHTML(day, month, filteredOlympiads);
+    }
+    
     return html;
 }
 
+// Функция для преобразования hex цвета в rgba с прозрачностью
 function hexToRgba(hex, alpha) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -348,21 +452,26 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+// ИЗМЕНЕНО: Используем кастомные метки и цвета из настроек олимпиады с динамическими стилями
 function createDayCellHTML(day, month, filteredOlympiads) {
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
+    
     let regLabel = '';
     let regClass = '';
     let customGlowStyle = '';
-
+    
     if (focusedOlympiadId !== null) {
         const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
         if (focusedOlympiad) {
             if (focusedOlympiad.regStart === dateStr) {
                 const labelText = focusedOlympiad.focusLabelStart || 'Начало регистрации';
                 const color = focusedOlympiad.focusColorStart || '#ff6b6b';
+                
                 regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
                 regClass = ' reg-start';
+                
+                // Создаем кастомное свечение с цветом из настроек
                 customGlowStyle = `
                     <style>
                         .day-cell.reg-start[data-date="${dateStr}"]::before {
@@ -373,8 +482,11 @@ function createDayCellHTML(day, month, filteredOlympiads) {
             } else if (focusedOlympiad.regEnd === dateStr) {
                 const labelText = focusedOlympiad.focusLabelEnd || 'Конец регистрации';
                 const color = focusedOlympiad.focusColorEnd || '#ff4757';
+                
                 regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
                 regClass = ' reg-end';
+                
+                // Создаем кастомное свечение с цветом из настроек
                 customGlowStyle = `
                     <style>
                         .day-cell.reg-end[data-date="${dateStr}"]::before {
@@ -385,23 +497,25 @@ function createDayCellHTML(day, month, filteredOlympiads) {
             }
         }
     }
-
+    
     let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
         eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
     });
-
+    
     let focusClass = '';
     if (focusedOlympiadId !== null) {
         const hasFocusedOlympiad = dayOlympiads.some(o => o.id === focusedOlympiadId);
-        if (!hasFocusedOlympiad && dayOlympiads.length > 0) focusClass = ' focus-hidden';
+        if (!hasFocusedOlympiad && dayOlympiads.length > 0) {
+            focusClass = ' focus-hidden';
+        }
     }
-
-    const clickHandler = dayOlympiads.length > 0
-        ? `onclick="handleDayCellClick('${dateStr}', event)"`
+    
+    const clickHandler = dayOlympiads.length > 0 
+        ? `onclick="handleDayCellClick('${dateStr}', event)"` 
         : (isAdmin ? `onclick="openOlympiadModal('${dateStr}')"` : '');
-
+    
     return `
         ${customGlowStyle}
         <div class="day-cell${regClass}${focusClass}" data-date="${dateStr}" ${clickHandler}>
@@ -414,33 +528,41 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     `;
 }
 
+// ИЗМЕНЕНО: Добавлена проверка на повторный клик
 function handleDayCellClick(dateStr, event) {
+    // Если кликнули на тот же день, что и открыт сейчас - закрываем панель
     if (dayPanel.classList.contains('active') && currentOpenDate === dateStr) {
         closeDayPanel();
         return;
     }
+    
     showDayPanel(dateStr);
 }
 
 function showDayPanel(dateStr) {
     const filteredOlympiads = getFilteredOlympiads();
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
+    
     if (dayOlympiads.length === 0) return;
+    
     closeSidePanel();
+    
+    // Сохраняем текущую открытую дату
     currentOpenDate = dateStr;
-
+    
     const date = new Date(dateStr + 'T00:00:00');
     const day = date.getDate();
     const monthGenitive = monthNamesGenitive[date.getMonth()];
     const year = date.getFullYear();
     const olympiadWord = getOlympiadWord(dayOlympiads.length);
-
+    
     document.getElementById('dayPanelTitle').innerHTML = `${day} ${monthGenitive} ${year}<br><small style="font-size: 0.7em; font-weight: 400; opacity: 0.9;">${dayOlympiads.length} ${olympiadWord}</small>`;
-
+    
     dayPanelContent.innerHTML = dayOlympiads.map(olympiad => {
         const isExpanded = expandedOlympiads.has(olympiad.id);
         const detailsClass = isExpanded ? '' : 'hidden';
         const iconRotation = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+        
         return `
         <div class="day-olympiad-card" data-olympiad-id="${olympiad.id}">
             <div class="day-olympiad-header">
@@ -454,42 +576,77 @@ function showDayPanel(dateStr) {
                 <div class="preview-item">
                     <strong>Сложность:</strong> ${olympiad.difficulty}
                 </div>
-                ${olympiad.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${olympiad.website}" target="_blank">${olympiad.website}</a></div>` : ''}
+                ${olympiad.website ? `<div class="preview-item">
+                    <strong>Сайт:</strong> <a href="${olympiad.website}" target="_blank">${olympiad.website}</a>
+                </div>` : ''}
             </div>
             <div class="day-olympiad-details ${detailsClass}">
-                ${olympiad.description ? `<div class="detail-item"><strong>Описание:</strong> ${olympiad.description}</div>` : ''}
-                <div class="detail-item"><strong>Время:</strong> ${olympiad.time || 'Не установлено'}</div>
-                <div class="detail-item"><strong>Класс:</strong> ${olympiad.grade}</div>
-                <div class="detail-item"><strong>Место проведения:</strong> ${olympiad.location || 'Не установлено'}</div>
-                ${olympiad.regStart ? `<div class="detail-item"><strong>Начало регистрации:</strong> ${formatDate(olympiad.regStart)}</div>` : ''}
-                ${olympiad.regEnd ? `<div class="detail-item"><strong>Конец регистрации:</strong> ${formatDate(olympiad.regEnd)}</div>` : ''}
-                ${olympiad.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${olympiad.archive}" target="_blank">Скачать</a></div>` : ''}
+                ${olympiad.description ? `<div class="detail-item">
+                    <strong>Описание:</strong> ${olympiad.description}
+                </div>` : ''}
+                <div class="detail-item">
+                    <strong>Время:</strong> ${olympiad.time || 'Не установлено'}
+                </div>
+                <div class="detail-item">
+                    <strong>Класс:</strong> ${olympiad.grade}
+                </div>
+                <div class="detail-item">
+                    <strong>Место проведения:</strong> ${olympiad.location || 'Не установлено'}
+                </div>
+                ${olympiad.regStart ? `<div class="detail-item">
+                    <strong>Начало регистрации:</strong> ${formatDate(olympiad.regStart)}
+                </div>` : ''}
+                ${olympiad.regEnd ? `<div class="detail-item">
+                    <strong>Конец регистрации:</strong> ${formatDate(olympiad.regEnd)}
+                </div>` : ''}
+                ${olympiad.archive ? `<div class="detail-item">
+                    <strong>Архив задач:</strong> <a href="${olympiad.archive}" target="_blank">Скачать</a>
+                </div>` : ''}
                 <button class="register-btn-compact">Регистрация на олимпиаду</button>
-                ${isAdmin ? `<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>` : ''}
+                ${isAdmin ? `
+                    <div class="admin-actions-compact">
+                        <button class="edit-btn-compact">Редактировать</button>
+                        <button class="delete-btn-compact">Удалить</button>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
     }).join('');
-
+    
     dayPanel.classList.add('active');
 }
 
 function getOlympiadWord(count) {
     const lastDigit = count % 10;
     const lastTwoDigits = count % 100;
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'олимпиад';
-    if (lastDigit === 1) return 'олимпиада';
-    if (lastDigit >= 2 && lastDigit <= 4) return 'олимпиады';
+    
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return 'олимпиад';
+    }
+    
+    if (lastDigit === 1) {
+        return 'олимпиада';
+    }
+    
+    if (lastDigit >= 2 && lastDigit <= 4) {
+        return 'олимпиады';
+    }
+    
     return 'олимпиад';
 }
 
+// ИСПРАВЛЕНО: Ищем элементы только внутри dayPanel
 function toggleOlympiadDetails(olympiadId) {
     const card = dayPanel.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     if (!card) return;
+    
     const details = card.querySelector('.day-olympiad-details');
     const icon = card.querySelector('.expand-icon');
     if (!details || !icon) return;
+    
     const isCurrentlyHidden = details.classList.contains('hidden');
+    
     if (isCurrentlyHidden) {
         details.classList.remove('hidden');
         icon.style.transform = 'rotate(180deg)';
@@ -503,6 +660,7 @@ function toggleOlympiadDetails(olympiadId) {
 
 function closeDayPanel() {
     dayPanel.classList.remove('active');
+    // НЕ очищаем expandedOlympiads, чтобы сохранить состояние раскрытия
     currentOpenDate = null;
 }
 
@@ -520,26 +678,45 @@ function handleDeleteFromDay(olympiadId) {
         const dateStr = olympiads.find(o => o.id === olympiadId)?.date;
         olympiads = olympiads.filter(o => o.id !== olympiadId);
         localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
-        if (focusedOlympiadId === olympiadId) exitFocusMode();
+        
+        if (focusedOlympiadId === olympiadId) {
+            exitFocusMode();
+        }
+        
+        // Удаляем из expandedOlympiads при удалении
         expandedOlympiads.delete(olympiadId);
+        
         const remainingOlympiads = olympiads.filter(o => o.date === dateStr);
-        if (remainingOlympiads.length > 0) showDayPanel(dateStr); else closeDayPanel();
+        if (remainingOlympiads.length > 0) {
+            showDayPanel(dateStr);
+        } else {
+            closeDayPanel();
+        }
+        
         renderAllMonths();
     }
 }
 
+// ИЗМЕНЕНО: Добавлена проверка на повторный клик
 function showOlympiadDetailsById(olympiadId) {
+    // Если кликнули на ту же олимпиаду, что и открыта сейчас - закрываем панель
     if (sidePanel.classList.contains('active') && currentOpenOlympiadId === olympiadId) {
         closeSidePanel();
         return;
     }
+    
     const olympiad = olympiads.find(o => o.id === olympiadId);
-    if (olympiad) showOlympiadDetails(olympiad);
+    if (olympiad) {
+        showOlympiadDetails(olympiad);
+    }
 }
 
 function showOlympiadDetails(olympiad) {
     closeDayPanel();
+    
+    // Сохраняем текущую открытую олимпиаду
     currentOpenOlympiadId = olympiad.id;
+    
     document.getElementById('olympiadName').textContent = olympiad.name;
     document.getElementById('olympiadDescription').textContent = olympiad.description || 'Нет описания';
     document.getElementById('olympiadDate').textContent = formatDate(olympiad.date);
@@ -547,8 +724,10 @@ function showOlympiadDetails(olympiad) {
     document.getElementById('olympiadDifficulty').textContent = olympiad.difficulty;
     document.getElementById('olympiadGrade').textContent = olympiad.grade;
     document.getElementById('olympiadLocation').textContent = olympiad.location || 'Не установлено';
+    
     document.getElementById('olympiadRegStart').textContent = olympiad.regStart ? formatDate(olympiad.regStart) : 'Не установлено';
     document.getElementById('olympiadRegEnd').textContent = olympiad.regEnd ? formatDate(olympiad.regEnd) : 'Не установлено';
+    
     const websiteLink = document.getElementById('olympiadWebsite');
     if (olympiad.website) {
         websiteLink.href = olympiad.website;
@@ -557,6 +736,7 @@ function showOlympiadDetails(olympiad) {
     } else {
         websiteLink.style.display = 'none';
     }
+    
     const archiveLink = document.getElementById('olympiadArchive');
     if (olympiad.archive) {
         archiveLink.href = olympiad.archive;
@@ -564,6 +744,7 @@ function showOlympiadDetails(olympiad) {
     } else {
         archiveLink.style.display = 'none';
     }
+    
     sidePanel.dataset.olympiadId = olympiad.id;
     sidePanel.classList.add('active');
 }
@@ -575,14 +756,21 @@ function closeSidePanel() {
 
 function openOlympiadModal(dateStr = null) {
     if (!isAdmin) return;
+    
     editingOlympiadId = null;
     olympiadForm.reset();
     document.getElementById('modalTitle').textContent = 'Добавить олимпиаду';
+    
+    // Значения по умолчанию для новой олимпиады
     document.getElementById('focusLabelStartInput').value = '';
     document.getElementById('focusColorStartInput').value = '#ff6b6b';
     document.getElementById('focusLabelEndInput').value = '';
     document.getElementById('focusColorEndInput').value = '#ff4757';
-    if (dateStr) document.getElementById('dateInput').value = dateStr;
+    
+    if (dateStr) {
+        document.getElementById('dateInput').value = dateStr;
+    }
+    
     olympiadModal.classList.add('active');
 }
 
@@ -591,6 +779,7 @@ function closeOlympiadModal() {
     editingOlympiadId = null;
 }
 
+// Заполнение формы при редактировании
 function populateFormForEdit(olympiad) {
     editingOlympiadId = olympiad.id;
     document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
@@ -612,9 +801,12 @@ function populateFormForEdit(olympiad) {
     document.getElementById('colorInput').value = olympiad.color || '#667eea';
 }
 
+// Сохраняем кастомные метки и цвета
 function handleFormSubmit(e) {
     e.preventDefault();
+    
     if (!isAdmin) return;
+    
     const olympiad = {
         id: editingOlympiadId || Date.now(),
         name: document.getElementById('nameInput').value,
@@ -634,12 +826,14 @@ function handleFormSubmit(e) {
         archive: document.getElementById('archiveInput').value,
         color: document.getElementById('colorInput').value
     };
+    
     if (editingOlympiadId) {
         const index = olympiads.findIndex(o => o.id === editingOlympiadId);
         olympiads[index] = olympiad;
     } else {
         olympiads.push(olympiad);
     }
+    
     localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
     closeOlympiadModal();
     renderAllMonths();
@@ -651,8 +845,10 @@ function handleRegistration() {
 
 function handleEdit() {
     if (!isAdmin) return;
+    
     const olympiadId = parseInt(sidePanel.dataset.olympiadId);
     const olympiad = olympiads.find(o => o.id === olympiadId);
+    
     if (olympiad) {
         closeSidePanel();
         populateFormForEdit(olympiad);
@@ -662,12 +858,20 @@ function handleEdit() {
 
 function handleDelete() {
     if (!isAdmin) return;
+    
     const olympiadId = parseInt(sidePanel.dataset.olympiadId);
+    
     if (confirm('Вы уверены, что хотите удалить эту олимпиаду?')) {
         olympiads = olympiads.filter(o => o.id !== olympiadId);
         localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
-        if (focusedOlympiadId === olympiadId) exitFocusMode();
+        
+        if (focusedOlympiadId === olympiadId) {
+            exitFocusMode();
+        }
+        
+        // Удаляем из expandedOlympiads при удалении
         expandedOlympiads.delete(olympiadId);
+        
         closeSidePanel();
         renderAllMonths();
     }
