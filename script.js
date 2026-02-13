@@ -102,13 +102,14 @@ function updateAdminUI() {
     }
 }
 
-// ИСПРАВЛЕНО: Объединены обработчики кликов в один
+// ИСПРАВЛЕНО: Единый обработчик кликов с правильным порядком проверок
 function handleGlobalClick(e) {
     // ПРИОРИТЕТ 1: Обработка кликов внутри dayPanel (для динамически созданных элементов)
-    if (dayPanel.contains(e.target)) {
+    if (dayPanel.classList.contains('active') && dayPanel.contains(e.target)) {
         // Обработка клика по хедеру карточки олимпиады
         const header = e.target.closest('.day-olympiad-header');
         if (header) {
+            e.preventDefault();
             e.stopPropagation();
             const card = header.closest('.day-olympiad-card');
             if (card) {
@@ -121,6 +122,7 @@ function handleGlobalClick(e) {
         
         // Обработка кнопки регистрации
         if (e.target.classList.contains('register-btn-compact')) {
+            e.preventDefault();
             e.stopPropagation();
             handleRegistration();
             return;
@@ -128,6 +130,7 @@ function handleGlobalClick(e) {
         
         // Обработка кнопки редактирования
         if (e.target.classList.contains('edit-btn-compact')) {
+            e.preventDefault();
             e.stopPropagation();
             const card = e.target.closest('.day-olympiad-card');
             if (card) {
@@ -139,6 +142,7 @@ function handleGlobalClick(e) {
         
         // Обработка кнопки удаления
         if (e.target.classList.contains('delete-btn-compact')) {
+            e.preventDefault();
             e.stopPropagation();
             const card = e.target.closest('.day-olympiad-card');
             if (card) {
@@ -150,7 +154,6 @@ function handleGlobalClick(e) {
         
         // Обработка ссылок - не блокируем
         if (e.target.tagName === 'A') {
-            e.stopPropagation();
             return;
         }
         
@@ -637,11 +640,19 @@ function toggleOlympiadDetails(olympiadId) {
     console.log('toggleOlympiadDetails вызван для ID:', olympiadId);
     const card = document.querySelector(`[data-olympiad-id="${olympiadId}"]`);
     console.log('Найдена карточка:', card);
-    if (!card) return;
+    if (!card) {
+        console.log('ОШИБКА: Карточка не найдена!');
+        return;
+    }
     
     const details = card.querySelector('.day-olympiad-details');
     const icon = card.querySelector('.expand-icon');
     console.log('Details элемент:', details, 'Icon элемент:', icon);
+    
+    if (!details || !icon) {
+        console.log('ОШИБКА: Details или Icon не найдены!');
+        return;
+    }
     
     const isCurrentlyHidden = details.classList.contains('hidden');
     console.log('Текущее состояние hidden:', isCurrentlyHidden);
@@ -650,12 +661,12 @@ function toggleOlympiadDetails(olympiadId) {
         details.classList.remove('hidden');
         icon.style.transform = 'rotate(180deg)';
         expandedOlympiads.add(olympiadId);
-        console.log('Раскрыто, expandedOlympiads:', expandedOlympiads);
+        console.log('✅ Раскрыто, expandedOlympiads:', Array.from(expandedOlympiads));
     } else {
         details.classList.add('hidden');
         icon.style.transform = 'rotate(0deg)';
         expandedOlympiads.delete(olympiadId);
-        console.log('Свернуто, expandedOlympiads:', expandedOlympiads);
+        console.log('✅ Свернуто, expandedOlympiads:', Array.from(expandedOlympiads));
     }
 }
 
