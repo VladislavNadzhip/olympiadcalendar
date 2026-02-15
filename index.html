@@ -192,6 +192,7 @@
                 <div class="form-group">
                     <label for="nameInput">Название олимпиады: <span class="required">*</span></label>
                     <input type="text" id="nameInput" required>
+                    <small>При выборе нескольких классов будет добавлено указание класса</small>
                 </div>
                 <div class="form-group">
                     <label for="descriptionInput">Описание:</label>
@@ -248,10 +249,43 @@
                         <option value="Очень сложная">Очень сложная</option>
                     </select>
                 </div>
+                
+                <!-- НОВОЕ: Чекбоксы для классов -->
                 <div class="form-group">
-                    <label for="gradeInput">Класс: <span class="required">*</span></label>
-                    <input type="text" id="gradeInput" placeholder="Например: 9-11 класс" required>
+                    <label>Классы: <span class="required">*</span></label>
+                    <div class="grade-checkboxes">
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="5">
+                            <span>5</span>
+                        </label>
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="6">
+                            <span>6</span>
+                        </label>
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="7">
+                            <span>7</span>
+                        </label>
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="8">
+                            <span>8</span>
+                        </label>
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="9">
+                            <span>9</span>
+                        </label>
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="10">
+                            <span>10</span>
+                        </label>
+                        <label class="grade-checkbox">
+                            <input type="checkbox" name="grade" value="11">
+                            <span>11</span>
+                        </label>
+                    </div>
+                    <small>Выберите один или несколько классов. Будет создано отдельное событие для каждого класса.</small>
                 </div>
+                
                 <div class="form-group">
                     <label for="locationInput">Место проведения:</label>
                     <input type="text" id="locationInput">
