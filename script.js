@@ -123,19 +123,9 @@ function updateAdminUI() {
     }
 }
 
-// ИСПРАВЛЕНО: Улучшенная обработка кликов с правильным порядком
+// ИСПРАВЛЕНО: Правильная обработка кликов с делегированием
 function handleGlobalClick(e) {
-    // ПРИОРИТЕТ 1: Клики по плашкам олимпиад в календаре
-    const olympiadEvent = e.target.closest('.olympiad-event');
-    if (olympiadEvent) {
-        e.preventDefault();
-        e.stopPropagation();
-        const olympiadId = parseInt(olympiadEvent.dataset.olympiadId);
-        showOlympiadDetailsById(olympiadId);
-        return;
-    }
-    
-    // ПРИОРИТЕТ 2: Обработка кликов внутри monthOlympiadsModal
+    // ПРИОРИТЕТ 1: Обработка кликов внутри monthOlympiadsModal
     if (monthOlympiadsModal.classList.contains('active') && monthOlympiadsModal.contains(e.target)) {
         const olympiadCard = e.target.closest('.month-olympiad-card');
         if (olympiadCard) {
@@ -149,7 +139,7 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // ПРИОРИТЕТ 3: Обработка кликов внутри dayPanel
+    // ПРИОРИТЕТ 2: Обработка кликов внутри dayPanel
     if (dayPanel.classList.contains('active') && dayPanel.contains(e.target)) {
         const header = e.target.closest('.day-olympiad-header');
         if (header) {
@@ -199,29 +189,7 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // ПРИОРИТЕТ 4: Клик по дню с олимпиадами
-    const dayCell = e.target.closest('.day-cell:not(.empty-cell)');
-    if (dayCell && dayCell.dataset.date) {
-        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
-        if (clickedInsideEvents) {
-            // Клик внутри контейнера олимпиад - не открываем панель дня
-            return;
-        }
-        
-        const dateStr = dayCell.dataset.date;
-        const filteredOlympiads = getFilteredOlympiads();
-        const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
-        
-        if (dayOlympiads.length > 0) {
-            handleDayCellClick(dateStr, e);
-            return;
-        } else if (isAdmin) {
-            openOlympiadModal(dateStr);
-            return;
-        }
-    }
-    
-    // ПРИОРИТЕТ 5: Проверка кликов вне панелей
+    // ПРИОРИТЕТ 3: Проверка кликов вне панелей
     const isSidePanelOpen = sidePanel.classList.contains('active');
     const isDayPanelOpen = dayPanel.classList.contains('active');
     const isMonthModalOpen = monthOlympiadsModal.classList.contains('active');
@@ -233,6 +201,16 @@ function handleGlobalClick(e) {
     const clickedInsideMonthModal = monthOlympiadsModal.contains(e.target);
     
     if (clickedInsideSidePanel || clickedInsideDayPanel || clickedInsideMonthModal) return;
+    
+    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
+    if (clickedOnOlympiadEvent) return;
+    
+    const clickedDayCell = e.target.closest('.day-cell:not(.empty-cell)');
+    if (clickedDayCell) {
+        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
+        if (clickedInsideEvents) return;
+        return;
+    }
     
     closeSidePanel();
     closeDayPanel();
@@ -578,7 +556,42 @@ function renderAllMonths() {
         monthsScrollContainer.appendChild(monthWrapper);
     }
     
+    // Добавляем обработчики кликов после рендера
+    attachEventHandlers();
+    
     monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
+}
+
+// ИСПРАВЛЕНО: Новая функция для добавления обработчиков кликов
+function attachEventHandlers() {
+    // Обработчики для плашек олимпиад
+    document.querySelectorAll('.olympiad-event').forEach(event => {
+        event.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const olympiadId = parseInt(this.dataset.olympiadId);
+            showOlympiadDetailsById(olympiadId);
+        });
+    });
+    
+    // Обработчики для дней календаря
+    document.querySelectorAll('.day-cell:not(.empty-cell)').forEach(cell => {
+        cell.addEventListener('click', function(e) {
+            const clickedInsideEvents = e.target.closest('.olympiad-events-container');
+            if (clickedInsideEvents) return; // Не открываем панель при клике на плашку
+            
+            const dateStr = this.dataset.date;
+            if (!dateStr) return;
+            
+            const filteredOlympiads = getFilteredOlympiads();
+            const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
+            
+            if (dayOlympiads.length > 0) {
+                handleDayCellClick(dateStr, e);
+            } else if (isAdmin) {
+                openOlympiadModal(dateStr);
+            }
+        });
+    });
 }
 
 function updateCurrentMonthTitle() {
@@ -617,7 +630,7 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// ИСПРАВЛЕНО: Добавлен data-olympiad-id в плашки олимпиад + фикс фокус-режима для новых олимпиад
+// Добавлен data-olympiad-id в плашки олимпиад + фикс фокус-режима
 function createDayCellHTML(day, month, filteredOlympiads) {
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
@@ -686,7 +699,6 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        // ИСПРАВЛЕНО: Добавлен data-olympiad-id для корректной работы кликов
         eventsHTML += `<div class="olympiad-event" data-olympiad-id="${olympiad.id}" style="background-color: ${bgColor}">${olympiad.name}</div>`;
     });
     
