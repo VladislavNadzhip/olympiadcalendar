@@ -345,23 +345,9 @@ body {
     margin: 0;
 }
 
-/* Кнопка олимпиад месяца */
+/* СКРЫТЬ кнопку олимпиад месяца (справа) */
 .month-olympiads-btn {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.month-olympiads-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
+    display: none !important;
 }
 
 .calendar-grid {
@@ -1139,9 +1125,5 @@ body {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
-    }
-    
-    .month-olympiads-btn {
-        width: 100%;
     }
 }
