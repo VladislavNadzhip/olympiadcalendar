@@ -326,16 +326,12 @@ body {
 /* Каждый месяц в скролле */
 .month-calendar-wrapper {
     min-height: auto;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
 }
 
-/* Заголовок месяца с кнопкой */
+/* Заголовок месяца с кнопкой - СКРЫВАЕМ */
 .month-title-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 0 10px;
+    display: none;
 }
 
 .month-title {
