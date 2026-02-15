@@ -77,14 +77,6 @@
                     <span id="olympiadLocation"></span>
                 </div>
                 <div class="info-field">
-                    <label>Начало регистрации:</label>
-                    <span id="olympiadRegStart"></span>
-                </div>
-                <div class="info-field">
-                    <label>Конец регистрации:</label>
-                    <span id="olympiadRegEnd"></span>
-                </div>
-                <div class="info-field">
                     <label>Сайт олимпиады:</label>
                     <a id="olympiadWebsite" href="#" target="_blank"></a>
                 </div>
@@ -207,37 +199,16 @@
                     <input type="time" id="timeInput">
                     <small>Оставьте пустым, если не установлено</small>
                 </div>
+                
+                <!-- НОВОЕ: Количество фокус-плашек -->
                 <div class="form-group">
-                    <label for="regStartInput">Начало регистрации:</label>
-                    <input type="date" id="regStartInput">
-                    <small>Оставьте пустым, если не установлено</small>
-                </div>
-                <div class="form-group">
-                    <label for="regEndInput">Конец регистрации:</label>
-                    <input type="date" id="regEndInput">
-                    <small>Оставьте пустым, если не установлено</small>
+                    <label for="focusPlatesCountInput">Количество фокус-плашек:</label>
+                    <input type="number" id="focusPlatesCountInput" min="0" max="10" value="0">
+                    <small>Укажите количество важных дат для подсветки в фокус-режиме (0-10)</small>
                 </div>
                 
-                <!-- НОВОЕ: Кастомные метки фокус-режима -->
-                <div class="form-group">
-                    <label for="focusLabelStartInput">Метка для начала регистрации (фокус-режим):</label>
-                    <input type="text" id="focusLabelStartInput" placeholder="Начало регистрации" maxlength="50">
-                    <small>Текст, который будет показываться на дате начала регистрации</small>
-                </div>
-                <div class="form-group">
-                    <label for="focusColorStartInput">Цвет свечения для начала регистрации:</label>
-                    <input type="color" id="focusColorStartInput" value="#ff6b6b">
-                </div>
-                
-                <div class="form-group">
-                    <label for="focusLabelEndInput">Метка для конца регистрации (фокус-режим):</label>
-                    <input type="text" id="focusLabelEndInput" placeholder="Конец регистрации" maxlength="50">
-                    <small>Текст, который будет показываться на дате конца регистрации</small>
-                </div>
-                <div class="form-group">
-                    <label for="focusColorEndInput">Цвет свечения для конца регистрации:</label>
-                    <input type="color" id="focusColorEndInput" value="#ff4757">
-                </div>
+                <!-- Контейнер для фокус-плашек -->
+                <div id="focusPlatesContainer"></div>
                 
                 <div class="form-group">
                     <label for="difficultyInput">Сложность: <span class="required">*</span></label>
@@ -250,7 +221,7 @@
                     </select>
                 </div>
                 
-                <!-- НОВОЕ: Чекбоксы для классов -->
+                <!-- Чекбоксы для классов -->
                 <div class="form-group">
                     <label>Классы: <span class="required">*</span></label>
                     <div class="grade-checkboxes">
