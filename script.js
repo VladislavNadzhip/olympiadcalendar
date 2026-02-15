@@ -515,6 +515,7 @@ function handleLogout() {
     renderAllMonths();
 }
 
+// ИСПРАВЛЕНО: Убрано создание кнопки month-olympiads-btn
 function renderAllMonths() {
     monthsScrollContainer.innerHTML = '';
     
@@ -525,7 +526,7 @@ function renderAllMonths() {
         monthWrapper.className = 'month-calendar-wrapper';
         monthWrapper.id = `month-${month}`;
         
-        // Добавляем контейнер с заголовком месяца и кнопкой
+        // Только заголовок месяца без кнопки
         const titleContainer = document.createElement('div');
         titleContainer.className = 'month-title-container';
         
@@ -533,16 +534,7 @@ function renderAllMonths() {
         monthTitle.className = 'month-title';
         monthTitle.textContent = `${monthNames[month]} ${currentYear}`;
         
-        const monthBtn = document.createElement('button');
-        monthBtn.className = 'month-olympiads-btn';
-        monthBtn.textContent = 'Олимпиады в этом месяце';
-        monthBtn.onclick = (e) => {
-            e.stopPropagation();
-            openMonthOlympiadsModal(month);
-        };
-        
         titleContainer.appendChild(monthTitle);
-        titleContainer.appendChild(monthBtn);
         monthWrapper.appendChild(titleContainer);
         
         const calendarGrid = document.createElement('div');

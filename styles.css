@@ -515,6 +515,7 @@ body {
     scrollbar-color: #667eea rgba(61, 61, 84, 0.2);
 }
 
+/* ИСПРАВЛЕНО: Убран transform: scale */
 .olympiad-event {
     background: #4a5ab3;
     color: white;
@@ -531,8 +532,8 @@ body {
 }
 
 .olympiad-event:hover {
-    transform: scale(1.02);
     box-shadow: 0 3px 10px rgba(74, 90, 179, 0.5);
+    filter: brightness(1.1);
 }
 
 /* Side Panel */
