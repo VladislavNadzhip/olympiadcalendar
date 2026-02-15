@@ -13,6 +13,9 @@ let currentOpenMonth = null;
 let currentOpenDate = null;
 let currentOpenOlympiadId = null;
 
+// Переменная для отслеживания текущего видимого месяца
+let currentVisibleMonthIndex = 0;
+
 // Фильтры
 let currentFilter = {
     difficultyFrom: '',
@@ -74,6 +77,9 @@ const monthOlympiadsTitle = document.getElementById('monthOlympiadsTitle');
 const knownDatesColumn = document.getElementById('knownDatesColumn');
 const unknownDatesColumn = document.getElementById('unknownDatesColumn');
 const cancelledColumn = document.getElementById('cancelledColumn');
+
+// Кнопка олимпиад в верхнем хедере
+const headerMonthOlympiadsBtn = document.getElementById('headerMonthOlympiadsBtn');
 
 // Элементы фильтра и города
 const filterBtn = document.getElementById('filterBtn');
@@ -233,6 +239,9 @@ function initializeEventListeners() {
     // Новые обработчики для модального окна олимпиад месяца
     closeMonthOlympiadsBtn.addEventListener('click', closeMonthOlympiadsModal);
     
+    // Обработчик для кнопки в верхнем хедере
+    headerMonthOlympiadsBtn.addEventListener('click', openCurrentMonthOlympiadsModal);
+    
     // Фильтр и город
     filterBtn.addEventListener('click', openFilterModal);
     closeFilterModalBtn.addEventListener('click', closeFilterModal);
@@ -243,6 +252,11 @@ function initializeEventListeners() {
     // ИСПРАВЛЕНО: Используем единый обработчик кликов
     document.addEventListener('click', handleGlobalClick);
     document.addEventListener('contextmenu', handleRightClick);
+}
+
+// Функция для открытия модального окна текущего видимого месяца
+function openCurrentMonthOlympiadsModal() {
+    openMonthOlympiadsModal(currentVisibleMonthIndex);
 }
 
 // Функции для модального окна олимпиад месяца
@@ -555,7 +569,10 @@ function renderAllMonths() {
 
 function updateCurrentMonthTitle() {
     const scrollTop = monthsScrollContainer.scrollTop;
-    const monthIndex = Math.round(scrollTop / window.innerHeight);
+    const containerHeight = monthsScrollContainer.scrollHeight / 12; // Примерная высота одного месяца
+    const monthIndex = Math.max(0, Math.min(11, Math.floor(scrollTop / containerHeight)));
+    
+    currentVisibleMonthIndex = monthIndex;
     currentMonthTitle.textContent = `${monthNames[monthIndex]} ${currentYear}`;
 }
 
