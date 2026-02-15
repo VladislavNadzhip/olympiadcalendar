@@ -45,6 +45,7 @@ body {
 .header-left {
     display: flex;
     align-items: center;
+    gap: 15px;
     flex: 1;
 }
 
@@ -59,6 +60,27 @@ body {
     color: #eaeaea;
     font-size: 1.6em;
     line-height: 1;
+    margin: 0;
+}
+
+/* Кнопка в верхнем хедере */
+.header-month-olympiads-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    white-space: nowrap;
+}
+
+.header-month-olympiads-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
 }
 
 /* City Selector */
