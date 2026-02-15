@@ -7,6 +7,7 @@ let editingOlympiadId = null;
 let isAdmin = localStorage.getItem('isAdmin') === 'true';
 let focusedOlympiadId = null;
 let expandedOlympiads = new Set();
+let currentOpenMonth = null;
 
 // Переменные для отслеживания текущих открытых панелей
 let currentOpenDate = null;
@@ -66,6 +67,14 @@ const adminPasswordInput = document.getElementById('adminPasswordInput');
 const adminError = document.getElementById('adminError');
 const focusHint = document.getElementById('focusHint');
 
+// Новые элементы для модального окна олимпиад месяца
+const monthOlympiadsModal = document.getElementById('monthOlympiadsModal');
+const closeMonthOlympiadsBtn = document.getElementById('closeMonthOlympiadsBtn');
+const monthOlympiadsTitle = document.getElementById('monthOlympiadsTitle');
+const knownDatesColumn = document.getElementById('knownDatesColumn');
+const unknownDatesColumn = document.getElementById('unknownDatesColumn');
+const cancelledColumn = document.getElementById('cancelledColumn');
+
 // Элементы фильтра и города
 const filterBtn = document.getElementById('filterBtn');
 const filterModal = document.getElementById('filterModal');
@@ -104,7 +113,21 @@ function updateAdminUI() {
 
 // ИСПРАВЛЕНО: Единый обработчик кликов с правильным порядком проверок
 function handleGlobalClick(e) {
-    // ПРИОРИТЕТ 1: Обработка кликов внутри dayPanel (для динамически созданных элементов)
+    // ПРИОРИТЕТ 1: Обработка кликов внутри monthOlympiadsModal
+    if (monthOlympiadsModal.classList.contains('active') && monthOlympiadsModal.contains(e.target)) {
+        const olympiadCard = e.target.closest('.month-olympiad-card');
+        if (olympiadCard) {
+            e.preventDefault();
+            e.stopPropagation();
+            const olympiadId = parseInt(olympiadCard.dataset.olympiadId);
+            showOlympiadDetailsById(olympiadId);
+            closeMonthOlympiadsModal();
+            return;
+        }
+        return;
+    }
+    
+    // ПРИОРИТЕТ 2: Обработка кликов внутри dayPanel (для динамически созданных элементов)
     if (dayPanel.classList.contains('active') && dayPanel.contains(e.target)) {
         // Обработка клика по хедеру карточки олимпиады
         const header = e.target.closest('.day-olympiad-header');
@@ -161,16 +184,18 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // ПРИОРИТЕТ 2: Проверка кликов вне панелей (handleOutsideClick)
+    // ПРИОРИТЕТ 3: Проверка кликов вне панелей (handleOutsideClick)
     const isSidePanelOpen = sidePanel.classList.contains('active');
     const isDayPanelOpen = dayPanel.classList.contains('active');
+    const isMonthModalOpen = monthOlympiadsModal.classList.contains('active');
     
-    if (!isSidePanelOpen && !isDayPanelOpen) return;
+    if (!isSidePanelOpen && !isDayPanelOpen && !isMonthModalOpen) return;
     
     const clickedInsideSidePanel = sidePanel.contains(e.target);
     const clickedInsideDayPanel = dayPanel.contains(e.target);
+    const clickedInsideMonthModal = monthOlympiadsModal.contains(e.target);
     
-    if (clickedInsideSidePanel || clickedInsideDayPanel) return;
+    if (clickedInsideSidePanel || clickedInsideDayPanel || clickedInsideMonthModal) return;
     
     const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
     if (clickedOnOlympiadEvent) return;
@@ -184,6 +209,7 @@ function handleGlobalClick(e) {
     
     closeSidePanel();
     closeDayPanel();
+    closeMonthOlympiadsModal();
 }
 
 // Инициализация обработчиков
@@ -204,6 +230,9 @@ function initializeEventListeners() {
     cancelAdminBtn.addEventListener('click', closeAdminModal);
     adminForm.addEventListener('submit', handleAdminLogin);
     
+    // Новые обработчики для модального окна олимпиад месяца
+    closeMonthOlympiadsBtn.addEventListener('click', closeMonthOlympiadsModal);
+    
     // Фильтр и город
     filterBtn.addEventListener('click', openFilterModal);
     closeFilterModalBtn.addEventListener('click', closeFilterModal);
@@ -214,6 +243,91 @@ function initializeEventListeners() {
     // ИСПРАВЛЕНО: Используем единый обработчик кликов
     document.addEventListener('click', handleGlobalClick);
     document.addEventListener('contextmenu', handleRightClick);
+}
+
+// Функции для модального окна олимпиад месяца
+function openMonthOlympiadsModal(month) {
+    currentOpenMonth = month;
+    const filteredOlympiads = getFilteredOlympiads();
+    
+    // Олимпиады текущего месяца
+    const monthOlympiads = filteredOlympiads.filter(o => {
+        const olympiadDate = new Date(o.date + 'T00:00:00');
+        return olympiadDate.getMonth() === month && olympiadDate.getFullYear() === currentYear;
+    });
+    
+    // Установка заголовка
+    monthOlympiadsTitle.textContent = `Олимпиады - ${monthNames[month]} ${currentYear}`;
+    
+    // Очищаем колонки
+    knownDatesColumn.innerHTML = '';
+    unknownDatesColumn.innerHTML = '';
+    cancelledColumn.innerHTML = '';
+    
+    // Распределяем олимпиады по колонкам
+    monthOlympiads.forEach(olympiad => {
+        const card = createMonthOlympiadCard(olympiad);
+        
+        // Пока что все олимпиады с известными датами
+        // В будущем можно добавить логику для определения статуса
+        knownDatesColumn.appendChild(card);
+    });
+    
+    // Показываем сообщения, если колонки пустые
+    if (knownDatesColumn.children.length === 0) {
+        knownDatesColumn.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Нет олимпиад</p>';
+    }
+    if (unknownDatesColumn.children.length === 0) {
+        unknownDatesColumn.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Нет олимпиад</p>';
+    }
+    if (cancelledColumn.children.length === 0) {
+        cancelledColumn.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Нет отменённых олимпиад</p>';
+    }
+    
+    monthOlympiadsModal.classList.add('active');
+}
+
+function createMonthOlympiadCard(olympiad) {
+    const card = document.createElement('div');
+    card.className = 'month-olympiad-card';
+    card.dataset.olympiadId = olympiad.id;
+    card.style.background = `linear-gradient(135deg, ${olympiad.color || '#667eea'} 0%, ${adjustColor(olympiad.color || '#667eea', -20)} 100%)`;
+    
+    const name = document.createElement('div');
+    name.className = 'month-olympiad-name';
+    name.textContent = olympiad.name;
+    
+    const date = document.createElement('div');
+    date.className = 'month-olympiad-date';
+    date.textContent = `📅 ${formatDate(olympiad.date)}`;
+    
+    const difficulty = document.createElement('div');
+    difficulty.className = 'month-olympiad-difficulty';
+    difficulty.textContent = `🎯 ${olympiad.difficulty}`;
+    
+    card.appendChild(name);
+    card.appendChild(date);
+    card.appendChild(difficulty);
+    
+    return card;
+}
+
+// Вспомогательная функция для затемнения цвета
+function adjustColor(color, percent) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+        (B < 255 ? B < 1 ? 0 : B : 255))
+        .toString(16).slice(1);
+}
+
+function closeMonthOlympiadsModal() {
+    monthOlympiadsModal.classList.remove('active');
+    currentOpenMonth = null;
 }
 
 // Фильтрация олимпиад
@@ -295,6 +409,7 @@ function handleCityChange() {
         exitFocusMode();
         closeSidePanel();
         closeDayPanel();
+        closeMonthOlympiadsModal();
         
         renderAllMonths();
     }
@@ -394,6 +509,16 @@ function renderAllMonths() {
         const monthWrapper = document.createElement('div');
         monthWrapper.className = 'month-calendar-wrapper';
         monthWrapper.id = `month-${month}`;
+        
+        // Добавляем кнопку "Олимпиады в этом месяце"
+        const monthBtn = document.createElement('button');
+        monthBtn.className = 'month-olympiads-btn';
+        monthBtn.textContent = 'Олимпиады в этом месяце';
+        monthBtn.onclick = (e) => {
+            e.stopPropagation();
+            openMonthOlympiadsModal(month);
+        };
+        monthWrapper.appendChild(monthBtn);
         
         const calendarGrid = document.createElement('div');
         calendarGrid.className = 'calendar-grid';

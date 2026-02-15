@@ -305,6 +305,30 @@ body {
 .month-calendar-wrapper {
     min-height: auto;
     margin-bottom: 40px;
+    position: relative;
+}
+
+/* Кнопка олимпиад месяца */
+.month-olympiads-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.month-olympiads-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
 }
 
 .calendar-grid {
@@ -822,6 +846,119 @@ body {
     overflow-y: auto;
 }
 
+/* Month Olympiads Modal - шире и с гридом */
+.month-olympiads-modal-content {
+    max-width: 1200px !important;
+    width: 95% !important;
+}
+
+.month-olympiads-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 30px;
+}
+
+.month-olympiads-column {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #3d3d54;
+}
+
+.column-title {
+    color: #667eea;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #3d3d54;
+}
+
+.olympiads-column-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Кастомный скроллбар для колонок */
+.olympiads-column-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.olympiads-column-content::-webkit-scrollbar-track {
+    background: rgba(61, 61, 84, 0.2);
+    border-radius: 10px;
+}
+
+.olympiads-column-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.olympiads-column-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
+}
+
+/* Плашка олимпиады в модальном окне */
+.month-olympiad-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.month-olympiad-card:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.month-olympiad-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.month-olympiad-card:hover::before {
+    opacity: 1;
+}
+
+.month-olympiad-name {
+    color: white;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    word-wrap: break-word;
+}
+
+.month-olympiad-date {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.month-olympiad-difficulty {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85em;
+    font-style: italic;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -958,5 +1095,10 @@ body {
     
     .header-right {
         flex-wrap: wrap;
+    }
+    
+    .month-olympiads-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
     }
 }
