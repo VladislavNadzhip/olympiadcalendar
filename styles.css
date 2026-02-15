@@ -912,7 +912,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 60vh;
+    max-height: 70vh;
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -1040,6 +1040,52 @@ body {
 .form-group input:focus, .form-group select:focus {
     outline: none;
     border-color: #667eea;
+}
+
+/* Grade Checkboxes */
+.grade-checkboxes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.grade-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    background: #2d2d44;
+    border: 2px solid #3d3d54;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.grade-checkbox:hover {
+    border-color: #667eea;
+    background: #3d3d54;
+}
+
+.grade-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.grade-checkbox span {
+    color: #eaeaea;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.grade-checkbox input[type="checkbox"]:checked + span {
+    color: white;
+}
+
+.grade-checkbox:has(input[type="checkbox"]:checked) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .error-message {
