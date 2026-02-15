@@ -123,9 +123,19 @@ function updateAdminUI() {
     }
 }
 
-// ИСПРАВЛЕНО: Улучшенная обработка кликов
+// ИСПРАВЛЕНО: Улучшенная обработка кликов с правильным порядком
 function handleGlobalClick(e) {
-    // ПРИОРИТЕТ 1: Обработка кликов внутри monthOlympiadsModal
+    // ПРИОРИТЕТ 1: Клики по плашкам олимпиад в календаре
+    const olympiadEvent = e.target.closest('.olympiad-event');
+    if (olympiadEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        const olympiadId = parseInt(olympiadEvent.dataset.olympiadId);
+        showOlympiadDetailsById(olympiadId);
+        return;
+    }
+    
+    // ПРИОРИТЕТ 2: Обработка кликов внутри monthOlympiadsModal
     if (monthOlympiadsModal.classList.contains('active') && monthOlympiadsModal.contains(e.target)) {
         const olympiadCard = e.target.closest('.month-olympiad-card');
         if (olympiadCard) {
@@ -139,7 +149,7 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // ПРИОРИТЕТ 2: Обработка кликов внутри dayPanel
+    // ПРИОРИТЕТ 3: Обработка кликов внутри dayPanel
     if (dayPanel.classList.contains('active') && dayPanel.contains(e.target)) {
         const header = e.target.closest('.day-olympiad-header');
         if (header) {
@@ -189,7 +199,29 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // ПРИОРИТЕТ 3: Проверка кликов вне панелей
+    // ПРИОРИТЕТ 4: Клик по дню с олимпиадами
+    const dayCell = e.target.closest('.day-cell:not(.empty-cell)');
+    if (dayCell && dayCell.dataset.date) {
+        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
+        if (clickedInsideEvents) {
+            // Клик внутри контейнера олимпиад - не открываем панель дня
+            return;
+        }
+        
+        const dateStr = dayCell.dataset.date;
+        const filteredOlympiads = getFilteredOlympiads();
+        const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
+        
+        if (dayOlympiads.length > 0) {
+            handleDayCellClick(dateStr, e);
+            return;
+        } else if (isAdmin) {
+            openOlympiadModal(dateStr);
+            return;
+        }
+    }
+    
+    // ПРИОРИТЕТ 5: Проверка кликов вне панелей
     const isSidePanelOpen = sidePanel.classList.contains('active');
     const isDayPanelOpen = dayPanel.classList.contains('active');
     const isMonthModalOpen = monthOlympiadsModal.classList.contains('active');
@@ -201,16 +233,6 @@ function handleGlobalClick(e) {
     const clickedInsideMonthModal = monthOlympiadsModal.contains(e.target);
     
     if (clickedInsideSidePanel || clickedInsideDayPanel || clickedInsideMonthModal) return;
-    
-    const clickedOnOlympiadEvent = e.target.closest('.olympiad-event');
-    if (clickedOnOlympiadEvent) return;
-    
-    const clickedDayCell = e.target.closest('.day-cell:not(.empty-cell)');
-    if (clickedDayCell) {
-        const clickedInsideEvents = e.target.closest('.olympiad-events-container');
-        if (clickedInsideEvents) return;
-        return;
-    }
     
     closeSidePanel();
     closeDayPanel();
@@ -448,17 +470,12 @@ function handleRightClick(e) {
     if (olympiadEvent) {
         e.preventDefault();
         
-        const onclickAttr = olympiadEvent.getAttribute('onclick');
-        const match = onclickAttr.match(/showOlympiadDetailsById\((\d+)\)/);
+        const olympiadId = parseInt(olympiadEvent.dataset.olympiadId);
         
-        if (match) {
-            const olympiadId = parseInt(match[1]);
-            
-            if (focusedOlympiadId === olympiadId) {
-                exitFocusMode();
-            } else {
-                enterFocusMode(olympiadId);
-            }
+        if (focusedOlympiadId === olympiadId) {
+            exitFocusMode();
+        } else {
+            enterFocusMode(olympiadId);
         }
         return;
     }
@@ -600,7 +617,7 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// ИСПРАВЛЕНО: Добавлена поддержка старых олимпиад с regStart/regEnd
+// ИСПРАВЛЕНО: Добавлен data-olympiad-id в плашки олимпиад + фикс фокус-режима для новых олимпиад
 function createDayCellHTML(day, month, filteredOlympiads) {
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
@@ -613,7 +630,7 @@ function createDayCellHTML(day, month, filteredOlympiads) {
         const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
         if (focusedOlympiad) {
             // Проверяем новый формат (focusPlates)
-            if (focusedOlympiad.focusPlates && focusedOlympiad.focusPlates.length > 0) {
+            if (focusedOlympiad.focusPlates && Array.isArray(focusedOlympiad.focusPlates) && focusedOlympiad.focusPlates.length > 0) {
                 const plateForThisDate = focusedOlympiad.focusPlates.find(p => p.date === dateStr);
                 if (plateForThisDate) {
                     const color = plateForThisDate.color || '#667eea';
@@ -669,7 +686,8 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     let eventsHTML = '';
     dayOlympiads.forEach(olympiad => {
         const bgColor = olympiad.color || '#4a5ab3';
-        eventsHTML += `<div class="olympiad-event" style="background-color: ${bgColor}" onclick="event.stopPropagation(); showOlympiadDetailsById(${olympiad.id})">${olympiad.name}</div>`;
+        // ИСПРАВЛЕНО: Добавлен data-olympiad-id для корректной работы кликов
+        eventsHTML += `<div class="olympiad-event" data-olympiad-id="${olympiad.id}" style="background-color: ${bgColor}">${olympiad.name}</div>`;
     });
     
     let focusClass = '';
@@ -680,13 +698,9 @@ function createDayCellHTML(day, month, filteredOlympiads) {
         }
     }
     
-    const clickHandler = dayOlympiads.length > 0 
-        ? `onclick="handleDayCellClick('${dateStr}', event)"` 
-        : (isAdmin ? `onclick="openOlympiadModal('${dateStr}')"` : '');
-    
     return `
         ${customGlowStyle}
-        <div class="day-cell${regClass}${focusClass}" data-date="${dateStr}" ${clickHandler}>
+        <div class="day-cell${regClass}${focusClass}" data-date="${dateStr}">
             ${regLabel}
             <div class="day-number">${day}</div>
             <div class="olympiad-events-container">
