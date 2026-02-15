@@ -92,7 +92,7 @@ const difficultyToSelect = document.getElementById('difficultyToSelect');
 const gradeFilterInput = document.getElementById('gradeFilterInput');
 const citySelect = document.getElementById('citySelect');
 
-// НОВОЕ: Элементы для фокус-плашек
+// Элементы для фокус-плашек
 const focusPlatesCountInput = document.getElementById('focusPlatesCountInput');
 const focusPlatesContainer = document.getElementById('focusPlatesContainer');
 
@@ -102,16 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAdminUI();
     renderAllMonths();
     
-    // Устанавливаем текущий город
     citySelect.value = currentCity;
     
-    // Обновляем заголовок после рендера
     setTimeout(() => {
         updateCurrentMonthTitle();
     }, 100);
 });
 
-// Обновление интерфейса
 function updateAdminUI() {
     const adminElements = document.querySelectorAll('.admin-only');
     
@@ -126,7 +123,7 @@ function updateAdminUI() {
     }
 }
 
-// Единый обработчик кликов с правильным порядком проверок
+// ИСПРАВЛЕНО: Улучшенная обработка кликов
 function handleGlobalClick(e) {
     // ПРИОРИТЕТ 1: Обработка кликов внутри monthOlympiadsModal
     if (monthOlympiadsModal.classList.contains('active') && monthOlympiadsModal.contains(e.target)) {
@@ -220,7 +217,6 @@ function handleGlobalClick(e) {
     closeMonthOlympiadsModal();
 }
 
-// НОВОЕ: Обработчик изменения количества фокус-плашек
 function handleFocusPlatesCountChange() {
     const count = parseInt(focusPlatesCountInput.value) || 0;
     focusPlatesContainer.innerHTML = '';
@@ -255,7 +251,6 @@ function handleFocusPlatesCountChange() {
     }
 }
 
-// Инициализация обработчиков
 function initializeEventListeners() {
     closePanelBtn.addEventListener('click', closeSidePanel);
     closeDayPanelBtn.addEventListener('click', closeDayPanel);
@@ -288,7 +283,6 @@ function initializeEventListeners() {
     resetFilterBtn.addEventListener('click', resetFilter);
     citySelect.addEventListener('change', handleCityChange);
     
-    // НОВОЕ: Обработчик для фокус-плашек
     if (focusPlatesCountInput) {
         focusPlatesCountInput.addEventListener('change', handleFocusPlatesCountChange);
         focusPlatesCountInput.addEventListener('input', handleFocusPlatesCountChange);
@@ -606,7 +600,7 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// ИЗМЕНЕНО: Используем массив focusPlates вместо regStart/regEnd
+// ИСПРАВЛЕНО: Добавлена поддержка старых олимпиад с regStart/regEnd
 function createDayCellHTML(day, month, filteredOlympiads) {
     const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayOlympiads = filteredOlympiads.filter(o => o.date === dateStr);
@@ -617,22 +611,57 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     
     if (focusedOlympiadId !== null) {
         const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
-        if (focusedOlympiad && focusedOlympiad.focusPlates && focusedOlympiad.focusPlates.length > 0) {
-            const plateForThisDate = focusedOlympiad.focusPlates.find(p => p.date === dateStr);
-            if (plateForThisDate) {
-                const color = plateForThisDate.color || '#667eea';
-                const name = plateForThisDate.name || 'Важная дата';
-                
-                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${name}</div>`;
-                regClass = ' reg-start';
-                
-                customGlowStyle = `
-                    <style>
-                        .day-cell.reg-start[data-date="${dateStr}"]::before {
-                            background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
-                        }
-                    </style>
-                `;
+        if (focusedOlympiad) {
+            // Проверяем новый формат (focusPlates)
+            if (focusedOlympiad.focusPlates && focusedOlympiad.focusPlates.length > 0) {
+                const plateForThisDate = focusedOlympiad.focusPlates.find(p => p.date === dateStr);
+                if (plateForThisDate) {
+                    const color = plateForThisDate.color || '#667eea';
+                    const name = plateForThisDate.name || 'Важная дата';
+                    
+                    regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${name}</div>`;
+                    regClass = ' reg-start';
+                    
+                    customGlowStyle = `
+                        <style>
+                            .day-cell.reg-start[data-date="${dateStr}"]::before {
+                                background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
+                            }
+                        </style>
+                    `;
+                }
+            }
+            // Поддержка старого формата (regStart/regEnd)
+            else if (focusedOlympiad.regStart || focusedOlympiad.regEnd) {
+                if (focusedOlympiad.regStart === dateStr) {
+                    const labelText = focusedOlympiad.focusLabelStart || 'Начало регистрации';
+                    const color = focusedOlympiad.focusColorStart || '#ff6b6b';
+                    
+                    regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
+                    regClass = ' reg-start';
+                    
+                    customGlowStyle = `
+                        <style>
+                            .day-cell.reg-start[data-date="${dateStr}"]::before {
+                                background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
+                            }
+                        </style>
+                    `;
+                } else if (focusedOlympiad.regEnd === dateStr) {
+                    const labelText = focusedOlympiad.focusLabelEnd || 'Конец регистрации';
+                    const color = focusedOlympiad.focusColorEnd || '#ff4757';
+                    
+                    regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
+                    regClass = ' reg-end';
+                    
+                    customGlowStyle = `
+                        <style>
+                            .day-cell.reg-end[data-date="${dateStr}"]::before {
+                                background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.6)} 0%, ${hexToRgba(color, 0.3)} 50%, ${hexToRgba(color, 0)} 100%) !important;
+                            }
+                        </style>
+                    `;
+                }
             }
         }
     }
@@ -699,7 +728,7 @@ function showDayPanel(dateStr) {
         const detailsClass = isExpanded ? '' : 'hidden';
         const iconRotation = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
         
-        // ИЗМЕНЕНО: Отображаем фокус-плашки вместо regStart/regEnd
+        // Поддержка обоих форматов
         let focusPlatesHTML = '';
         if (olympiad.focusPlates && olympiad.focusPlates.length > 0) {
             focusPlatesHTML = '<div class="detail-item"><strong>Важные даты:</strong></div>';
@@ -709,6 +738,17 @@ function showDayPanel(dateStr) {
                     <strong>${plate.name}:</strong> ${formatDate(plate.date)}
                 </div>`;
             });
+        } else if (olympiad.regStart || olympiad.regEnd) {
+            if (olympiad.regStart) {
+                focusPlatesHTML += `<div class="detail-item">
+                    <strong>Начало регистрации:</strong> ${formatDate(olympiad.regStart)}
+                </div>`;
+            }
+            if (olympiad.regEnd) {
+                focusPlatesHTML += `<div class="detail-item">
+                    <strong>Конец регистрации:</strong> ${formatDate(olympiad.regEnd)}
+                </div>`;
+            }
         }
         
         return `
@@ -849,7 +889,7 @@ function showOlympiadDetailsById(olympiadId) {
     }
 }
 
-// ИЗМЕНЕНО: Показываем фокус-плашки в боковой панели
+// Поддержка обоих форматов в боковой панели
 function showOlympiadDetails(olympiad) {
     closeDayPanel();
     
@@ -863,13 +903,11 @@ function showOlympiadDetails(olympiad) {
     document.getElementById('olympiadGrade').textContent = olympiad.grade;
     document.getElementById('olympiadLocation').textContent = olympiad.location || 'Не установлено';
     
-    // Скрываем старые поля регистрации
+    // Показываем/скрываем старые поля
     const regStartField = document.getElementById('olympiadRegStart').parentElement;
     const regEndField = document.getElementById('olympiadRegEnd').parentElement;
-    regStartField.style.display = 'none';
-    regEndField.style.display = 'none';
     
-    // Показываем фокус-плашки, если они есть
+    // Поддержка нового формата (focusPlates)
     let focusPlatesContainer = document.getElementById('focusPlatesInfoContainer');
     if (!focusPlatesContainer) {
         focusPlatesContainer = document.createElement('div');
@@ -878,7 +916,12 @@ function showOlympiadDetails(olympiad) {
     }
     
     focusPlatesContainer.innerHTML = '';
+    
     if (olympiad.focusPlates && olympiad.focusPlates.length > 0) {
+        // Новый формат - показываем фокус-плашки
+        regStartField.style.display = 'none';
+        regEndField.style.display = 'none';
+        
         focusPlatesContainer.innerHTML = '<div class="info-field"><label>Важные даты:</label></div>';
         olympiad.focusPlates.forEach(plate => {
             const plateDiv = document.createElement('div');
@@ -893,6 +936,13 @@ function showOlympiadDetails(olympiad) {
             `;
             focusPlatesContainer.appendChild(plateDiv);
         });
+    } else {
+        // Старый формат - показываем regStart/regEnd
+        regStartField.style.display = olympiad.regStart ? 'block' : 'none';
+        regEndField.style.display = olympiad.regEnd ? 'block' : 'none';
+        
+        document.getElementById('olympiadRegStart').textContent = olympiad.regStart ? formatDate(olympiad.regStart) : 'Не установлено';
+        document.getElementById('olympiadRegEnd').textContent = olympiad.regEnd ? formatDate(olympiad.regEnd) : 'Не установлено';
     }
     
     const websiteLink = document.getElementById('olympiadWebsite');
@@ -928,7 +978,6 @@ function openOlympiadModal(dateStr = null) {
     olympiadForm.reset();
     document.getElementById('modalTitle').textContent = 'Добавить олимпиаду';
     
-    // Сбрасываем фокус-плашки
     focusPlatesCountInput.value = 0;
     focusPlatesContainer.innerHTML = '';
     
@@ -947,7 +996,6 @@ function closeOlympiadModal() {
     editingOlympiadId = null;
 }
 
-// ИЗМЕНЕНО: Заполняем фокус-плашки при редактировании
 function populateFormForEdit(olympiad) {
     editingOlympiadId = olympiad.id;
     document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
@@ -975,7 +1023,6 @@ function populateFormForEdit(olympiad) {
     document.getElementById('archiveInput').value = olympiad.archive || '';
     document.getElementById('colorInput').value = olympiad.color || '#667eea';
     
-    // Заполняем фокус-плашки
     if (olympiad.focusPlates && olympiad.focusPlates.length > 0) {
         focusPlatesCountInput.value = olympiad.focusPlates.length;
         handleFocusPlatesCountChange();
@@ -998,7 +1045,6 @@ function populateFormForEdit(olympiad) {
     }
 }
 
-// ИЗМЕНЕНО: Собираем фокус-плашки при сохранении
 function handleFormSubmit(e) {
     e.preventDefault();
     
@@ -1011,7 +1057,6 @@ function handleFormSubmit(e) {
         return;
     }
     
-    // Собираем фокус-плашки
     const focusPlatesCount = parseInt(focusPlatesCountInput.value) || 0;
     const focusPlates = [];
     for (let i = 1; i <= focusPlatesCount; i++) {
