@@ -923,7 +923,7 @@ body {
     display: none; /* Chrome, Safari, Opera */
 }
 
-/* ИСПРАВЛЕНО: Убран transform и scale при hover */
+/* ИСПРАВЛЕНО: Убран белый ::before эффект */
 .month-olympiad-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
@@ -938,23 +938,6 @@ body {
 .month-olympiad-card:hover {
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
     border-color: rgba(255, 255, 255, 0.3);
-}
-
-.month-olympiad-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.month-olympiad-card:hover::before {
-    opacity: 1;
 }
 
 /* ИСПРАВЛЕНО: Только название */
