@@ -311,6 +311,7 @@ function openMonthOlympiadsModal(month) {
     monthOlympiadsModal.classList.add('active');
 }
 
+// ИСПРАВЛЕНО: Только название
 function createMonthOlympiadCard(olympiad) {
     const card = document.createElement('div');
     card.className = 'month-olympiad-card';
@@ -321,17 +322,7 @@ function createMonthOlympiadCard(olympiad) {
     name.className = 'month-olympiad-name';
     name.textContent = olympiad.name;
     
-    const date = document.createElement('div');
-    date.className = 'month-olympiad-date';
-    date.textContent = `📅 ${formatDate(olympiad.date)}`;
-    
-    const difficulty = document.createElement('div');
-    difficulty.className = 'month-olympiad-difficulty';
-    difficulty.textContent = `🎯 ${olympiad.difficulty}`;
-    
     card.appendChild(name);
-    card.appendChild(date);
-    card.appendChild(difficulty);
     
     return card;
 }
