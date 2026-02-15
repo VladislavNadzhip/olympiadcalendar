@@ -908,6 +908,7 @@ body {
     border-bottom: 2px solid #3d3d54;
 }
 
+/* ИСПРАВЛЕНО: Скрыт скроллбар и увеличена высота */
 .olympiads-column-content {
     display: flex;
     flex-direction: column;
@@ -915,29 +916,14 @@ body {
     max-height: 70vh;
     overflow-y: auto;
     padding-right: 5px;
+    scrollbar-width: none; /* Firefox */
 }
 
-/* Кастомный скроллбар для колонок */
 .olympiads-column-content::-webkit-scrollbar {
-    width: 6px;
+    display: none; /* Chrome, Safari, Opera */
 }
 
-.olympiads-column-content::-webkit-scrollbar-track {
-    background: rgba(61, 61, 84, 0.2);
-    border-radius: 10px;
-}
-
-.olympiads-column-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-    transition: background 0.3s ease;
-}
-
-.olympiads-column-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
-}
-
-/* Плашка олимпиады в модальном окне */
+/* ИСПРАВЛЕНО: Убран transform и scale при hover */
 .month-olympiad-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
@@ -950,7 +936,6 @@ body {
 }
 
 .month-olympiad-card:hover {
-    transform: translateY(-3px) scale(1.02);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
     border-color: rgba(255, 255, 255, 0.3);
 }
@@ -972,24 +957,13 @@ body {
     opacity: 1;
 }
 
+/* ИСПРАВЛЕНО: Только название */
 .month-olympiad-name {
     color: white;
     font-size: 1.1em;
     font-weight: 600;
-    margin-bottom: 8px;
     word-wrap: break-word;
-}
-
-.month-olympiad-date {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9em;
-    margin-bottom: 5px;
-}
-
-.month-olympiad-difficulty {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85em;
-    font-style: italic;
+    line-height: 1.4;
 }
 
 .modal-header {
