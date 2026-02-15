@@ -510,7 +510,14 @@ function renderAllMonths() {
         monthWrapper.className = 'month-calendar-wrapper';
         monthWrapper.id = `month-${month}`;
         
-        // Добавляем кнопку "Олимпиады в этом месяце"
+        // Добавляем контейнер с заголовком месяца и кнопкой
+        const titleContainer = document.createElement('div');
+        titleContainer.className = 'month-title-container';
+        
+        const monthTitle = document.createElement('h3');
+        monthTitle.className = 'month-title';
+        monthTitle.textContent = `${monthNames[month]} ${currentYear}`;
+        
         const monthBtn = document.createElement('button');
         monthBtn.className = 'month-olympiads-btn';
         monthBtn.textContent = 'Олимпиады в этом месяце';
@@ -518,7 +525,10 @@ function renderAllMonths() {
             e.stopPropagation();
             openMonthOlympiadsModal(month);
         };
-        monthWrapper.appendChild(monthBtn);
+        
+        titleContainer.appendChild(monthTitle);
+        titleContainer.appendChild(monthBtn);
+        monthWrapper.appendChild(titleContainer);
         
         const calendarGrid = document.createElement('div');
         calendarGrid.className = 'calendar-grid';
