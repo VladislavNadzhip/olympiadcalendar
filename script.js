@@ -14,7 +14,7 @@ let currentOpenDate = null;
 let currentOpenOlympiadId = null;
 
 // Переменная для отслеживания текущего видимого месяца
-let currentVisibleMonthIndex = 0;
+let currentVisibleMonthIndex = 1; // Февраль по умолчанию
 
 // Фильтры
 let currentFilter = {
@@ -100,6 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Устанавливаем текущий город
     citySelect.value = currentCity;
+    
+    // ИСПРАВЛЕНО: Обновляем заголовок после рендера
+    setTimeout(() => {
+        updateCurrentMonthTitle();
+    }, 100);
 });
 
 // Обновление интерфейса
@@ -239,8 +244,13 @@ function initializeEventListeners() {
     // Новые обработчики для модального окна олимпиад месяца
     closeMonthOlympiadsBtn.addEventListener('click', closeMonthOlympiadsModal);
     
-    // Обработчик для кнопки в верхнем хедере
-    headerMonthOlympiadsBtn.addEventListener('click', openCurrentMonthOlympiadsModal);
+    // ИСПРАВЛЕНО: Обработчик для кнопки в верхнем хедере
+    if (headerMonthOlympiadsBtn) {
+        headerMonthOlympiadsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openCurrentMonthOlympiadsModal();
+        });
+    }
     
     // Фильтр и город
     filterBtn.addEventListener('click', openFilterModal);
@@ -620,7 +630,7 @@ function createDayCellHTML(day, month, filteredOlympiads) {
                 const labelText = focusedOlympiad.focusLabelStart || 'Начало регистрации';
                 const color = focusedOlympiad.focusColorStart || '#ff6b6b';
                 
-                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
+                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${ labelText}</div>`;
                 regClass = ' reg-start';
                 
                 // Создаем кастомное свечение с цветом из настроек
@@ -635,7 +645,7 @@ function createDayCellHTML(day, month, filteredOlympiads) {
                 const labelText = focusedOlympiad.focusLabelEnd || 'Конец регистрации';
                 const color = focusedOlympiad.focusColorEnd || '#ff4757';
                 
-                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
+                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${ labelText}</div>`;
                 regClass = ' reg-end';
                 
                 // Создаем кастомное свечение с цветом из настроек
@@ -919,6 +929,10 @@ function openOlympiadModal(dateStr = null) {
     document.getElementById('focusLabelEndInput').value = '';
     document.getElementById('focusColorEndInput').value = '#ff4757';
     
+    // Сбрасываем чекбоксы
+    const gradeCheckboxes = document.querySelectorAll('input[name="grade"]');
+    gradeCheckboxes.forEach(cb => cb.checked = false);
+    
     if (dateStr) {
         document.getElementById('dateInput').value = dateStr;
     }
@@ -946,22 +960,44 @@ function populateFormForEdit(olympiad) {
     document.getElementById('focusLabelEndInput').value = olympiad.focusLabelEnd || '';
     document.getElementById('focusColorEndInput').value = olympiad.focusColorEnd || '#ff4757';
     document.getElementById('difficultyInput').value = olympiad.difficulty;
-    document.getElementById('gradeInput').value = olympiad.grade;
+    
+    // При редактировании чекбоксы не используются, показываем только класс из олимпиады
+    const gradeCheckboxes = document.querySelectorAll('input[name="grade"]');
+    gradeCheckboxes.forEach(cb => cb.checked = false);
+    // Если в названии есть класс в скобках, убираем его
+    const nameWithoutGrade = olympiad.name.replace(/\s*\(\d+\s*класс\)\s*$/, '');
+    document.getElementById('nameInput').value = nameWithoutGrade;
+    
+    // Извлекаем класс из grade и отмечаем соответствующий чекбокс
+    const gradeMatch = olympiad.grade.match(/\d+/);
+    if (gradeMatch) {
+        const grade = gradeMatch[0];
+        const checkbox = document.querySelector(`input[name="grade"][value="${grade}"]`);
+        if (checkbox) checkbox.checked = true;
+    }
+    
     document.getElementById('locationInput').value = olympiad.location || '';
     document.getElementById('websiteInput').value = olympiad.website || '';
     document.getElementById('archiveInput').value = olympiad.archive || '';
     document.getElementById('colorInput').value = olympiad.color || '#667eea';
 }
 
-// Сохраняем кастомные метки и цвета
+// НОВОЕ: Сохраняем несколько олимпиад по чекбоксам
 function handleFormSubmit(e) {
     e.preventDefault();
     
     if (!isAdmin) return;
     
-    const olympiad = {
-        id: editingOlympiadId || Date.now(),
-        name: document.getElementById('nameInput').value,
+    // Получаем отмеченные чекбоксы
+    const selectedGrades = Array.from(document.querySelectorAll('input[name="grade"]:checked')).map(cb => cb.value);
+    
+    if (selectedGrades.length === 0) {
+        alert('Выберите хотя бы один класс!');
+        return;
+    }
+    
+    const baseName = document.getElementById('nameInput').value;
+    const baseOlympiad = {
         description: document.getElementById('descriptionInput').value,
         date: document.getElementById('dateInput').value,
         time: document.getElementById('timeInput').value,
@@ -972,7 +1008,6 @@ function handleFormSubmit(e) {
         focusLabelEnd: document.getElementById('focusLabelEndInput').value,
         focusColorEnd: document.getElementById('focusColorEndInput').value,
         difficulty: document.getElementById('difficultyInput').value,
-        grade: document.getElementById('gradeInput').value,
         location: document.getElementById('locationInput').value,
         website: document.getElementById('websiteInput').value,
         archive: document.getElementById('archiveInput').value,
@@ -980,10 +1015,28 @@ function handleFormSubmit(e) {
     };
     
     if (editingOlympiadId) {
+        // При редактировании создаем только одну олимпиаду
+        const grade = selectedGrades[0];
+        const olympiad = {
+            ...baseOlympiad,
+            id: editingOlympiadId,
+            name: selectedGrades.length > 1 ? `${baseName} (${grade} класс)` : baseName,
+            grade: `${grade} класс`
+        };
+        
         const index = olympiads.findIndex(o => o.id === editingOlympiadId);
         olympiads[index] = olympiad;
     } else {
-        olympiads.push(olympiad);
+        // При создании - создаем отдельную олимпиаду для каждого класса
+        selectedGrades.forEach(grade => {
+            const olympiad = {
+                ...baseOlympiad,
+                id: Date.now() + Math.random(), // Уникальный ID
+                name: selectedGrades.length > 1 ? `${baseName} (${grade} класс)` : baseName,
+                grade: `${grade} класс`
+            };
+            olympiads.push(olympiad);
+        });
     }
     
     localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
