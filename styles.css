@@ -373,10 +373,9 @@ body.light-theme {
     scrollbar-color: var(--gradient-start) var(--bg-primary);
 }
 
-/* Каждый месяц в скролле */
+/* Каждый месяц в скролле - УБРАН margin-bottom */
 .month-calendar-wrapper {
     min-height: auto;
-    margin-bottom: 10px;
 }
 
 /* Заголовок месяца с кнопкой - СКРЫВАЕМ */
