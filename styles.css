@@ -416,13 +416,13 @@ body.light-theme {
     text-align: center;
     font-weight: 600;
     color: var(--gradient-start);
-    padding: 8px 5px;
+    padding: 3px 5px;
     font-size: 0.85em;
     background: var(--bg-secondary);
     border-radius: 6px;
     line-height: 1;
-    height: 35px;
-    max-height: 35px;
+    height: 24px;
+    max-height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1305,8 +1305,8 @@ body.light-theme {
     /* Мобильные плашки дней недели */
     .weekday {
         font-size: 0.75em;
-        padding: 6px 3px;
-        height: 28px;
-        max-height: 28px;
+        padding: 3px 3px;
+        height: 20px;
+        max-height: 20px;
     }
 }
