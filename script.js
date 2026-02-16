@@ -97,6 +97,10 @@ const focusPlatesContainer = document.getElementById('focusPlatesContainer');
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация календаря...');
+    
+    // КРИТИЧНОЕ ИСПРАВЛЕНИЕ: Перезагрузка олимпиад из localStorage
+    reloadOlympiads();
+    
     initializeEventListeners();
     updateAdminUI();
     renderAllMonths();
@@ -107,6 +111,27 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCurrentMonthTitle();
     }, 100);
 });
+
+// НОВАЯ ФУНКЦИЯ: Перезагрузка олимпиад из localStorage
+function reloadOlympiads() {
+    const stored = localStorage.getItem(`olympiads_${currentCity}`);
+    console.log(`📦 Загрузка олимпиад из localStorage для города: ${currentCity}`);
+    console.log(`📦 Сырые данные из localStorage:`, stored);
+    
+    if (stored) {
+        try {
+            olympiads = JSON.parse(stored);
+            console.log(`✅ Загружено олимпиад: ${olympiads.length}`);
+            console.log(`📋 Список ID олимпиад:`, olympiads.map(o => o.id));
+        } catch (e) {
+            console.error('❌ Ошибка парсинга данных из localStorage:', e);
+            olympiads = [];
+        }
+    } else {
+        console.log('⚠️ Нет сохранённых олимпиад в localStorage');
+        olympiads = [];
+    }
+}
 
 function updateAdminUI() {
     const adminElements = document.querySelectorAll('.admin-only');
@@ -433,7 +458,8 @@ function handleCityChange() {
         currentCity = newCity;
         localStorage.setItem('currentCity', currentCity);
         
-        olympiads = [];
+        // ИСПРАВЛЕНО: перезагружаем олимпиады для нового города
+        reloadOlympiads();
         
         exitFocusMode();
         closeSidePanel();
@@ -935,6 +961,9 @@ function handleDeleteFromDay(olympiadId) {
 function showOlympiadDetailsById(olympiadId) {
     console.log('📖 Открытие боковой панели для олимпиады ID:', olympiadId);
     
+    // КРИТИЧНОЕ ИСПРАВЛЕНИЕ: перезагружаем олимпиады перед поиском
+    reloadOlympiads();
+    
     if (sidePanel.classList.contains('active') && currentOpenOlympiadId === olympiadId) {
         closeSidePanel();
         return;
@@ -942,9 +971,11 @@ function showOlympiadDetailsById(olympiadId) {
     
     const olympiad = olympiads.find(o => o.id === olympiadId);
     if (olympiad) {
+        console.log('✅ Олимпиада найдена:', olympiad.name);
         showOlympiadDetails(olympiad);
     } else {
         console.error('❌ Олимпиада не найдена! ID:', olympiadId);
+        console.error('📋 Доступные ID:', olympiads.map(o => o.id));
     }
 }
 
