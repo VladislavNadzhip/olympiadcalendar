@@ -2,10 +2,7 @@
 let currentYear = 2026;
 let currentMonth = 0;
 let currentCity = localStorage.getItem('currentCity') || 'Москва';
-// ИЗМЕНЕНО: Инициализируем olympiads пустым массивом вместо загрузки из localStorage
-let olympiads = [];
-let editingOlympiadId = null;
-let isAdmin = localStorage.getItem('isAdmin') === 'true';
+let olympiads = JSON.parse(localStorage.getItem(`olympiads_${currentCity}`)) || [];let isAdmin = localStorage.getItem('isAdmin') === 'true';
 let focusedOlympiadId = null;
 let expandedOlympiads = new Set();
 let currentOpenMonth = null;
@@ -100,9 +97,6 @@ const focusPlatesContainer = document.getElementById('focusPlatesContainer');
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация календаря...');
-    // ДОБАВЛЕНО: Очищаем localStorage при загрузке
-    localStorage.removeItem(`olympiads_${currentCity}`);
-    console.log('🧹 localStorage очищен');
     initializeEventListeners();
     updateAdminUI();
     renderAllMonths();
