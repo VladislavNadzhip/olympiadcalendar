@@ -154,7 +154,7 @@ function handleGlobalClick(e) {
         if (olympiadCard) {
             e.preventDefault();
             e.stopPropagation();
-            const olympiadId = parseInt(olympiadCard.dataset.olympiadId);
+            const olympiadId = parseFloat(olympiadCard.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
             console.log('📌 Клик по карточке олимпиады в модальном окне, ID:', olympiadId);
             showOlympiadDetailsById(olympiadId);
             closeMonthOlympiadsModal();
@@ -171,7 +171,7 @@ function handleGlobalClick(e) {
             e.stopPropagation();
             const card = header.closest('.day-olympiad-card');
             if (card && dayPanel.contains(card)) {
-                const olympiadId = parseInt(card.dataset.olympiadId);
+                const olympiadId = parseFloat(card.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
                 console.log('📌 Клик по заголовку карточки в dayPanel, ID:', olympiadId);
                 toggleOlympiadDetails(olympiadId);
             }
@@ -190,7 +190,7 @@ function handleGlobalClick(e) {
             e.stopPropagation();
             const card = e.target.closest('.day-olympiad-card');
             if (card && dayPanel.contains(card)) {
-                const olympiadId = parseInt(card.dataset.olympiadId);
+                const olympiadId = parseFloat(card.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
                 handleEditFromDay(olympiadId);
             }
             return;
@@ -201,7 +201,7 @@ function handleGlobalClick(e) {
             e.stopPropagation();
             const card = e.target.closest('.day-olympiad-card');
             if (card && dayPanel.contains(card)) {
-                const olympiadId = parseInt(card.dataset.olympiadId);
+                const olympiadId = parseFloat(card.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
                 handleDeleteFromDay(olympiadId);
             }
             return;
@@ -476,7 +476,7 @@ function handleRightClick(e) {
     if (olympiadEvent) {
         e.preventDefault();
         
-        const olympiadId = parseInt(olympiadEvent.dataset.olympiadId);
+        const olympiadId = parseFloat(olympiadEvent.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
         
         if (focusedOlympiadId === olympiadId) {
             exitFocusMode();
@@ -612,7 +612,7 @@ function attachEventHandlers() {
         event.addEventListener('click', function(e) {
             e.stopPropagation();
             e.preventDefault();
-            const olympiadId = parseInt(this.dataset.olympiadId);
+            const olympiadId = parseFloat(this.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
             console.log('🎯 Клик по плашке олимпиады, ID:', olympiadId);
             showOlympiadDetailsById(olympiadId);
         });
@@ -1211,7 +1211,7 @@ function handleRegistration() {
 function handleEdit() {
     if (!isAdmin) return;
     
-    const olympiadId = parseInt(sidePanel.dataset.olympiadId);
+    const olympiadId = parseFloat(sidePanel.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
     const olympiad = olympiads.find(o => o.id === olympiadId);
     
     if (olympiad) {
@@ -1224,7 +1224,7 @@ function handleEdit() {
 function handleDelete() {
     if (!isAdmin) return;
     
-    const olympiadId = parseInt(sidePanel.dataset.olympiadId);
+    const olympiadId = parseFloat(sidePanel.dataset.olympiadId); // ИСПРАВЛЕНО: parseFloat вместо parseInt
     
     if (confirm('Вы уверены, что хотите удалить эту олимпиаду?')) {
         olympiads = olympiads.filter(o => o.id !== olympiadId);
