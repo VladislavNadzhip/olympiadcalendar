@@ -468,38 +468,34 @@ function renderAllMonths() {
 }
 
 function attachEventHandlers() {
-    // Обработчики для плашек олимпиад - stopPropagation чтобы не тригерить клик на ячейке
-    document.querySelectorAll('.olympiad-event').forEach(e => e.replaceWith(e.cloneNode(true)));
-    document.querySelectorAll('.olympiad-event').forEach(e => {
-        e.addEventListener('click', function(ev) { 
-            ev.stopPropagation();  // ВАЖНО: останавливаем всплытие
-            ev.preventDefault(); 
-            showOlympiadDetailsById(parseFloat(this.dataset.olympiadId)); 
-        });
-    });
-    
-    // ИСПРАВЛЕНО: Обработчик для всей ячейки дня
-    document.querySelectorAll('.day-cell:not(.empty-cell)').forEach(c => {
-        c.addEventListener('click', function(ev) {
-            // Если кликнули на плашку олимпиады, не обрабатываем (она сама обработает через stopPropagation)
-            if (ev.target.classList.contains('olympiad-event') || ev.target.closest('.olympiad-event')) {
-                return;  // Плашка олимпиады сама обработает клик
-            }
-            
-            const date = this.dataset.date;
+    // НОВЫЙ ПОДХОД: Добавляем обработчик на весь контейнер календаря (event delegation)
+    monthsScrollContainer.addEventListener('click', function(e) {
+        // Если кликнули на плашку олимпиады - обрабатываем её
+        const olympiadEvent = e.target.closest('.olympiad-event');
+        if (olympiadEvent) {
+            e.stopPropagation();
+            e.preventDefault();
+            showOlympiadDetailsById(parseFloat(olympiadEvent.dataset.olympiadId));
+            return;
+        }
+        
+        // Если кликнули на день (но не на плашку)
+        const dayCell = e.target.closest('.day-cell:not(.empty-cell)');
+        if (dayCell) {
+            const date = dayCell.dataset.date;
             if (!date) return;
             
             const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
             
             // Если есть олимпиады, открываем панель дня
             if (dayOlympiads.length > 0) {
-                handleDayCellClick(date, ev);
+                handleDayCellClick(date, e);
             } 
             // Если олимпиад нет и пользователь админ, открываем форму добавления
             else if (isAdmin) {
                 openOlympiadModal(date);
             }
-        });
+        }
     });
 }
 
