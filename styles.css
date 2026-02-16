@@ -64,7 +64,7 @@ body {
 }
 
 /* Кнопка в верхнем хедере */
-.header-month-olympiads-btn {
+.header-month-olympiads-btn, .tutorial-btn {
     padding: 10px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -78,7 +78,7 @@ body {
     white-space: nowrap;
 }
 
-.header-month-olympiads-btn:hover {
+.header-month-olympiads-btn:hover, .tutorial-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
 }
@@ -1069,6 +1069,66 @@ body {
 .submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Tutorial Modal Styles */
+.tutorial-modal-content {
+    max-width: 800px !important;
+    width: 90% !important;
+}
+
+.tutorial-content {
+    padding: 30px;
+    color: #eaeaea;
+    line-height: 1.8;
+}
+
+.tutorial-content h4 {
+    color: #667eea;
+    font-size: 1.4em;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3d3d54;
+}
+
+.tutorial-content h4:first-child {
+    margin-top: 0;
+}
+
+.tutorial-content p {
+    margin-bottom: 15px;
+    font-size: 1.05em;
+    color: #ccc;
+}
+
+.tutorial-content strong {
+    color: #eaeaea;
+    font-weight: 600;
+}
+
+.tutorial-content em {
+    color: #999;
+    font-style: italic;
+}
+
+.edit-tutorial-btn {
+    margin: 20px 30px 30px 30px;
+    width: calc(100% - 60px);
+    padding: 12px;
+    background: #3d3d54;
+    color: #eaeaea;
+    border: 2px solid #4d4d64;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-tutorial-btn:hover {
+    background: #4d4d64;
+    border-color: #667eea;
 }
 
 .hidden {
