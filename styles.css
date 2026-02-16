@@ -409,7 +409,7 @@ body.light-theme {
     width: 100%;
 }
 
-/* ИСПРАВЛЕНО: Компактные плашки для дней недели */
+/* ИСПРАВЛЕНО: Компактные плашки для дней недели с фиксированной высотой */
 .weekday {
     text-align: center;
     font-weight: 600;
@@ -419,8 +419,8 @@ body.light-theme {
     background: var(--bg-secondary);
     border-radius: 6px;
     line-height: 1;
-    height: auto;
-    min-height: 30px;
+    height: 35px;
+    max-height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1303,6 +1303,7 @@ body.light-theme {
     .weekday {
         font-size: 0.75em;
         padding: 6px 3px;
-        min-height: 25px;
+        height: 28px;
+        max-height: 28px;
     }
 }
