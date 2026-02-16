@@ -373,10 +373,10 @@ body.light-theme {
     scrollbar-color: var(--gradient-start) var(--bg-primary);
 }
 
-/* Каждый месяц в скролле - С ОТСТУПОМ СВЕРХУ */
+/* Каждый месяц в скролле - НЕБОЛЬШОЙ ОТСТУП */
 .month-calendar-wrapper {
     min-height: auto;
-    margin-top: 30px;
+    margin-top: 15px;
 }
 
 /* Первый месяц без отступа сверху */
