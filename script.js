@@ -12,6 +12,7 @@ let currentOpenOlympiadId = null;
 let currentVisibleMonthIndex = 1;
 let currentTheme = localStorage.getItem('theme') || 'dark';
 let adminModeEnabled = false; // Флаг для отображения админ-функционала
+let calendarClickHandlerAttached = false; // Флаг для предотвращения дублирования обработчиков
 
 // Фильтры
 let currentFilter = {
@@ -487,12 +488,18 @@ function renderAllMonths() {
         wrapper.appendChild(grid);
         monthsScrollContainer.appendChild(wrapper);
     }
-    setTimeout(() => attachEventHandlers(), 100);
-    monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
+    attachEventHandlers();
 }
 
 function attachEventHandlers() {
+    // Предотвращаем дублирование обработчиков
+    if (calendarClickHandlerAttached) {
+        console.log('⚠️ Обработчики уже подключены, пропускаем');
+        return;
+    }
+    
     console.log('🔧 Подключение обработчиков событий...');
+    calendarClickHandlerAttached = true;
     
     // Event delegation для кликов на календарь
     monthsScrollContainer.addEventListener('click', function(e) {
@@ -505,7 +512,7 @@ function attachEventHandlers() {
             e.stopPropagation();
             e.preventDefault();
             showOlympiadDetailsById(parseFloat(olympiadEvent.dataset.olympiadId));
-            return; // ВАЖНО: останавливаем дальнейшую обработку
+            return;
         }
         
         // Проверка 2: Клик на ячейку дня (но не на плашку)
@@ -522,26 +529,27 @@ function attachEventHandlers() {
             const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
             console.log(`📊 Найдено олимпиад на ${date}:`, dayOlympiads.length);
             
-            // Всегда пытаемся открыть панель дня
             if (dayOlympiads.length > 0) {
                 console.log('✅ Открываем панель дня');
-                e.stopPropagation(); // КРИТИЧНО: останавливаем всплытие события!
+                e.stopPropagation();
                 e.preventDefault();
                 handleDayCellClick(date);
-                return; // ВАЖНО: останавливаем дальнейшую обработку
+                return;
             } else {
                 console.log('ℹ️ Нет олимпиад на эту дату');
-                // Если пользователь админ И включен админ-режим, открываем форму добавления
                 if (adminModeEnabled && isAdmin) {
                     console.log('👤 Админ - открываем форму добавления');
                     e.stopPropagation();
                     e.preventDefault();
                     openOlympiadModal(date);
-                    return; // ВАЖНО: останавливаем дальнейшую обработку
+                    return;
                 }
             }
         }
     });
+    
+    // Обработчик скролла
+    monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
 }
 
 function updateCurrentMonthTitle() {
