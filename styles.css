@@ -694,6 +694,33 @@ body.light-theme {
     text-decoration: underline;
 }
 
+/* Related Events Card Styling */
+.related-event-card {
+    cursor: pointer;
+    user-select: none;
+}
+
+.related-event-card:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+
+/* Related Events Checkbox Styling */
+.related-event-checkbox {
+    transition: all 0.3s ease;
+}
+
+.related-event-checkbox:hover {
+    transform: translateX(5px);
+}
+
+.related-event-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--gradient-start);
+}
+
 .register-btn, .edit-btn, .delete-btn {
     width: 100%;
     padding: 15px;
