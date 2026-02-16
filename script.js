@@ -14,6 +14,7 @@ let currentTheme = localStorage.getItem('theme') || 'dark';
 let adminModeEnabled = false;
 let calendarClickHandlerAttached = false;
 let editingOlympiadId = null;
+let selectedRelatedEvents = [];
 
 // Фильтры
 let currentFilter = {
@@ -316,7 +317,7 @@ function renderRelatedEventsSelector() {
     const container = document.getElementById('relatedEventsContainer');
     if (!container) return;
     
-    container.innerHTML = '<label style="color: #667eea; font-size: 1.15em; margin-bottom: 15px; display: block; font-weight: 700;">🔗 Связанные события</label>';
+    container.innerHTML = '<label style="color: #667eea; font-size: 1.15em; margin-bottom: 15px; display: block; font-weight: 700;">Связанные события</label>';
     
     const currentEditId = editingOlympiadId;
     const availableOlympiads = olympiads.filter(o => o.id !== currentEditId);
@@ -326,15 +327,117 @@ function renderRelatedEventsSelector() {
         return;
     }
     
-    availableOlympiads.forEach(o => {
-        const isSelected = editingOlympiadId && olympiads.find(x => x.id === editingOlympiadId)?.relatedEvents?.includes(o.id);
-        container.innerHTML += `
-            <label class="related-event-checkbox" style="display: flex; align-items: center; padding: 10px; margin: 5px 0; background: #2d2d44; border-radius: 8px; cursor: pointer; border: 2px solid ${isSelected ? o.color : '#3d3d54'};">
-                <input type="checkbox" name="relatedEvent" value="${o.id}" ${isSelected ? 'checked' : ''} style="margin-right: 10px;">
-                <div style="display: inline-block; width: 20px; height: 20px; background: ${o.color || '#667eea'}; border-radius: 4px; margin-right: 10px;"></div>
-                <span style="color: #eaeaea;">${o.name} - ${formatDate(o.date)}</span>
-            </label>
+    // Поле поиска
+    container.innerHTML += `
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="relatedEventsSearchInput" placeholder="Начните вводить название олимпиады..." style="width: 100%; padding: 12px; border: 2px solid #3d3d54; border-radius: 8px; font-size: 1em; background: #2d2d44; color: #eaeaea;">
+        </div>
+        <div id="relatedEventsSearchResults" style="max-height: 300px; overflow-y: auto;"></div>
+        <div id="relatedEventsSelected" style="margin-top: 20px;"></div>
+    `;
+    
+    // Загружаем выбранные события
+    if (editingOlympiadId) {
+        const editedOlympiad = olympiads.find(x => x.id === editingOlympiadId);
+        if (editedOlympiad?.relatedEvents) {
+            selectedRelatedEvents = [...editedOlympiad.relatedEvents];
+        } else {
+            selectedRelatedEvents = [];
+        }
+    } else {
+        selectedRelatedEvents = [];
+    }
+    
+    renderSelectedRelatedEvents();
+    
+    // Обработчик поиска
+    const searchInput = document.getElementById('relatedEventsSearchInput');
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const resultsContainer = document.getElementById('relatedEventsSearchResults');
+        
+        if (query.length === 0) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        
+        const filtered = availableOlympiads.filter(o => 
+            o.name.toLowerCase().includes(query) && !selectedRelatedEvents.includes(o.id)
+        );
+        
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = '<p style="color: #999; padding: 10px; text-align: center;">Ничего не найдено</p>';
+            return;
+        }
+        
+        resultsContainer.innerHTML = filtered.map(o => `
+            <div class="related-event-search-item" data-olympiad-id="${o.id}" style="display: flex; align-items: center; padding: 10px; margin: 5px 0; background: #2d2d44; border-radius: 8px; cursor: pointer; border: 2px solid #3d3d54; transition: all 0.3s ease;">
+                <div style="display: inline-block; width: 20px; height: 20px; background: ${o.color || '#667eea'}; border-radius: 4px; margin-right: 10px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                    <div style="color: #eaeaea; font-weight: 600;">${o.name}</div>
+                    <div style="color: #999; font-size: 0.85em;">${formatDate(o.date)}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Обработчики кликов на результаты поиска
+        resultsContainer.querySelectorAll('.related-event-search-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const olympiadId = parseFloat(item.dataset.olympiadId);
+                if (!selectedRelatedEvents.includes(olympiadId)) {
+                    selectedRelatedEvents.push(olympiadId);
+                    renderSelectedRelatedEvents();
+                    searchInput.value = '';
+                    resultsContainer.innerHTML = '';
+                }
+            });
+            
+            item.addEventListener('mouseenter', (e) => {
+                e.target.style.borderColor = '#667eea';
+                e.target.style.background = '#3d3d54';
+            });
+            
+            item.addEventListener('mouseleave', (e) => {
+                e.target.style.borderColor = '#3d3d54';
+                e.target.style.background = '#2d2d44';
+            });
+        });
+    });
+}
+
+function renderSelectedRelatedEvents() {
+    const container = document.getElementById('relatedEventsSelected');
+    if (!container) return;
+    
+    if (selectedRelatedEvents.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = '<label style="color: #667eea; font-size: 1em; margin-bottom: 10px; display: block; font-weight: 600;">Выбранные события:</label>';
+    
+    selectedRelatedEvents.forEach(relatedId => {
+        const o = olympiads.find(x => x.id === relatedId);
+        if (!o) return;
+        
+        const card = document.createElement('div');
+        card.style.cssText = 'display: flex; align-items: center; padding: 10px; margin: 5px 0; background: #2d2d44; border-radius: 8px; border: 2px solid ' + (o.color || '#667eea');
+        card.innerHTML = `
+            <div style="display: inline-block; width: 20px; height: 20px; background: ${o.color || '#667eea'}; border-radius: 4px; margin-right: 10px; flex-shrink: 0;"></div>
+            <div style="flex: 1;">
+                <div style="color: #eaeaea; font-weight: 600;">${o.name}</div>
+                <div style="color: #999; font-size: 0.85em;">${formatDate(o.date)}</div>
+            </div>
+            <button type="button" class="remove-related-btn" data-olympiad-id="${relatedId}" style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight: 600;">Удалить</button>
         `;
+        
+        const removeBtn = card.querySelector('.remove-related-btn');
+        removeBtn.addEventListener('click', () => {
+            selectedRelatedEvents = selectedRelatedEvents.filter(id => id !== relatedId);
+            renderSelectedRelatedEvents();
+        });
+        
+        container.appendChild(card);
     });
 }
 
@@ -732,9 +835,9 @@ function showOlympiadDetails(o) {
     relatedContainer.innerHTML = '';
     
     if (o.relatedEvents?.length) {
-        relatedContainer.innerHTML = '<div class="info-field" style="margin-top: 20px;"><label style="color: #667eea; font-size: 1.1em; font-weight: 700;">🔗 Связанные события:</label></div>';
+        relatedContainer.innerHTML = '<div class="info-field" style="margin-top: 30px; margin-bottom: 25px;"><label style="color: #667eea; font-size: 1.1em; font-weight: 700;">Связанные события:</label></div>';
         const relatedEventsContainer = document.createElement('div');
-        relatedEventsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 10px; margin-top: 10px;';
+        relatedEventsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;';
         
         o.relatedEvents.forEach(relatedId => {
             const related = olympiads.find(x => x.id === relatedId);
@@ -781,6 +884,7 @@ function closeSidePanel() { sidePanel.classList.remove('active'); currentOpenOly
 function openOlympiadModal(date = null) {
     if (!isAdmin) return;
     editingOlympiadId = null;
+    selectedRelatedEvents = [];
     olympiadForm.reset();
     document.getElementById('modalTitle').textContent = 'Добавить олимпиаду';
     focusPlatesCountInput.value = 0;
@@ -802,7 +906,7 @@ function openOlympiadModal(date = null) {
     olympiadModal.classList.add('active');
 }
 
-function closeOlympiadModal() { olympiadModal.classList.remove('active'); editingOlympiadId = null; }
+function closeOlympiadModal() { olympiadModal.classList.remove('active'); editingOlympiadId = null; selectedRelatedEvents = []; }
 
 function populateFormForEdit(o) {
     editingOlympiadId = o.id;
@@ -869,9 +973,6 @@ function handleFormSubmit(e) {
         if (date && name) plates.push({ date, name, color: color || '#667eea' });
     }
     
-    // Получаем связанные события
-    const relatedEvents = Array.from(document.querySelectorAll('input[name="relatedEvent"]:checked')).map(cb => parseFloat(cb.value));
-    
     const base = {
         description: document.getElementById('descriptionInput').value,
         date: document.getElementById('dateInput').value,
@@ -882,7 +983,7 @@ function handleFormSubmit(e) {
         archive: document.getElementById('archiveInput').value,
         color: document.getElementById('colorInput').value,
         focusPlates: plates,
-        relatedEvents: relatedEvents
+        relatedEvents: selectedRelatedEvents
     };
     const baseName = document.getElementById('nameInput').value;
     if (editingOlympiadId) {
