@@ -181,11 +181,13 @@ function updateAdminUI() {
 }
 
 function handleGlobalClick(e) {
-    if (tutorialModal.classList.contains('active') && !tutorialModal.contains(e.target)) {
+    // Проверка для туториала - клик по затемнённому фону (не по содержимому)
+    if (tutorialModal.classList.contains('active') && e.target === tutorialModal) {
         closeTutorialModal();
         return;
     }
-    if (editTutorialModal.classList.contains('active') && !editTutorialModal.contains(e.target)) {
+    // Проверка для модального окна редактирования туториала
+    if (editTutorialModal.classList.contains('active') && e.target === editTutorialModal) {
         closeEditTutorialModal();
         return;
     }
