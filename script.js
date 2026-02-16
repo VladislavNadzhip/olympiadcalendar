@@ -98,9 +98,7 @@ const focusPlatesContainer = document.getElementById('focusPlatesContainer');
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация календаря...');
     
-    // КРИТИЧНОЕ ИСПРАВЛЕНИЕ: Перезагрузка олимпиад из localStorage
     reloadOlympiads();
-    
     initializeEventListeners();
     updateAdminUI();
     renderAllMonths();
@@ -112,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 
-// НОВАЯ ФУНКЦИЯ: Перезагрузка олимпиад из localStorage
 function reloadOlympiads() {
     const stored = localStorage.getItem(`olympiads_${currentCity}`);
     console.log(`📦 Загрузка олимпиад из localStorage для города: ${currentCity}`);
@@ -148,7 +145,6 @@ function updateAdminUI() {
 }
 
 function handleGlobalClick(e) {
-    // Обработка кликов внутри monthOlympiadsModal
     if (monthOlympiadsModal.classList.contains('active') && monthOlympiadsModal.contains(e.target)) {
         const olympiadCard = e.target.closest('.month-olympiad-card');
         if (olympiadCard) {
@@ -163,7 +159,6 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // Обработка кликов внутри dayPanel
     if (dayPanel.classList.contains('active') && dayPanel.contains(e.target)) {
         const header = e.target.closest('.day-olympiad-header');
         if (header) {
@@ -214,7 +209,6 @@ function handleGlobalClick(e) {
         return;
     }
     
-    // Проверка кликов вне панелей
     const isSidePanelOpen = sidePanel.classList.contains('active');
     const isDayPanelOpen = dayPanel.classList.contains('active');
     const isMonthModalOpen = monthOlympiadsModal.classList.contains('active');
@@ -458,7 +452,6 @@ function handleCityChange() {
         currentCity = newCity;
         localStorage.setItem('currentCity', currentCity);
         
-        // ИСПРАВЛЕНО: перезагружаем олимпиады для нового города
         reloadOlympiads();
         
         exitFocusMode();
@@ -492,17 +485,15 @@ function handleRightClick(e) {
     }
 }
 
-// ИСПРАВЛЕНО: Проверка на наличие фокус-плашек перед включением фокус-режима
 function enterFocusMode(olympiadId) {
     const focusedOlympiad = olympiads.find(o => o.id === olympiadId);
     
     if (!focusedOlympiad) return;
     
-    // Проверяем, есть ли у олимпиады фокус-плашки (новый формат) или старые поля регистрации
+    // Проверяем наличие фокус-плашек
     const hasFocusPlates = focusedOlympiad.focusPlates && focusedOlympiad.focusPlates.length > 0;
-    const hasOldFormat = focusedOlympiad.regStart || focusedOlympiad.regEnd;
     
-    if (!hasFocusPlates && !hasOldFormat) {
+    if (!hasFocusPlates) {
         console.log('⚠️ Олимпиада не имеет фокус-плашек, фокус-режим не включается:', focusedOlympiad.name);
         return;
     }
@@ -598,7 +589,6 @@ function renderAllMonths() {
         monthsScrollContainer.appendChild(monthWrapper);
     }
     
-    // КРИТИЧНО: Добавляем обработчики после рендера
     setTimeout(() => {
         attachEventHandlers();
         console.log('✅ Обработчики кликов добавлены после рендера');
@@ -607,14 +597,11 @@ function renderAllMonths() {
     monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
 }
 
-// ИСПРАВЛЕНО: Функция для добавления обработчиков кликов к динамически созданным элементам
 function attachEventHandlers() {
-    // Обработчики для плашек олимпиад
     const olympiadEvents = document.querySelectorAll('.olympiad-event');
     console.log(`🔗 Добавление обработчиков к ${olympiadEvents.length} плашкам олимпиад`);
     
     olympiadEvents.forEach(event => {
-        // Удаляем старый обработчик если есть
         event.replaceWith(event.cloneNode(true));
     });
     
@@ -628,13 +615,11 @@ function attachEventHandlers() {
         });
     });
     
-    // Обработчики для дней календаря
     const dayCells = document.querySelectorAll('.day-cell:not(.empty-cell)');
     console.log(`🔗 Добавление обработчиков к ${dayCells.length} дням календаря`);
     
     dayCells.forEach(cell => {
         cell.addEventListener('click', function(e) {
-            // Если клик по плашке олимпиады - игнорируем
             const clickedOnEvent = e.target.closest('.olympiad-event');
             if (clickedOnEvent) {
                 console.log('⏭️  Клик по плашке внутри дня - пропускаем обработчик дня');
@@ -704,57 +689,22 @@ function createDayCellHTML(day, month, filteredOlympiads) {
     
     if (focusedOlympiadId !== null) {
         const focusedOlympiad = olympiads.find(o => o.id === focusedOlympiadId);
-        if (focusedOlympiad) {
-            // Проверяем новый формат (focusPlates)
-            if (focusedOlympiad.focusPlates && Array.isArray(focusedOlympiad.focusPlates) && focusedOlympiad.focusPlates.length > 0) {
-                const plateForThisDate = focusedOlympiad.focusPlates.find(p => p.date === dateStr);
-                if (plateForThisDate) {
-                    const color = plateForThisDate.color || '#667eea';
-                    const name = plateForThisDate.name || 'Важная дата';
-                    
-                    regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${name}</div>`;
-                    regClass = ' reg-start';
-                    
-                    customGlowStyle = `
-                        <style>
-                            .day-cell.reg-start[data-date="${dateStr}"]::before {
-                                background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
-                            }
-                        </style>
-                    `;
-                }
-            }
-            // Поддержка старого формата (regStart/regEnd)
-            else if (focusedOlympiad.regStart || focusedOlympiad.regEnd) {
-                if (focusedOlympiad.regStart === dateStr) {
-                    const labelText = focusedOlympiad.focusLabelStart || 'Начало регистрации';
-                    const color = focusedOlympiad.focusColorStart || '#ff6b6b';
-                    
-                    regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
-                    regClass = ' reg-start';
-                    
-                    customGlowStyle = `
-                        <style>
-                            .day-cell.reg-start[data-date="${dateStr}"]::before {
-                                background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
-                            }
-                        </style>
-                    `;
-                } else if (focusedOlympiad.regEnd === dateStr) {
-                    const labelText = focusedOlympiad.focusLabelEnd || 'Конец регистрации';
-                    const color = focusedOlympiad.focusColorEnd || '#ff4757';
-                    
-                    regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${labelText}</div>`;
-                    regClass = ' reg-end';
-                    
-                    customGlowStyle = `
-                        <style>
-                            .day-cell.reg-end[data-date="${dateStr}"]::before {
-                                background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.6)} 0%, ${hexToRgba(color, 0.3)} 50%, ${hexToRgba(color, 0)} 100%) !important;
-                            }
-                        </style>
-                    `;
-                }
+        if (focusedOlympiad && focusedOlympiad.focusPlates && Array.isArray(focusedOlympiad.focusPlates)) {
+            const plateForThisDate = focusedOlympiad.focusPlates.find(p => p.date === dateStr);
+            if (plateForThisDate) {
+                const color = plateForThisDate.color || '#667eea';
+                const name = plateForThisDate.name || 'Важная дата';
+                
+                regLabel = `<div class="reg-label" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 3px 10px ${hexToRgba(color, 0.5)};">${name}</div>`;
+                regClass = ' reg-start';
+                
+                customGlowStyle = `
+                    <style>
+                        .day-cell.reg-start[data-date="${dateStr}"]::before {
+                            background: radial-gradient(ellipse at center, ${hexToRgba(color, 0.5)} 0%, ${hexToRgba(color, 0.2)} 50%, ${hexToRgba(color, 0)} 100%) !important;
+                        }
+                    </style>
+                `;
             }
         }
     }
@@ -819,7 +769,6 @@ function showDayPanel(dateStr) {
         const detailsClass = isExpanded ? '' : 'hidden';
         const iconRotation = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
         
-        // Поддержка обоих форматов
         let focusPlatesHTML = '';
         if (olympiad.focusPlates && olympiad.focusPlates.length > 0) {
             focusPlatesHTML = '<div class="detail-item"><strong>Важные даты:</strong></div>';
@@ -829,17 +778,6 @@ function showDayPanel(dateStr) {
                     <strong>${plate.name}:</strong> ${formatDate(plate.date)}
                 </div>`;
             });
-        } else if (olympiad.regStart || olympiad.regEnd) {
-            if (olympiad.regStart) {
-                focusPlatesHTML += `<div class="detail-item">
-                    <strong>Начало регистрации:</strong> ${formatDate(olympiad.regStart)}
-                </div>`;
-            }
-            if (olympiad.regEnd) {
-                focusPlatesHTML += `<div class="detail-item">
-                    <strong>Конец регистрации:</strong> ${formatDate(olympiad.regEnd)}
-                </div>`;
-            }
         }
         
         return `
@@ -971,7 +909,6 @@ function handleDeleteFromDay(olympiadId) {
 function showOlympiadDetailsById(olympiadId) {
     console.log('📖 Открытие боковой панели для олимпиады ID:', olympiadId);
     
-    // КРИТИЧНОЕ ИСПРАВЛЕНИЕ: перезагружаем олимпиады перед поиском
     reloadOlympiads();
     
     if (sidePanel.classList.contains('active') && currentOpenOlympiadId === olympiadId) {
@@ -989,7 +926,6 @@ function showOlympiadDetailsById(olympiadId) {
     }
 }
 
-// Поддержка обоих форматов в боковой панели
 function showOlympiadDetails(olympiad) {
     closeDayPanel();
     
@@ -1003,25 +939,25 @@ function showOlympiadDetails(olympiad) {
     document.getElementById('olympiadGrade').textContent = olympiad.grade;
     document.getElementById('olympiadLocation').textContent = olympiad.location || 'Не установлено';
     
-    // Показываем/скрываем старые поля
-    const regStartField = document.getElementById('olympiadRegStart').parentElement;
-    const regEndField = document.getElementById('olympiadRegEnd').parentElement;
+    // Скрываем старые поля регистрации
+    const regStartField = document.getElementById('olympiadRegStart')?.parentElement;
+    const regEndField = document.getElementById('olympiadRegEnd')?.parentElement;
+    if (regStartField) regStartField.style.display = 'none';
+    if (regEndField) regEndField.style.display = 'none';
     
-    // Поддержка нового формата (focusPlates)
+    // Показываем фокус-плашки
     let focusPlatesContainer = document.getElementById('focusPlatesInfoContainer');
     if (!focusPlatesContainer) {
         focusPlatesContainer = document.createElement('div');
         focusPlatesContainer.id = 'focusPlatesInfoContainer';
-        regEndField.insertAdjacentElement('afterend', focusPlatesContainer);
+        if (regEndField) {
+            regEndField.insertAdjacentElement('afterend', focusPlatesContainer);
+        }
     }
     
     focusPlatesContainer.innerHTML = '';
     
     if (olympiad.focusPlates && olympiad.focusPlates.length > 0) {
-        // Новый формат - показываем фокус-плашки
-        regStartField.style.display = 'none';
-        regEndField.style.display = 'none';
-        
         focusPlatesContainer.innerHTML = '<div class="info-field"><label>Важные даты:</label></div>';
         olympiad.focusPlates.forEach(plate => {
             const plateDiv = document.createElement('div');
@@ -1036,13 +972,6 @@ function showOlympiadDetails(olympiad) {
             `;
             focusPlatesContainer.appendChild(plateDiv);
         });
-    } else {
-        // Старый формат - показываем regStart/regEnd
-        regStartField.style.display = olympiad.regStart ? 'block' : 'none';
-        regEndField.style.display = olympiad.regEnd ? 'block' : 'none';
-        
-        document.getElementById('olympiadRegStart').textContent = olympiad.regStart ? formatDate(olympiad.regStart) : 'Не установлено';
-        document.getElementById('olympiadRegEnd').textContent = olympiad.regEnd ? formatDate(olympiad.regEnd) : 'Не установлено';
     }
     
     const websiteLink = document.getElementById('olympiadWebsite');
