@@ -11,8 +11,9 @@ let currentOpenDate = null;
 let currentOpenOlympiadId = null;
 let currentVisibleMonthIndex = 1;
 let currentTheme = localStorage.getItem('theme') || 'dark';
-let adminModeEnabled = false; // Флаг для отображения админ-функционала
-let calendarClickHandlerAttached = false; // Флаг для предотвращения дублирования обработчиков
+let adminModeEnabled = false;
+let calendarClickHandlerAttached = false;
+let editingOlympiadId = null;
 
 // Фильтры
 let currentFilter = {
@@ -21,10 +22,8 @@ let currentFilter = {
     grade: null
 };
 
-// Пароль админа
 const ADMIN_PASSWORD = 'admin123';
 
-// Туториал по умолчанию
 const DEFAULT_TUTORIAL = `
 <h4>Основные функции</h4>
 <p><strong>Просмотр календаря:</strong> Прокручивайте страницу вверх или вниз для перехода между месяцами. Текущий месяц отображается в верхней части экрана.</p>
@@ -54,7 +53,6 @@ const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель'
 const monthNamesGenitive = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 const difficultyLevels = {'Легкая': 1, 'Средняя': 2, 'Сложная': 3, 'Очень сложная': 4};
 
-// DOM элементы
 const monthView = document.getElementById('monthView');
 const currentMonthTitle = document.getElementById('currentMonthTitle');
 const monthsScrollContainer = document.getElementById('monthsScrollContainer');
@@ -99,8 +97,6 @@ const citySelect = document.getElementById('citySelect');
 const focusPlatesCountInput = document.getElementById('focusPlatesCountInput');
 const focusPlatesContainer = document.getElementById('focusPlatesContainer');
 const themeToggle = document.getElementById('themeToggle');
-
-// Элементы туториала
 const tutorialBtn = document.getElementById('tutorialBtn');
 const tutorialModal = document.getElementById('tutorialModal');
 const closeTutorialBtn = document.getElementById('closeTutorialBtn');
@@ -112,14 +108,12 @@ const editTutorialForm = document.getElementById('editTutorialForm');
 const cancelEditTutorialBtn = document.getElementById('cancelEditTutorialBtn');
 const tutorialTextInput = document.getElementById('tutorialTextInput');
 
-// Проверка URL-параметра для админ-режима
 function checkAdminMode() {
     const urlParams = new URLSearchParams(window.location.search);
     adminModeEnabled = urlParams.has('admin');
     console.log('🔐 Админ-режим:', adminModeEnabled ? 'включен' : 'отключен');
 }
 
-// Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация календаря...');
     checkAdminMode();
@@ -208,22 +202,16 @@ function reloadOlympiads() {
 }
 
 function updateAdminUI() {
-    // Показываем админ-элементы только если включен adminModeEnabled И пользователь залогинен
     const showAdmin = adminModeEnabled && isAdmin;
-    
     document.querySelectorAll('.admin-only').forEach(el => {
         if (showAdmin) el.classList.remove('hidden');
         else el.classList.add('hidden');
     });
-    
-    // Кнопка "Админ" показывается только если adminModeEnabled включен, но пользователь не залогинен
     if (adminModeEnabled && !isAdmin) {
         adminBtn.classList.remove('hidden');
     } else {
         adminBtn.classList.add('hidden');
     }
-    
-    // Кнопка "Выйти" показывается только если adminModeEnabled включен И пользователь залогинен
     if (adminModeEnabled && isAdmin) {
         logoutBtn.classList.remove('hidden');
     } else {
@@ -232,16 +220,27 @@ function updateAdminUI() {
 }
 
 function handleGlobalClick(e) {
-    // Проверка для туториала - клик по затемнённому фону (не по содержимому)
     if (tutorialModal.classList.contains('active') && e.target === tutorialModal) {
         closeTutorialModal();
         return;
     }
-    // Проверка для модального окна редактирования туториала
     if (editTutorialModal.classList.contains('active') && e.target === editTutorialModal) {
         closeEditTutorialModal();
         return;
     }
+    
+    // Обработка кликов на связанные события в боковой панели
+    if (sidePanel.classList.contains('active')) {
+        const relatedCard = e.target.closest('.related-event-card');
+        if (relatedCard) {
+            e.preventDefault();
+            e.stopPropagation();
+            const relatedId = parseFloat(relatedCard.dataset.olympiadId);
+            scrollToOlympiadAndShow(relatedId);
+            return;
+        }
+    }
+    
     if (monthOlympiadsModal.classList.contains('active') && monthOlympiadsModal.contains(e.target)) {
         const card = e.target.closest('.month-olympiad-card');
         if (card) {
@@ -278,6 +277,26 @@ function handleGlobalClick(e) {
     closeSidePanel(); closeDayPanel(); closeMonthOlympiadsModal();
 }
 
+function scrollToOlympiadAndShow(olympiadId) {
+    const o = olympiads.find(x => x.id === olympiadId);
+    if (!o) return;
+    
+    const d = new Date(o.date + 'T00:00:00');
+    const targetMonth = d.getMonth();
+    
+    // Прокручиваем к нужному месяцу
+    const scrollPos = (targetMonth / 12) * monthsScrollContainer.scrollHeight;
+    monthsScrollContainer.scrollTo({
+        top: scrollPos,
+        behavior: 'smooth'
+    });
+    
+    // Показываем детали олимпиады после небольшой задержки
+    setTimeout(() => {
+        showOlympiadDetails(o);
+    }, 500);
+}
+
 function handleFocusPlatesCountChange() {
     const count = parseInt(focusPlatesCountInput.value) || 0;
     focusPlatesContainer.innerHTML = '';
@@ -291,6 +310,32 @@ function handleFocusPlatesCountChange() {
             </div>
         `);
     }
+}
+
+function renderRelatedEventsSelector() {
+    const container = document.getElementById('relatedEventsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '<label style="color: #667eea; font-size: 1.15em; margin-bottom: 15px; display: block; font-weight: 700;">🔗 Связанные события</label>';
+    
+    const currentEditId = editingOlympiadId;
+    const availableOlympiads = olympiads.filter(o => o.id !== currentEditId);
+    
+    if (availableOlympiads.length === 0) {
+        container.innerHTML += '<p style="color: #999; font-size: 0.9em; padding: 10px;">Нет доступных олимпиад для связывания</p>';
+        return;
+    }
+    
+    availableOlympiads.forEach(o => {
+        const isSelected = editingOlympiadId && olympiads.find(x => x.id === editingOlympiadId)?.relatedEvents?.includes(o.id);
+        container.innerHTML += `
+            <label class="related-event-checkbox" style="display: flex; align-items: center; padding: 10px; margin: 5px 0; background: #2d2d44; border-radius: 8px; cursor: pointer; border: 2px solid ${isSelected ? o.color : '#3d3d54'};">
+                <input type="checkbox" name="relatedEvent" value="${o.id}" ${isSelected ? 'checked' : ''} style="margin-right: 10px;">
+                <div style="display: inline-block; width: 20px; height: 20px; background: ${o.color || '#667eea'}; border-radius: 4px; margin-right: 10px;"></div>
+                <span style="color: #eaeaea;">${o.name} - ${formatDate(o.date)}</span>
+            </label>
+        `;
+    });
 }
 
 function initializeEventListeners() {
@@ -492,53 +537,32 @@ function renderAllMonths() {
 }
 
 function attachEventHandlers() {
-    // Предотвращаем дублирование обработчиков
     if (calendarClickHandlerAttached) {
         console.log('⚠️ Обработчики уже подключены, пропускаем');
         return;
     }
-    
     console.log('🔧 Подключение обработчиков событий...');
     calendarClickHandlerAttached = true;
-    
-    // Event delegation для кликов на календарь
     monthsScrollContainer.addEventListener('click', function(e) {
-        console.log('🖱️ Клик в календаре:', e.target);
-        
-        // Проверка 1: Клик на плашку олимпиады
         const olympiadEvent = e.target.closest('.olympiad-event');
         if (olympiadEvent) {
-            console.log('✅ Клик на плашку олимпиады:', olympiadEvent.dataset.olympiadId);
             e.stopPropagation();
             e.preventDefault();
             showOlympiadDetailsById(parseFloat(olympiadEvent.dataset.olympiadId));
             return;
         }
-        
-        // Проверка 2: Клик на ячейку дня (но не на плашку)
         const dayCell = e.target.closest('.day-cell:not(.empty-cell)');
         if (dayCell) {
             const date = dayCell.dataset.date;
-            console.log('📅 Клик на ячейку дня:', date);
-            
-            if (!date) {
-                console.warn('⚠️ У ячейки нет атрибута data-date');
-                return;
-            }
-            
+            if (!date) return;
             const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
-            console.log(`📊 Найдено олимпиад на ${date}:`, dayOlympiads.length);
-            
             if (dayOlympiads.length > 0) {
-                console.log('✅ Открываем панель дня');
                 e.stopPropagation();
                 e.preventDefault();
                 handleDayCellClick(date);
                 return;
             } else {
-                console.log('ℹ️ Нет олимпиад на эту дату');
                 if (adminModeEnabled && isAdmin) {
-                    console.log('👤 Админ - открываем форму добавления');
                     e.stopPropagation();
                     e.preventDefault();
                     openOlympiadModal(date);
@@ -547,8 +571,6 @@ function attachEventHandlers() {
             }
         }
     });
-    
-    // Обработчик скролла
     monthsScrollContainer.addEventListener('scroll', updateCurrentMonthTitle);
 }
 
@@ -596,23 +618,16 @@ function createDayCellHTML(day, month, filtered) {
 }
 
 function handleDayCellClick(date) {
-    console.log('🎯 handleDayCellClick вызван для даты:', date);
     if (dayPanel.classList.contains('active') && currentOpenDate === date) { 
-        console.log('🔄 Панель уже открыта для этой даты - закрываем');
         closeDayPanel(); 
         return; 
     }
-    console.log('📂 Открываем панель дня');
     showDayPanel(date);
 }
 
 function showDayPanel(date) {
     const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
-    console.log('📋 showDayPanel для', date, '- олимпиад:', dayOlympiads.length);
-    if (!dayOlympiads.length) {
-        console.warn('⚠️ Нет олимпиад для отображения');
-        return;
-    }
+    if (!dayOlympiads.length) return;
     closeSidePanel();
     currentOpenDate = date;
     const d = new Date(date + 'T00:00:00');
@@ -626,7 +641,6 @@ function showDayPanel(date) {
         }
         return `<div class="day-olympiad-card" data-olympiad-id="${o.id}"><div class="day-olympiad-header"><div class="day-olympiad-title"><div class="day-olympiad-color" style="background-color: ${o.color || '#4a5ab3'}"></div><span>${o.name}</span></div><span class="expand-icon" style="transform: rotate(${expanded ? 180 : 0}deg)">▼</span></div><div class="day-olympiad-preview"><div class="preview-item"><strong>Сложность:</strong> ${o.difficulty}</div>${o.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${o.website}" target="_blank">${o.website}</a></div>` : ''}</div><div class="day-olympiad-details ${expanded ? '' : 'hidden'}">${o.description ? `<div class="detail-item"><strong>Описание:</strong> ${o.description}</div>` : ''}<div class="detail-item"><strong>Время:</strong> ${o.time || 'Не установлено'}</div><div class="detail-item"><strong>Класс:</strong> ${o.grade}</div><div class="detail-item"><strong>Место проведения:</strong> ${o.location || 'Не установлено'}</div>${platesHTML}${o.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${o.archive}" target="_blank">Скачать</a></div>` : ''}<button class="register-btn-compact">Регистрация на олимпиаду</button>${(adminModeEnabled && isAdmin) ? '<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>' : ''}</div></div>`;
     }).join('');
-    console.log('✅ Активируем панель дня');
     dayPanel.classList.add('active');
 }
 
@@ -689,6 +703,7 @@ function showOlympiadDetails(o) {
     const regEnd = document.getElementById('olympiadRegEnd')?.parentElement;
     if (regStart) regStart.style.display = 'none';
     if (regEnd) regEnd.style.display = 'none';
+    
     let container = document.getElementById('focusPlatesInfoContainer');
     if (!container) {
         container = document.createElement('div');
@@ -706,6 +721,53 @@ function showOlympiadDetails(o) {
             container.appendChild(div);
         });
     }
+    
+    // Отображение связанных событий
+    let relatedContainer = document.getElementById('relatedEventsInfoContainer');
+    if (!relatedContainer) {
+        relatedContainer = document.createElement('div');
+        relatedContainer.id = 'relatedEventsInfoContainer';
+        container.insertAdjacentElement('afterend', relatedContainer);
+    }
+    relatedContainer.innerHTML = '';
+    
+    if (o.relatedEvents?.length) {
+        relatedContainer.innerHTML = '<div class="info-field" style="margin-top: 20px;"><label style="color: #667eea; font-size: 1.1em; font-weight: 700;">🔗 Связанные события:</label></div>';
+        const relatedEventsContainer = document.createElement('div');
+        relatedEventsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 10px; margin-top: 10px;';
+        
+        o.relatedEvents.forEach(relatedId => {
+            const related = olympiads.find(x => x.id === relatedId);
+            if (related) {
+                const card = document.createElement('div');
+                card.className = 'related-event-card';
+                card.dataset.olympiadId = related.id;
+                card.style.cssText = `
+                    background: linear-gradient(135deg, ${related.color || '#667eea'} 0%, ${adjustColor(related.color || '#667eea', -20)} 100%);
+                    padding: 12px 15px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                `;
+                card.innerHTML = `
+                    <div style="font-weight: 600; font-size: 1em; color: #fff; margin-bottom: 5px;">${related.name}</div>
+                    <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${formatDate(related.date)}</div>
+                `;
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-2px)';
+                    card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                });
+                relatedEventsContainer.appendChild(card);
+            }
+        });
+        relatedContainer.appendChild(relatedEventsContainer);
+    }
+    
     const website = document.getElementById('olympiadWebsite');
     if (o.website) { website.href = website.textContent = o.website; website.style.display = 'inline'; } else website.style.display = 'none';
     const archive = document.getElementById('olympiadArchive');
@@ -723,6 +785,18 @@ function openOlympiadModal(date = null) {
     document.getElementById('modalTitle').textContent = 'Добавить олимпиаду';
     focusPlatesCountInput.value = 0;
     focusPlatesContainer.innerHTML = '';
+    
+    // Добавляем контейнер для связанных событий, если его нет
+    let relatedContainer = document.getElementById('relatedEventsContainer');
+    if (!relatedContainer) {
+        relatedContainer = document.createElement('div');
+        relatedContainer.id = 'relatedEventsContainer';
+        relatedContainer.className = 'form-group';
+        relatedContainer.style.cssText = 'padding: 20px; background: #1a1a2e; border-radius: 10px; margin-bottom: 15px; border: 2px solid #3d3d54;';
+        document.getElementById('colorInput').parentElement.insertAdjacentElement('beforebegin', relatedContainer);
+    }
+    
+    renderRelatedEventsSelector();
     document.querySelectorAll('input[name="grade"]').forEach(cb => cb.checked = false);
     if (date) document.getElementById('dateInput').value = date;
     olympiadModal.classList.add('active');
@@ -748,6 +822,19 @@ function populateFormForEdit(o) {
     document.getElementById('websiteInput').value = o.website || '';
     document.getElementById('archiveInput').value = o.archive || '';
     document.getElementById('colorInput').value = o.color || '#667eea';
+    
+    // Добавляем контейнер для связанных событий, если его нет
+    let relatedContainer = document.getElementById('relatedEventsContainer');
+    if (!relatedContainer) {
+        relatedContainer = document.createElement('div');
+        relatedContainer.id = 'relatedEventsContainer';
+        relatedContainer.className = 'form-group';
+        relatedContainer.style.cssText = 'padding: 20px; background: #1a1a2e; border-radius: 10px; margin-bottom: 15px; border: 2px solid #3d3d54;';
+        document.getElementById('colorInput').parentElement.insertAdjacentElement('beforebegin', relatedContainer);
+    }
+    
+    renderRelatedEventsSelector();
+    
     if (o.focusPlates?.length) {
         focusPlatesCountInput.value = o.focusPlates.length;
         handleFocusPlatesCountChange();
@@ -764,6 +851,8 @@ function populateFormForEdit(o) {
         focusPlatesCountInput.value = 0;
         focusPlatesContainer.innerHTML = '';
     }
+    
+    olympiadModal.classList.add('active');
 }
 
 function handleFormSubmit(e) {
@@ -779,6 +868,10 @@ function handleFormSubmit(e) {
         const color = document.getElementById(`focusPlateColor${i}`)?.value;
         if (date && name) plates.push({ date, name, color: color || '#667eea' });
     }
+    
+    // Получаем связанные события
+    const relatedEvents = Array.from(document.querySelectorAll('input[name="relatedEvent"]:checked')).map(cb => parseFloat(cb.value));
+    
     const base = {
         description: document.getElementById('descriptionInput').value,
         date: document.getElementById('dateInput').value,
@@ -788,7 +881,8 @@ function handleFormSubmit(e) {
         website: document.getElementById('websiteInput').value,
         archive: document.getElementById('archiveInput').value,
         color: document.getElementById('colorInput').value,
-        focusPlates: plates
+        focusPlates: plates,
+        relatedEvents: relatedEvents
     };
     const baseName = document.getElementById('nameInput').value;
     if (editingOlympiadId) {
@@ -808,7 +902,7 @@ function handleRegistration() { alert('Функция регистрации б�
 function handleEdit() {
     if (!isAdmin) return;
     const o = olympiads.find(x => x.id === parseFloat(sidePanel.dataset.olympiadId));
-    if (o) { closeSidePanel(); populateFormForEdit(o); olympiadModal.classList.add('active'); }
+    if (o) { closeSidePanel(); populateFormForEdit(o); }
 }
 
 function handleDelete() {
