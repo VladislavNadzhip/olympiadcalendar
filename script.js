@@ -10,6 +10,7 @@ let currentOpenMonth = null;
 let currentOpenDate = null;
 let currentOpenOlympiadId = null;
 let currentVisibleMonthIndex = 1;
+let currentTheme = localStorage.getItem('theme') || 'dark';
 
 // Фильтры
 let currentFilter = {
@@ -95,6 +96,7 @@ const gradeFilterInput = document.getElementById('gradeFilterInput');
 const citySelect = document.getElementById('citySelect');
 const focusPlatesCountInput = document.getElementById('focusPlatesCountInput');
 const focusPlatesContainer = document.getElementById('focusPlatesContainer');
+const themeToggle = document.getElementById('themeToggle');
 
 // Элементы туториала
 const tutorialBtn = document.getElementById('tutorialBtn');
@@ -113,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация календаря...');
     reloadOlympiads();
     initializeTutorial();
+    initializeTheme();
     initializeEventListeners();
     updateAdminUI();
     renderAllMonths();
@@ -124,6 +127,29 @@ function initializeTutorial() {
     if (!localStorage.getItem('tutorial')) {
         localStorage.setItem('tutorial', DEFAULT_TUTORIAL);
     }
+}
+
+function initializeTheme() {
+    if (currentTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.textContent = '🌞';
+    } else {
+        document.body.classList.remove('light-theme');
+        themeToggle.textContent = '🌙';
+    }
+}
+
+function toggleTheme() {
+    if (currentTheme === 'dark') {
+        currentTheme = 'light';
+        document.body.classList.add('light-theme');
+        themeToggle.textContent = '🌞';
+    } else {
+        currentTheme = 'dark';
+        document.body.classList.remove('light-theme');
+        themeToggle.textContent = '🌙';
+    }
+    localStorage.setItem('theme', currentTheme);
 }
 
 function loadTutorial() {
@@ -265,6 +291,7 @@ function initializeEventListeners() {
     if (closeEditTutorialBtn) closeEditTutorialBtn.addEventListener('click', closeEditTutorialModal);
     if (cancelEditTutorialBtn) cancelEditTutorialBtn.addEventListener('click', closeEditTutorialModal);
     if (editTutorialForm) editTutorialForm.addEventListener('submit', handleEditTutorialSubmit);
+    if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
     filterBtn.addEventListener('click', openFilterModal);
     closeFilterModalBtn.addEventListener('click', closeFilterModal);
     applyFilterBtn.addEventListener('click', applyFilter);
