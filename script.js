@@ -247,6 +247,13 @@ function handleGlobalClick(e) {
         if (card) {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Проверяем, не нажата ли кнопка редактирования
+            if (e.target.closest('.edit-month-olympiad-btn')) {
+                handleEditFromMonthModal(parseFloat(card.dataset.olympiadId));
+                return;
+            }
+            
             showOlympiadDetailsById(parseFloat(card.dataset.olympiadId));
             closeMonthOlympiadsModal();
         }
@@ -282,6 +289,12 @@ function scrollToOlympiadAndShow(olympiadId) {
     const o = olympiads.find(x => x.id === olympiadId);
     if (!o) return;
     
+    if (!o.date || o.dateUnknown) {
+        // Если дата неизвестна, просто показываем детали
+        showOlympiadDetails(o);
+        return;
+    }
+    
     const d = new Date(o.date + 'T00:00:00');
     const targetMonth = d.getMonth();
     
@@ -296,6 +309,15 @@ function scrollToOlympiadAndShow(olympiadId) {
     setTimeout(() => {
         showOlympiadDetails(o);
     }, 500);
+}
+
+function handleEditFromMonthModal(id) {
+    const o = olympiads.find(x => x.id === id);
+    if (o) {
+        closeMonthOlympiadsModal();
+        populateFormForEdit(o);
+        olympiadModal.classList.add('active');
+    }
 }
 
 function handleFocusPlatesCountChange() {
@@ -375,7 +397,7 @@ function renderRelatedEventsSelector() {
                 <div style="display: inline-block; width: 20px; height: 20px; background: ${o.color || '#667eea'}; border-radius: 4px; margin-right: 10px; flex-shrink: 0;"></div>
                 <div style="flex: 1;">
                     <div style="color: #eaeaea; font-weight: 600;">${o.name}</div>
-                    <div style="color: #999; font-size: 0.85em;">${formatDate(o.date)}</div>
+                    <div style="color: #999; font-size: 0.85em;">${o.dateUnknown ? 'Дата неизвестна' : (o.cancelled ? 'Отменена' : formatDate(o.date))}</div>
                 </div>
             </div>
         `).join('');
@@ -426,7 +448,7 @@ function renderSelectedRelatedEvents() {
             <div style="display: inline-block; width: 20px; height: 20px; background: ${o.color || '#667eea'}; border-radius: 4px; margin-right: 10px; flex-shrink: 0;"></div>
             <div style="flex: 1;">
                 <div style="color: #eaeaea; font-weight: 600;">${o.name}</div>
-                <div style="color: #999; font-size: 0.85em;">${formatDate(o.date)}</div>
+                <div style="color: #999; font-size: 0.85em;">${o.dateUnknown ? 'Дата неизвестна' : (o.cancelled ? 'Отменена' : formatDate(o.date))}</div>
             </div>
             <button type="button" class="remove-related-btn" data-olympiad-id="${relatedId}" style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight: 600;">Удалить</button>
         `;
@@ -476,19 +498,58 @@ function initializeEventListeners() {
     }
     document.addEventListener('click', handleGlobalClick);
     document.addEventListener('contextmenu', handleRightClick);
+    
+    // Обработчик для чекбокса "Дата неизвестна"
+    const dateUnknownCheckbox = document.getElementById('dateUnknownCheckbox');
+    const dateInput = document.getElementById('dateInput');
+    if (dateUnknownCheckbox && dateInput) {
+        dateUnknownCheckbox.addEventListener('change', () => {
+            if (dateUnknownCheckbox.checked) {
+                dateInput.disabled = true;
+                dateInput.value = '';
+            } else {
+                dateInput.disabled = false;
+            }
+        });
+    }
 }
 
 function openCurrentMonthOlympiadsModal() { openMonthOlympiadsModal(currentVisibleMonthIndex); }
 
 function openMonthOlympiadsModal(month) {
     currentOpenMonth = month;
-    const filtered = getFilteredOlympiads().filter(o => { const d = new Date(o.date + 'T00:00:00'); return d.getMonth() === month && d.getFullYear() === currentYear; });
+    const filtered = getFilteredOlympiads().filter(o => {
+        // Для олимпиад без даты проверяем месяц из поля month
+        if (o.dateUnknown) {
+            return o.month === month && o.year === currentYear;
+        }
+        // Для обычных олимпиад проверяем дату
+        const d = new Date(o.date + 'T00:00:00');
+        return d.getMonth() === month && d.getFullYear() === currentYear;
+    });
+    
     monthOlympiadsTitle.textContent = `Олимпиады - ${monthNames[month]} ${currentYear}`;
-    knownDatesColumn.innerHTML = unknownDatesColumn.innerHTML = cancelledColumn.innerHTML = '';
-    filtered.forEach(o => knownDatesColumn.appendChild(createMonthOlympiadCard(o)));
+    
+    // Разделяем на три категории
+    const knownDates = filtered.filter(o => !o.dateUnknown && !o.cancelled);
+    const unknownDates = filtered.filter(o => o.dateUnknown && !o.cancelled);
+    const cancelled = filtered.filter(o => o.cancelled);
+    
+    // Очищаем колонки
+    knownDatesColumn.innerHTML = '';
+    unknownDatesColumn.innerHTML = '';
+    cancelledColumn.innerHTML = '';
+    
+    // Заполняем колонки
+    knownDates.forEach(o => knownDatesColumn.appendChild(createMonthOlympiadCard(o)));
+    unknownDates.forEach(o => unknownDatesColumn.appendChild(createMonthOlympiadCard(o)));
+    cancelled.forEach(o => cancelledColumn.appendChild(createMonthOlympiadCard(o)));
+    
+    // Если колонка пустая, показываем сообщение
     if (!knownDatesColumn.children.length) knownDatesColumn.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Нет олимпиад</p>';
     if (!unknownDatesColumn.children.length) unknownDatesColumn.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Нет олимпиад</p>';
     if (!cancelledColumn.children.length) cancelledColumn.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Нет отменённых олимпиад</p>';
+    
     monthOlympiadsModal.classList.add('active');
 }
 
@@ -497,10 +558,44 @@ function createMonthOlympiadCard(olympiad) {
     card.className = 'month-olympiad-card';
     card.dataset.olympiadId = olympiad.id;
     card.style.background = `linear-gradient(135deg, ${olympiad.color || '#667eea'} 0%, ${adjustColor(olympiad.color || '#667eea', -20)} 100%)`;
+    
+    const content = document.createElement('div');
+    content.style.cssText = 'display: flex; justify-content: space-between; align-items: center;';
+    
+    const textContainer = document.createElement('div');
+    textContainer.style.flex = '1';
+    
     const name = document.createElement('div');
     name.className = 'month-olympiad-name';
     name.textContent = olympiad.name;
-    card.appendChild(name);
+    textContainer.appendChild(name);
+    
+    // Добавляем дату если известна
+    if (!olympiad.dateUnknown) {
+        const date = document.createElement('div');
+        date.style.cssText = 'color: rgba(255,255,255,0.8); font-size: 0.85em; margin-top: 5px;';
+        date.textContent = formatDate(olympiad.date);
+        textContainer.appendChild(date);
+    }
+    
+    content.appendChild(textContainer);
+    
+    // Добавляем кнопку редактирования для админов
+    if (adminModeEnabled && isAdmin) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-month-olympiad-btn';
+        editBtn.innerHTML = '✏️';
+        editBtn.style.cssText = 'background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1.1em; margin-left: 10px; transition: all 0.3s ease;';
+        editBtn.addEventListener('mouseenter', () => {
+            editBtn.style.background = 'rgba(255,255,255,0.3)';
+        });
+        editBtn.addEventListener('mouseleave', () => {
+            editBtn.style.background = 'rgba(255,255,255,0.2)';
+        });
+        content.appendChild(editBtn);
+    }
+    
+    card.appendChild(content);
     return card;
 }
 
@@ -658,7 +753,7 @@ function attachEventHandlers() {
         if (dayCell) {
             const date = dayCell.dataset.date;
             if (!date) return;
-            const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
+            const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date && !o.dateUnknown);
             if (dayOlympiads.length > 0) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -699,7 +794,7 @@ function hexToRgba(hex, alpha) {
 
 function createDayCellHTML(day, month, filtered) {
     const date = `${currentYear}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const dayOlympiads = filtered.filter(o => o.date === date);
+    const dayOlympiads = filtered.filter(o => o.date === date && !o.dateUnknown && !o.cancelled);
     let label = '', regClass = '', style = '';
     if (focusedOlympiadId) {
         const focused = olympiads.find(o => o.id === focusedOlympiadId);
@@ -729,7 +824,7 @@ function handleDayCellClick(date) {
 }
 
 function showDayPanel(date) {
-    const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
+    const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date && !o.dateUnknown);
     if (!dayOlympiads.length) return;
     closeSidePanel();
     currentOpenDate = date;
@@ -797,11 +892,19 @@ function showOlympiadDetails(o) {
     currentOpenOlympiadId = o.id;
     document.getElementById('olympiadName').textContent = o.name;
     document.getElementById('olympiadDescription').textContent = o.description || 'Нет описания';
-    document.getElementById('olympiadDate').textContent = formatDate(o.date);
+    
+    const dateField = document.getElementById('olympiadDate');
+    if (o.dateUnknown) {
+        dateField.textContent = 'Дата неизвестна';
+    } else {
+        dateField.textContent = formatDate(o.date);
+    }
+    
     document.getElementById('olympiadTime').textContent = o.time || 'Не установлено';
     document.getElementById('olympiadDifficulty').textContent = o.difficulty;
     document.getElementById('olympiadGrade').textContent = o.grade;
     document.getElementById('olympiadLocation').textContent = o.location || 'Не установлено';
+    
     const regStart = document.getElementById('olympiadRegStart')?.parentElement;
     const regEnd = document.getElementById('olympiadRegEnd')?.parentElement;
     if (regStart) regStart.style.display = 'none';
@@ -855,7 +958,7 @@ function showOlympiadDetails(o) {
                 `;
                 card.innerHTML = `
                     <div style="font-weight: 600; font-size: 1em; color: #fff; margin-bottom: 5px;">${related.name}</div>
-                    <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${formatDate(related.date)}</div>
+                    <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${related.dateUnknown ? 'Дата неизвестна' : formatDate(related.date)}</div>
                 `;
                 card.addEventListener('mouseenter', () => {
                     card.style.transform = 'translateY(-2px)';
@@ -900,9 +1003,82 @@ function openOlympiadModal(date = null) {
         document.getElementById('colorInput').parentElement.insertAdjacentElement('beforebegin', relatedContainer);
     }
     
+    // Добавляем поля для олимпиад без даты, если их нет
+    let statusContainer = document.getElementById('statusContainer');
+    if (!statusContainer) {
+        statusContainer = document.createElement('div');
+        statusContainer.id = 'statusContainer';
+        statusContainer.className = 'form-group';
+        statusContainer.innerHTML = `
+            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="dateUnknownCheckbox" style="width: auto;">
+                <span style="color: #eaeaea; font-weight: 600;">Дата неизвестна</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="cancelledCheckbox" style="width: auto;">
+                <span style="color: #eaeaea; font-weight: 600;">Олимпиада отменена</span>
+            </label>
+            <div id="monthYearContainer" class="hidden" style="margin-top: 15px;">
+                <label style="color: #eaeaea; font-weight: 600; margin-bottom: 8px; display: block;">Месяц и год</label>
+                <div style="display: flex; gap: 10px;">
+                    <select id="monthSelect" style="flex: 1; padding: 12px; border: 2px solid #3d3d54; border-radius: 8px; font-size: 1em; background: #2d2d44; color: #eaeaea;">
+                        <option value="0">Январь</option>
+                        <option value="1">Февраль</option>
+                        <option value="2">Март</option>
+                        <option value="3">Апрель</option>
+                        <option value="4">Май</option>
+                        <option value="5">Июнь</option>
+                        <option value="6">Июль</option>
+                        <option value="7">Август</option>
+                        <option value="8">Сентябрь</option>
+                        <option value="9">Октябрь</option>
+                        <option value="10">Ноябрь</option>
+                        <option value="11">Декабрь</option>
+                    </select>
+                    <input type="number" id="yearInput" min="2020" max="2030" value="2026" style="width: 120px; padding: 12px; border: 2px solid #3d3d54; border-radius: 8px; font-size: 1em; background: #2d2d44; color: #eaeaea;">
+                </div>
+            </div>
+        `;
+        document.getElementById('dateInput').parentElement.insertAdjacentElement('afterend', statusContainer);
+        
+        // Обработчики для чекбоксов
+        const dateUnknownCheckbox = document.getElementById('dateUnknownCheckbox');
+        const cancelledCheckbox = document.getElementById('cancelledCheckbox');
+        const dateInput = document.getElementById('dateInput');
+        const monthYearContainer = document.getElementById('monthYearContainer');
+        
+        dateUnknownCheckbox.addEventListener('change', () => {
+            if (dateUnknownCheckbox.checked) {
+                dateInput.disabled = true;
+                dateInput.value = '';
+                monthYearContainer.classList.remove('hidden');
+            } else {
+                dateInput.disabled = false;
+                monthYearContainer.classList.add('hidden');
+            }
+        });
+        
+        cancelledCheckbox.addEventListener('change', () => {
+            if (cancelledCheckbox.checked) {
+                dateUnknownCheckbox.checked = false;
+                dateInput.disabled = true;
+                dateInput.value = '';
+                monthYearContainer.classList.remove('hidden');
+            } else {
+                dateInput.disabled = false;
+                monthYearContainer.classList.add('hidden');
+            }
+        });
+    }
+    
     renderRelatedEventsSelector();
     document.querySelectorAll('input[name="grade"]').forEach(cb => cb.checked = false);
-    if (date) document.getElementById('dateInput').value = date;
+    if (date) {
+        document.getElementById('dateInput').value = date;
+        document.getElementById('dateUnknownCheckbox').checked = false;
+        document.getElementById('cancelledCheckbox').checked = false;
+        document.getElementById('monthYearContainer').classList.add('hidden');
+    }
     olympiadModal.classList.add('active');
 }
 
@@ -913,7 +1089,38 @@ function populateFormForEdit(o) {
     document.getElementById('modalTitle').textContent = 'Редактировать олимпиаду';
     document.getElementById('nameInput').value = o.name.replace(/\s*\(\d+\s*класс\)\s*$/, '');
     document.getElementById('descriptionInput').value = o.description || '';
-    document.getElementById('dateInput').value = o.date;
+    
+    const dateUnknownCheckbox = document.getElementById('dateUnknownCheckbox');
+    const cancelledCheckbox = document.getElementById('cancelledCheckbox');
+    const dateInput = document.getElementById('dateInput');
+    const monthYearContainer = document.getElementById('monthYearContainer');
+    const monthSelect = document.getElementById('monthSelect');
+    const yearInput = document.getElementById('yearInput');
+    
+    if (o.dateUnknown) {
+        dateUnknownCheckbox.checked = true;
+        cancelledCheckbox.checked = false;
+        dateInput.disabled = true;
+        dateInput.value = '';
+        monthYearContainer.classList.remove('hidden');
+        monthSelect.value = o.month.toString();
+        yearInput.value = o.year.toString();
+    } else if (o.cancelled) {
+        dateUnknownCheckbox.checked = false;
+        cancelledCheckbox.checked = true;
+        dateInput.disabled = true;
+        dateInput.value = '';
+        monthYearContainer.classList.remove('hidden');
+        monthSelect.value = o.month.toString();
+        yearInput.value = o.year.toString();
+    } else {
+        dateUnknownCheckbox.checked = false;
+        cancelledCheckbox.checked = false;
+        dateInput.disabled = false;
+        dateInput.value = o.date;
+        monthYearContainer.classList.add('hidden');
+    }
+    
     document.getElementById('timeInput').value = o.time || '';
     document.getElementById('difficultyInput').value = o.difficulty;
     document.querySelectorAll('input[name="grade"]').forEach(cb => cb.checked = false);
@@ -964,18 +1171,44 @@ function handleFormSubmit(e) {
     if (!isAdmin) return;
     const grades = Array.from(document.querySelectorAll('input[name="grade"]:checked')).map(cb => cb.value);
     if (!grades.length) { alert('Выберите хотя бы один класс!'); return; }
+    
+    const dateUnknownCheckbox = document.getElementById('dateUnknownCheckbox');
+    const cancelledCheckbox = document.getElementById('cancelledCheckbox');
+    const dateInput = document.getElementById('dateInput');
+    const monthSelect = document.getElementById('monthSelect');
+    const yearInput = document.getElementById('yearInput');
+    
+    let dateUnknown = dateUnknownCheckbox.checked;
+    let cancelled = cancelledCheckbox.checked;
+    let date = dateInput.value;
+    let month = null;
+    let year = null;
+    
+    if (dateUnknown || cancelled) {
+        month = parseInt(monthSelect.value);
+        year = parseInt(yearInput.value);
+        date = '';
+    } else if (!date) {
+        alert('Укажите дату олимпиады или отметьте "Дата неизвестна"!');
+        return;
+    }
+    
     const count = parseInt(focusPlatesCountInput.value) || 0;
     const plates = [];
     for (let i = 1; i <= count; i++) {
-        const date = document.getElementById(`focusPlateDate${i}`)?.value;
+        const plateDate = document.getElementById(`focusPlateDate${i}`)?.value;
         const name = document.getElementById(`focusPlateName${i}`)?.value;
         const color = document.getElementById(`focusPlateColor${i}`)?.value;
-        if (date && name) plates.push({ date, name, color: color || '#667eea' });
+        if (plateDate && name) plates.push({ date: plateDate, name, color: color || '#667eea' });
     }
     
     const base = {
         description: document.getElementById('descriptionInput').value,
-        date: document.getElementById('dateInput').value,
+        date: date,
+        dateUnknown: dateUnknown,
+        cancelled: cancelled,
+        month: month,
+        year: year,
         time: document.getElementById('timeInput').value,
         difficulty: document.getElementById('difficultyInput').value,
         location: document.getElementById('locationInput').value,
@@ -996,6 +1229,11 @@ function handleFormSubmit(e) {
     localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
     closeOlympiadModal();
     renderAllMonths();
+    
+    // Если был открыт месяц олимпиад, обновляем его
+    if (currentOpenMonth !== null) {
+        openMonthOlympiadsModal(currentOpenMonth);
+    }
 }
 
 function handleRegistration() { alert('Функция регистрации будет реализована позже. Здесь должна быть интеграция с системой регистрации.'); }
