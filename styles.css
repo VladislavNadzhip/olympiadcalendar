@@ -487,8 +487,9 @@ body.light-theme {
     border-radius: 12px;
     font-size: 0.7em;
     font-weight: 700;
-    z-index: 10;
+    z-index: 1;
     white-space: nowrap;
+    pointer-events: none;
 }
 
 /* Hidden olympiads in focus mode */
