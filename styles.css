@@ -425,6 +425,7 @@ body.light-theme {
     max-height: 24px;
     display: flex;
     align-items: center;
+        margin-bottom: 0;
     justify-content: center;
 }
 
