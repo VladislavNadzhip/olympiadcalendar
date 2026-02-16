@@ -404,21 +404,26 @@ body.light-theme {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    /* ИЗМЕНЕНО: Динамическое количество строк вместо фиксированного */
     grid-auto-rows: 180px;
     gap: 10px;
     width: 100%;
 }
 
+/* ИСПРАВЛЕНО: Компактные плашки для дней недели */
 .weekday {
     text-align: center;
     font-weight: 600;
     color: var(--gradient-start);
-    padding: 10px;
-    font-size: 1em;
+    padding: 8px 5px;
+    font-size: 0.85em;
     background: var(--bg-secondary);
-    border-radius: 8px;
+    border-radius: 6px;
     line-height: 1;
+    height: auto;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .days-container {
@@ -1292,5 +1297,12 @@ body.light-theme {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+    }
+    
+    /* Мобильные плашки дней недели */
+    .weekday {
+        font-size: 0.75em;
+        padding: 6px 3px;
+        min-height: 25px;
     }
 }
