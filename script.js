@@ -481,7 +481,7 @@ function attachEventHandlers() {
             e.stopPropagation();
             e.preventDefault();
             showOlympiadDetailsById(parseFloat(olympiadEvent.dataset.olympiadId));
-            return;
+            return; // ВАЖНО: останавливаем дальнейшую обработку
         }
         
         // Проверка 2: Клик на ячейку дня (но не на плашку)
@@ -501,13 +501,19 @@ function attachEventHandlers() {
             // Всегда пытаемся открыть панель дня
             if (dayOlympiads.length > 0) {
                 console.log('✅ Открываем панель дня');
+                e.stopPropagation(); // КРИТИЧНО: останавливаем всплытие события!
+                e.preventDefault();
                 handleDayCellClick(date);
+                return; // ВАЖНО: останавливаем дальнейшую обработку
             } else {
                 console.log('ℹ️ Нет олимпиад на эту дату');
                 // Если пользователь админ, открываем форму добавления
                 if (isAdmin) {
                     console.log('👤 Админ - открываем форму добавления');
+                    e.stopPropagation();
+                    e.preventDefault();
                     openOlympiadModal(date);
+                    return; // ВАЖНО: останавливаем дальнейшую обработку
                 }
             }
         }
