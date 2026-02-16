@@ -506,7 +506,6 @@ body.light-theme {
     line-height: 1;
     position: relative;
     z-index: 5;
-    pointer-events: none;
 }
 
 .day-cell.other-month {
