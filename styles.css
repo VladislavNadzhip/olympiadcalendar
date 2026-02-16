@@ -6,10 +6,39 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: #1a1a2e;
+    background: var(--bg-primary);
     height: 100vh;
-    color: #eaeaea;
+    color: var(--text-primary);
     overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Темная тема (по умолчанию) */
+body {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #2d2d44;
+    --bg-tertiary: #3d3d54;
+    --text-primary: #eaeaea;
+    --text-secondary: #ccc;
+    --text-tertiary: #999;
+    --border-color: #3d3d54;
+    --gradient-start: #667eea;
+    --gradient-end: #764ba2;
+    --hover-bg: #3d3d54;
+}
+
+/* Светлая тема */
+body.light-theme {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8e8e8;
+    --text-primary: #1a1a2e;
+    --text-secondary: #333333;
+    --text-tertiary: #666666;
+    --border-color: #d0d0d0;
+    --gradient-start: #667eea;
+    --gradient-end: #764ba2;
+    --hover-bg: #e8e8e8;
 }
 
 .container {
@@ -23,7 +52,7 @@ body {
 .month-view {
     width: 100vw;
     height: 100vh;
-    background: #1a1a2e;
+    background: var(--bg-primary);
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -36,10 +65,10 @@ body {
     align-items: center;
     margin: 0;
     padding: 16px 24px;
-    border-bottom: 2px solid #2d2d44;
+    border-bottom: 2px solid var(--border-color);
     flex-shrink: 0;
     height: 100px;
-    background: linear-gradient(to bottom, #1a1a2e 0%, #242438 100%);
+    background: linear-gradient(to bottom, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 }
 
 .header-left {
@@ -57,16 +86,37 @@ body {
 }
 
 .month-header h2 {
-    color: #eaeaea;
+    color: var(--text-primary);
     font-size: 1.6em;
     line-height: 1;
     margin: 0;
 }
 
+/* Theme Toggle Button */
+.theme-toggle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: rotate(20deg) scale(1.05);
+    border-color: var(--gradient-start);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
 /* Кнопка в верхнем хедере */
 .header-month-olympiads-btn, .tutorial-btn {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     color: white;
     border: none;
     border-radius: 10px;
@@ -88,27 +138,27 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #2d2d44;
+    background: var(--bg-secondary);
     padding: 10px 16px;
     border-radius: 10px;
-    border: 2px solid #3d3d54;
+    border: 2px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .city-selector:hover {
-    border-color: #667eea;
+    border-color: var(--gradient-start);
 }
 
 .city-selector label {
-    color: #999;
+    color: var(--text-tertiary);
     font-weight: 600;
     font-size: 0.95em;
 }
 
 #citySelect {
-    background: #1a1a2e;
-    color: #eaeaea;
-    border: 1px solid #3d3d54;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 0.95em;
@@ -118,12 +168,12 @@ body {
 }
 
 #citySelect:hover {
-    border-color: #667eea;
+    border-color: var(--gradient-start);
 }
 
 #citySelect:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--gradient-start);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
@@ -139,19 +189,19 @@ body {
 }
 
 .filter-btn {
-    background: #2d2d44;
-    color: #eaeaea;
-    border: 2px solid #3d3d54;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .filter-btn:hover {
-    background: #3d3d54;
-    border-color: #667eea;
+    background: var(--hover-bg);
+    border-color: var(--gradient-start);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .add-btn {
-    background: #667eea;
+    background: var(--gradient-start);
     color: white;
 }
 
@@ -161,7 +211,7 @@ body {
 }
 
 .admin-btn {
-    background: #667eea;
+    background: var(--gradient-start);
     color: white;
 }
 
@@ -194,21 +244,21 @@ body {
 .filter-range select {
     flex: 1;
     padding: 12px;
-    border: 2px solid #3d3d54;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 1em;
-    background: #1a1a2e;
-    color: #eaeaea;
+    background: var(--bg-primary);
+    color: var(--text-primary);
     transition: border-color 0.3s ease;
 }
 
 .filter-range select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--gradient-start);
 }
 
 .filter-range span {
-    color: #999;
+    color: var(--text-tertiary);
     font-weight: 600;
     font-size: 1.2em;
 }
@@ -216,7 +266,7 @@ body {
 .form-group small {
     display: block;
     margin-top: 5px;
-    color: #999;
+    color: var(--text-tertiary);
     font-size: 0.85em;
 }
 
@@ -231,24 +281,24 @@ body {
 .form-group textarea {
     width: 100%;
     padding: 12px;
-    border: 2px solid #3d3d54;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 1em;
     transition: border-color 0.3s ease;
-    background: #1a1a2e;
-    color: #eaeaea;
+    background: var(--bg-primary);
+    color: var(--text-primary);
     font-family: inherit;
     resize: vertical;
 }
 
 .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--gradient-start);
 }
 
 /* Description text in panel */
 .description-text {
-    color: #eaeaea !important;
+    color: var(--text-primary) !important;
     font-size: 1em !important;
     line-height: 1.6;
     white-space: pre-wrap;
@@ -302,14 +352,14 @@ body {
 }
 
 .months-scroll-container::-webkit-scrollbar-track {
-    background: #1a1a2e;
+    background: var(--bg-primary);
     border-radius: 10px;
 }
 
 .months-scroll-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     border-radius: 10px;
-    border: 2px solid #1a1a2e;
+    border: 2px solid var(--bg-primary);
     transition: background 0.3s ease;
 }
 
@@ -320,7 +370,7 @@ body {
 /* Для Firefox */
 .months-scroll-container {
     scrollbar-width: thin;
-    scrollbar-color: #667eea #1a1a2e;
+    scrollbar-color: var(--gradient-start) var(--bg-primary);
 }
 
 /* Каждый месяц в скролле */
@@ -337,7 +387,7 @@ body {
 .month-title {
     font-size: 1.8em;
     font-weight: 700;
-    color: #eaeaea;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -357,10 +407,10 @@ body {
 .weekday {
     text-align: center;
     font-weight: 600;
-    color: #667eea;
+    color: var(--gradient-start);
     padding: 10px;
     font-size: 1em;
-    background: #2d2d44;
+    background: var(--bg-secondary);
     border-radius: 8px;
     line-height: 1;
 }
@@ -370,8 +420,8 @@ body {
 }
 
 .day-cell {
-    background: #2d2d44;
-    border: 1px solid #3d3d54;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 15px;
     transition: all 0.2s ease;
@@ -384,8 +434,8 @@ body {
 }
 
 .day-cell:hover {
-    background: #3d3d54;
-    border-color: #667eea;
+    background: var(--hover-bg);
+    border-color: var(--gradient-start);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
@@ -448,7 +498,7 @@ body {
 
 .day-number {
     font-weight: 600;
-    color: #eaeaea;
+    color: var(--text-primary);
     margin-bottom: 10px;
     font-size: 1.3em;
     flex-shrink: 0;
@@ -482,7 +532,7 @@ body {
 }
 
 .olympiad-events-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     border-radius: 10px;
     transition: background 0.3s ease;
 }
@@ -494,7 +544,7 @@ body {
 /* Для Firefox */
 .olympiad-events-container {
     scrollbar-width: thin;
-    scrollbar-color: #667eea rgba(61, 61, 84, 0.2);
+    scrollbar-color: var(--gradient-start) rgba(61, 61, 84, 0.2);
 }
 
 /* ИСПРАВЛЕНО: Убран transform: scale */
@@ -525,7 +575,7 @@ body {
     top: 0;
     width: 450px;
     height: 100vh;
-    background: #2d2d44;
+    background: var(--bg-secondary);
     box-shadow: -5px 0 15px rgba(0,0,0,0.5);
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
@@ -542,12 +592,12 @@ body {
 }
 
 .side-panel::-webkit-scrollbar-track {
-    background: #1a1a2e;
+    background: var(--bg-primary);
     border-radius: 10px;
 }
 
 .side-panel::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     border-radius: 10px;
     transition: background 0.3s ease;
 }
@@ -559,7 +609,7 @@ body {
 /* Для Firefox */
 .side-panel {
     scrollbar-width: thin;
-    scrollbar-color: #667eea #1a1a2e;
+    scrollbar-color: var(--gradient-start) var(--bg-primary);
 }
 
 .panel-header {
@@ -567,8 +617,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 25px;
-    border-bottom: 2px solid #3d3d54;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: 2px solid var(--border-color);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     color: white;
 }
 
@@ -594,7 +644,7 @@ body {
 }
 
 .olympiad-info h4 {
-    color: #667eea;
+    color: var(--gradient-start);
     font-size: 1.8em;
     margin-bottom: 25px;
 }
@@ -602,24 +652,24 @@ body {
 .info-field {
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #3d3d54;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .info-field label {
     display: block;
     font-weight: 600;
-    color: #999;
+    color: var(--text-tertiary);
     margin-bottom: 8px;
     font-size: 0.9em;
 }
 
 .info-field span, .info-field a {
-    color: #eaeaea;
+    color: var(--text-primary);
     font-size: 1.1em;
 }
 
 .info-field a {
-    color: #667eea;
+    color: var(--gradient-start);
     text-decoration: none;
 }
 
@@ -640,7 +690,7 @@ body {
 }
 
 .register-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     color: white;
 }
 
@@ -650,14 +700,14 @@ body {
 }
 
 .edit-btn {
-    background: #3d3d54;
-    color: #eaeaea;
-    border: 2px solid #4d4d64;
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .edit-btn:hover {
-    background: #4d4d64;
-    border-color: #667eea;
+    background: var(--border-color);
+    border-color: var(--gradient-start);
 }
 
 .delete-btn {
@@ -672,16 +722,16 @@ body {
 
 /* Day Panel - карточки олимпиад дня */
 .day-olympiad-card {
-    background: #1a1a2e;
+    background: var(--bg-primary);
     border-radius: 12px;
     margin-bottom: 15px;
     overflow: hidden;
-    border: 2px solid #3d3d54;
+    border: 2px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .day-olympiad-card:hover {
-    border-color: #667eea;
+    border-color: var(--gradient-start);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
@@ -691,12 +741,12 @@ body {
     align-items: center;
     padding: 15px 20px;
     cursor: pointer;
-    background: #2d2d44;
+    background: var(--bg-secondary);
     transition: background 0.2s ease;
 }
 
 .day-olympiad-header:hover {
-    background: #3d3d54;
+    background: var(--hover-bg);
 }
 
 .day-olympiad-title {
@@ -705,7 +755,7 @@ body {
     gap: 12px;
     font-size: 1.1em;
     font-weight: 600;
-    color: #eaeaea;
+    color: var(--text-primary);
 }
 
 .day-olympiad-color {
@@ -717,7 +767,7 @@ body {
 
 .expand-icon {
     font-size: 1.2em;
-    color: #667eea;
+    color: var(--gradient-start);
     transition: transform 0.3s ease;
     cursor: pointer;
     user-select: none;
@@ -726,22 +776,22 @@ body {
 .day-olympiad-preview {
     padding: 15px 20px;
     padding-left: 52px;
-    background: #1a1a2e;
+    background: var(--bg-primary);
 }
 
 .preview-item {
     margin-bottom: 8px;
     font-size: 0.95em;
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .preview-item strong {
-    color: #999;
+    color: var(--text-tertiary);
     margin-right: 8px;
 }
 
 .preview-item a {
-    color: #667eea;
+    color: var(--gradient-start);
     text-decoration: none;
     word-break: break-all;
 }
@@ -753,23 +803,23 @@ body {
 .day-olympiad-details {
     padding: 15px 20px;
     padding-left: 52px;
-    background: #1a1a2e;
-    border-top: 1px solid #3d3d54;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
 }
 
 .detail-item {
     margin-bottom: 12px;
     font-size: 0.95em;
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .detail-item strong {
-    color: #999;
+    color: var(--text-tertiary);
     margin-right: 8px;
 }
 
 .detail-item a {
-    color: #667eea;
+    color: var(--gradient-start);
     text-decoration: none;
     word-break: break-all;
 }
@@ -786,7 +836,7 @@ body {
     font-size: 1em;
     font-weight: 600;
     cursor: pointer;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     color: white;
     margin-top: 15px;
     transition: all 0.3s ease;
@@ -815,14 +865,14 @@ body {
 }
 
 .edit-btn-compact {
-    background: #3d3d54;
-    color: #eaeaea;
-    border: 2px solid #4d4d64;
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .edit-btn-compact:hover {
-    background: #4d4d64;
-    border-color: #667eea;
+    background: var(--border-color);
+    border-color: var(--gradient-start);
 }
 
 .delete-btn-compact {
@@ -854,12 +904,38 @@ body {
 }
 
 .modal-content {
-    background: #2d2d44;
+    background: var(--bg-secondary);
     border-radius: 20px;
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
+}
+
+/* Кастомный скроллбар для модального окна */
+.modal-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
+}
+
+/* Для Firefox */
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gradient-start) var(--bg-primary);
 }
 
 /* Month Olympiads Modal - шире и с гридом */
@@ -876,19 +952,19 @@ body {
 }
 
 .month-olympiads-column {
-    background: #1a1a2e;
+    background: var(--bg-primary);
     border-radius: 12px;
     padding: 20px;
-    border: 2px solid #3d3d54;
+    border: 2px solid var(--border-color);
 }
 
 .column-title {
-    color: #667eea;
+    color: var(--gradient-start);
     font-size: 1.2em;
     margin-bottom: 20px;
     text-align: center;
     padding-bottom: 15px;
-    border-bottom: 2px solid #3d3d54;
+    border-bottom: 2px solid var(--border-color);
 }
 
 /* ИСПРАВЛЕНО: Убран padding-right и уменьшен gap */
@@ -907,7 +983,7 @@ body {
 
 /* ИСПРАВЛЕНО: Упрощенный hover без артефактов */
 .month-olympiad-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     border-radius: 12px;
     padding: 15px;
     cursor: pointer;
@@ -933,8 +1009,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 25px;
-    border-bottom: 2px solid #3d3d54;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: 2px solid var(--border-color);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     color: white;
     border-radius: 20px 20px 0 0;
 }
@@ -959,23 +1035,23 @@ body {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #eaeaea;
+    color: var(--text-primary);
 }
 
 .form-group input, .form-group select {
     width: 100%;
     padding: 12px;
-    border: 2px solid #3d3d54;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 1em;
     transition: border-color 0.3s ease;
-    background: #1a1a2e;
-    color: #eaeaea;
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 .form-group input:focus, .form-group select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--gradient-start);
 }
 
 /* Grade Checkboxes */
@@ -991,8 +1067,8 @@ body {
     align-items: center;
     justify-content: center;
     padding: 10px 15px;
-    background: #2d2d44;
-    border: 2px solid #3d3d54;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -1000,8 +1076,8 @@ body {
 }
 
 .grade-checkbox:hover {
-    border-color: #667eea;
-    background: #3d3d54;
+    border-color: var(--gradient-start);
+    background: var(--hover-bg);
 }
 
 .grade-checkbox input[type="checkbox"] {
@@ -1009,7 +1085,7 @@ body {
 }
 
 .grade-checkbox span {
-    color: #eaeaea;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 1.1em;
 }
@@ -1019,8 +1095,8 @@ body {
 }
 
 .grade-checkbox:has(input[type="checkbox"]:checked) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    border-color: var(--gradient-start);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
@@ -1052,17 +1128,17 @@ body {
 }
 
 .cancel-btn {
-    background: #3d3d54;
-    color: #eaeaea;
-    border: 2px solid #4d4d64;
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .cancel-btn:hover {
-    background: #4d4d64;
+    background: var(--border-color);
 }
 
 .submit-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     color: white;
 }
 
@@ -1079,17 +1155,46 @@ body {
 
 .tutorial-content {
     padding: 30px;
-    color: #eaeaea;
+    color: var(--text-primary);
     line-height: 1.8;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Кастомный скроллбар для туториала */
+.tutorial-content::-webkit-scrollbar {
+    width: 12px;
+}
+
+.tutorial-content::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+.tutorial-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    border-radius: 10px;
+    border: 2px solid var(--bg-primary);
+    transition: background 0.3s ease;
+}
+
+.tutorial-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6539a0 100%);
+}
+
+/* Для Firefox */
+.tutorial-content {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gradient-start) var(--bg-primary);
 }
 
 .tutorial-content h4 {
-    color: #667eea;
+    color: var(--gradient-start);
     font-size: 1.4em;
     margin-top: 25px;
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 2px solid #3d3d54;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .tutorial-content h4:first-child {
@@ -1099,16 +1204,16 @@ body {
 .tutorial-content p {
     margin-bottom: 15px;
     font-size: 1.05em;
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .tutorial-content strong {
-    color: #eaeaea;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .tutorial-content em {
-    color: #999;
+    color: var(--text-tertiary);
     font-style: italic;
 }
 
@@ -1116,9 +1221,9 @@ body {
     margin: 20px 30px 30px 30px;
     width: calc(100% - 60px);
     padding: 12px;
-    background: #3d3d54;
-    color: #eaeaea;
-    border: 2px solid #4d4d64;
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     font-size: 1em;
     font-weight: 600;
@@ -1127,8 +1232,8 @@ body {
 }
 
 .edit-tutorial-btn:hover {
-    background: #4d4d64;
-    border-color: #667eea;
+    background: var(--border-color);
+    border-color: var(--gradient-start);
 }
 
 .hidden {
