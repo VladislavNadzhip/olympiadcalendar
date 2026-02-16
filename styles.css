@@ -512,7 +512,6 @@ body.light-theme {
     opacity: 0.3;
 }
 
-/* ИСПРАВЛЕНО: контейнер НЕ блокирует клики на пустом пространстве */
 .olympiad-events-container {
     flex: 1;
     overflow-y: auto;
@@ -521,7 +520,6 @@ body.light-theme {
     min-height: 0;
     position: relative;
     z-index: 5;
-    pointer-events: none;
 }
 
 /* Кастомный скроллбар для событий внутри ячеек */
@@ -550,7 +548,6 @@ body.light-theme {
     scrollbar-color: var(--gradient-start) rgba(61, 61, 84, 0.2);
 }
 
-/* ИСПРАВЛЕНО: плашки олимпиад ПРИНИМАЮТ клики */
 .olympiad-event {
     background: #4a5ab3;
     color: white;
@@ -564,7 +561,6 @@ body.light-theme {
     text-overflow: ellipsis;
     white-space: nowrap;
     flex-shrink: 0;
-    pointer-events: auto;
 }
 
 .olympiad-event:hover {
