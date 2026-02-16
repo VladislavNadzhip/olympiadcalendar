@@ -11,6 +11,7 @@ let currentOpenDate = null;
 let currentOpenOlympiadId = null;
 let currentVisibleMonthIndex = 1;
 let currentTheme = localStorage.getItem('theme') || 'dark';
+let adminModeEnabled = false; // Флаг для отображения админ-функционала
 
 // Фильтры
 let currentFilter = {
@@ -110,9 +111,17 @@ const editTutorialForm = document.getElementById('editTutorialForm');
 const cancelEditTutorialBtn = document.getElementById('cancelEditTutorialBtn');
 const tutorialTextInput = document.getElementById('tutorialTextInput');
 
+// Проверка URL-параметра для админ-режима
+function checkAdminMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    adminModeEnabled = urlParams.has('admin');
+    console.log('🔐 Админ-режим:', adminModeEnabled ? 'включен' : 'отключен');
+}
+
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация календаря...');
+    checkAdminMode();
     reloadOlympiads();
     initializeTutorial();
     initializeTheme();
@@ -198,12 +207,27 @@ function reloadOlympiads() {
 }
 
 function updateAdminUI() {
+    // Показываем админ-элементы только если включен adminModeEnabled И пользователь залогинен
+    const showAdmin = adminModeEnabled && isAdmin;
+    
     document.querySelectorAll('.admin-only').forEach(el => {
-        if (isAdmin) el.classList.remove('hidden');
+        if (showAdmin) el.classList.remove('hidden');
         else el.classList.add('hidden');
     });
-    adminBtn.classList.toggle('hidden', isAdmin);
-    logoutBtn.classList.toggle('hidden', !isAdmin);
+    
+    // Кнопка "Админ" показывается только если adminModeEnabled включен, но пользователь не залогинен
+    if (adminModeEnabled && !isAdmin) {
+        adminBtn.classList.remove('hidden');
+    } else {
+        adminBtn.classList.add('hidden');
+    }
+    
+    // Кнопка "Выйти" показывается только если adminModeEnabled включен И пользователь залогинен
+    if (adminModeEnabled && isAdmin) {
+        logoutBtn.classList.remove('hidden');
+    } else {
+        logoutBtn.classList.add('hidden');
+    }
 }
 
 function handleGlobalClick(e) {
@@ -507,8 +531,8 @@ function attachEventHandlers() {
                 return; // ВАЖНО: останавливаем дальнейшую обработку
             } else {
                 console.log('ℹ️ Нет олимпиад на эту дату');
-                // Если пользователь админ, открываем форму добавления
-                if (isAdmin) {
+                // Если пользователь админ И включен админ-режим, открываем форму добавления
+                if (adminModeEnabled && isAdmin) {
                     console.log('👤 Админ - открываем форму добавления');
                     e.stopPropagation();
                     e.preventDefault();
@@ -592,7 +616,7 @@ function showDayPanel(date) {
             platesHTML = '<div class="detail-item"><strong>Важные даты:</strong></div>';
             o.focusPlates.forEach(p => platesHTML += `<div class="detail-item" style="padding-left: 20px;"><span style="display: inline-block; width: 12px; height: 12px; background: ${p.color}; border-radius: 50%; margin-right: 8px;"></span><strong>${p.name}:</strong> ${formatDate(p.date)}</div>`);
         }
-        return `<div class="day-olympiad-card" data-olympiad-id="${o.id}"><div class="day-olympiad-header"><div class="day-olympiad-title"><div class="day-olympiad-color" style="background-color: ${o.color || '#4a5ab3'}"></div><span>${o.name}</span></div><span class="expand-icon" style="transform: rotate(${expanded ? 180 : 0}deg)">▼</span></div><div class="day-olympiad-preview"><div class="preview-item"><strong>Сложность:</strong> ${o.difficulty}</div>${o.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${o.website}" target="_blank">${o.website}</a></div>` : ''}</div><div class="day-olympiad-details ${expanded ? '' : 'hidden'}">${o.description ? `<div class="detail-item"><strong>Описание:</strong> ${o.description}</div>` : ''}<div class="detail-item"><strong>Время:</strong> ${o.time || 'Не установлено'}</div><div class="detail-item"><strong>Класс:</strong> ${o.grade}</div><div class="detail-item"><strong>Место проведения:</strong> ${o.location || 'Не установлено'}</div>${platesHTML}${o.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${o.archive}" target="_blank">Скачать</a></div>` : ''}<button class="register-btn-compact">Регистрация на олимпиаду</button>${isAdmin ? '<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>' : ''}</div></div>`;
+        return `<div class="day-olympiad-card" data-olympiad-id="${o.id}"><div class="day-olympiad-header"><div class="day-olympiad-title"><div class="day-olympiad-color" style="background-color: ${o.color || '#4a5ab3'}"></div><span>${o.name}</span></div><span class="expand-icon" style="transform: rotate(${expanded ? 180 : 0}deg)">▼</span></div><div class="day-olympiad-preview"><div class="preview-item"><strong>Сложность:</strong> ${o.difficulty}</div>${o.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${o.website}" target="_blank">${o.website}</a></div>` : ''}</div><div class="day-olympiad-details ${expanded ? '' : 'hidden'}">${o.description ? `<div class="detail-item"><strong>Описание:</strong> ${o.description}</div>` : ''}<div class="detail-item"><strong>Время:</strong> ${o.time || 'Не установлено'}</div><div class="detail-item"><strong>Класс:</strong> ${o.grade}</div><div class="detail-item"><strong>Место проведения:</strong> ${o.location || 'Не установлено'}</div>${platesHTML}${o.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${o.archive}" target="_blank">Скачать</a></div>` : ''}<button class="register-btn-compact">Регистрация на олимпиаду</button>${(adminModeEnabled && isAdmin) ? '<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>' : ''}</div></div>`;
     }).join('');
     console.log('✅ Активируем панель дня');
     dayPanel.classList.add('active');
