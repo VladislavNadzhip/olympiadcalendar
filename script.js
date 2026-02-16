@@ -468,32 +468,47 @@ function renderAllMonths() {
 }
 
 function attachEventHandlers() {
-    // НОВЫЙ ПОДХОД: Добавляем обработчик на весь контейнер календаря (event delegation)
+    console.log('🔧 Подключение обработчиков событий...');
+    
+    // Event delegation для кликов на календарь
     monthsScrollContainer.addEventListener('click', function(e) {
-        // Если кликнули на плашку олимпиады - обрабатываем её
+        console.log('🖱️ Клик в календаре:', e.target);
+        
+        // Проверка 1: Клик на плашку олимпиады
         const olympiadEvent = e.target.closest('.olympiad-event');
         if (olympiadEvent) {
+            console.log('✅ Клик на плашку олимпиады:', olympiadEvent.dataset.olympiadId);
             e.stopPropagation();
             e.preventDefault();
             showOlympiadDetailsById(parseFloat(olympiadEvent.dataset.olympiadId));
             return;
         }
         
-        // Если кликнули на день (но не на плашку)
+        // Проверка 2: Клик на ячейку дня (но не на плашку)
         const dayCell = e.target.closest('.day-cell:not(.empty-cell)');
         if (dayCell) {
             const date = dayCell.dataset.date;
-            if (!date) return;
+            console.log('📅 Клик на ячейку дня:', date);
+            
+            if (!date) {
+                console.warn('⚠️ У ячейки нет атрибута data-date');
+                return;
+            }
             
             const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
+            console.log(`📊 Найдено олимпиад на ${date}:`, dayOlympiads.length);
             
-            // Если есть олимпиады, открываем панель дня
+            // Всегда пытаемся открыть панель дня
             if (dayOlympiads.length > 0) {
-                handleDayCellClick(date, e);
-            } 
-            // Если олимпиад нет и пользователь админ, открываем форму добавления
-            else if (isAdmin) {
-                openOlympiadModal(date);
+                console.log('✅ Открываем панель дня');
+                handleDayCellClick(date);
+            } else {
+                console.log('ℹ️ Нет олимпиад на эту дату');
+                // Если пользователь админ, открываем форму добавления
+                if (isAdmin) {
+                    console.log('👤 Админ - открываем форму добавления');
+                    openOlympiadModal(date);
+                }
             }
         }
     });
@@ -543,13 +558,23 @@ function createDayCellHTML(day, month, filtered) {
 }
 
 function handleDayCellClick(date) {
-    if (dayPanel.classList.contains('active') && currentOpenDate === date) { closeDayPanel(); return; }
+    console.log('🎯 handleDayCellClick вызван для даты:', date);
+    if (dayPanel.classList.contains('active') && currentOpenDate === date) { 
+        console.log('🔄 Панель уже открыта для этой даты - закрываем');
+        closeDayPanel(); 
+        return; 
+    }
+    console.log('📂 Открываем панель дня');
     showDayPanel(date);
 }
 
 function showDayPanel(date) {
     const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date);
-    if (!dayOlympiads.length) return;
+    console.log('📋 showDayPanel для', date, '- олимпиад:', dayOlympiads.length);
+    if (!dayOlympiads.length) {
+        console.warn('⚠️ Нет олимпиад для отображения');
+        return;
+    }
     closeSidePanel();
     currentOpenDate = date;
     const d = new Date(date + 'T00:00:00');
@@ -563,6 +588,7 @@ function showDayPanel(date) {
         }
         return `<div class="day-olympiad-card" data-olympiad-id="${o.id}"><div class="day-olympiad-header"><div class="day-olympiad-title"><div class="day-olympiad-color" style="background-color: ${o.color || '#4a5ab3'}"></div><span>${o.name}</span></div><span class="expand-icon" style="transform: rotate(${expanded ? 180 : 0}deg)">▼</span></div><div class="day-olympiad-preview"><div class="preview-item"><strong>Сложность:</strong> ${o.difficulty}</div>${o.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${o.website}" target="_blank">${o.website}</a></div>` : ''}</div><div class="day-olympiad-details ${expanded ? '' : 'hidden'}">${o.description ? `<div class="detail-item"><strong>Описание:</strong> ${o.description}</div>` : ''}<div class="detail-item"><strong>Время:</strong> ${o.time || 'Не установлено'}</div><div class="detail-item"><strong>Класс:</strong> ${o.grade}</div><div class="detail-item"><strong>Место проведения:</strong> ${o.location || 'Не установлено'}</div>${platesHTML}${o.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${o.archive}" target="_blank">Скачать</a></div>` : ''}<button class="register-btn-compact">Регистрация на олимпиаду</button>${isAdmin ? '<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>' : ''}</div></div>`;
     }).join('');
+    console.log('✅ Активируем панель дня');
     dayPanel.classList.add('active');
 }
 
