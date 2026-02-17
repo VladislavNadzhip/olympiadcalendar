@@ -272,6 +272,7 @@ function handleGlobalClick(e) {
         if (e.target.classList.contains('register-btn-compact')) { e.preventDefault(); e.stopPropagation(); handleRegistration(); return; }
         if (e.target.classList.contains('edit-btn-compact')) { e.preventDefault(); e.stopPropagation(); const card = e.target.closest('.day-olympiad-card'); if (card) handleEditFromDay(parseFloat(card.dataset.olympiadId)); return; }
         if (e.target.classList.contains('delete-btn-compact')) { e.preventDefault(); e.stopPropagation(); const card = e.target.closest('.day-olympiad-card'); if (card) handleDeleteFromDay(parseFloat(card.dataset.olympiadId)); return; }
+        if (e.target.classList.contains('add-olympiad-in-day-btn')) { e.preventDefault(); e.stopPropagation(); handleAddOlympiadInDay(); return; }
         if (e.target.tagName === 'A') return;
         return;
     }
@@ -284,6 +285,12 @@ function handleGlobalClick(e) {
     const clickedDay = e.target.closest('.day-cell:not(.empty-cell)');
     if (clickedDay && e.target.closest('.olympiad-events-container')) return;
     closeSidePanel(); closeDayPanel(); closeMonthOlympiadsModal();
+}
+
+function handleAddOlympiadInDay() {
+    if (!isAdmin || !currentOpenDate) return;
+    closeDayPanel();
+    openOlympiadModal(currentOpenDate);
 }
 
 function scrollToOlympiadAndShow(olympiadId) {
@@ -873,20 +880,30 @@ function handleDayCellClick(date) {
 
 function showDayPanel(date) {
     const dayOlympiads = getFilteredOlympiads().filter(o => o.date === date && !o.dateUnknown);
-    if (!dayOlympiads.length) return;
+    if (!dayOlympiads.length && !(adminModeEnabled && isAdmin)) return;
     closeSidePanel();
     currentOpenDate = date;
     const d = new Date(date + 'T00:00:00');
     document.getElementById('dayPanelTitle').innerHTML = `${d.getDate()} ${monthNamesGenitive[d.getMonth()]} ${d.getFullYear()}<br><small style="font-size: 0.7em; font-weight: 400; opacity: 0.9;">${dayOlympiads.length} ${getOlympiadWord(dayOlympiads.length)}</small>`;
-    dayPanelContent.innerHTML = dayOlympiads.map(o => {
+    
+    let content = '';
+    
+    dayOlympiads.forEach(o => {
         const expanded = expandedOlympiads.has(o.id);
         let platesHTML = '';
         if (o.focusPlates?.length) {
             platesHTML = '<div class="detail-item"><strong>Важные даты:</strong></div>';
             o.focusPlates.forEach(p => platesHTML += `<div class="detail-item" style="padding-left: 20px;"><span style="display: inline-block; width: 12px; height: 12px; background: ${p.color}; border-radius: 50%; margin-right: 8px;"></span><strong>${p.name}:</strong> ${formatDate(p.date)}</div>`);
         }
-        return `<div class="day-olympiad-card" data-olympiad-id="${o.id}"><div class="day-olympiad-header"><div class="day-olympiad-title"><div class="day-olympiad-color" style="background-color: ${o.color || '#4a5ab3'}"></div><span>${o.name}</span></div><span class="expand-icon" style="transform: rotate(${expanded ? 180 : 0}deg)">▼</span></div><div class="day-olympiad-preview"><div class="preview-item"><strong>Сложность:</strong> ${o.difficulty}</div>${o.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${o.website}" target="_blank">${o.website}</a></div>` : ''}</div><div class="day-olympiad-details ${expanded ? '' : 'hidden'}">${o.description ? `<div class="detail-item"><strong>Описание:</strong> ${o.description}</div>` : ''}<div class="detail-item"><strong>Время:</strong> ${o.time || 'Не установлено'}</div><div class="detail-item"><strong>Класс:</strong> ${o.grade}</div><div class="detail-item"><strong>Место проведения:</strong> ${o.location || 'Не установлено'}</div>${platesHTML}${o.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${o.archive}" target="_blank">Скачать</a></div>` : ''}<button class="register-btn-compact">Регистрация на олимпиаду</button>${(adminModeEnabled && isAdmin) ? '<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>' : ''}</div></div>`;
-    }).join('');
+        content += `<div class="day-olympiad-card" data-olympiad-id="${o.id}"><div class="day-olympiad-header"><div class="day-olympiad-title"><div class="day-olympiad-color" style="background-color: ${o.color || '#4a5ab3'}"></div><span>${o.name}</span></div><span class="expand-icon" style="transform: rotate(${expanded ? 180 : 0}deg)">▼</span></div><div class="day-olympiad-preview"><div class="preview-item"><strong>Сложность:</strong> ${o.difficulty}</div>${o.website ? `<div class="preview-item"><strong>Сайт:</strong> <a href="${o.website}" target="_blank">${o.website}</a></div>` : ''}</div><div class="day-olympiad-details ${expanded ? '' : 'hidden'}">${o.description ? `<div class="detail-item"><strong>Описание:</strong> ${o.description}</div>` : ''}<div class="detail-item"><strong>Время:</strong> ${o.time || 'Не установлено'}</div><div class="detail-item"><strong>Класс:</strong> ${o.grade}</div><div class="detail-item"><strong>Место проведения:</strong> ${o.location || 'Не установлено'}</div>${platesHTML}${o.archive ? `<div class="detail-item"><strong>Архив задач:</strong> <a href="${o.archive}" target="_blank">Скачать</a></div>` : ''}<button class="register-btn-compact">Регистрация на олимпиаду</button>${(adminModeEnabled && isAdmin) ? '<div class="admin-actions-compact"><button class="edit-btn-compact">Редактировать</button><button class="delete-btn-compact">Удалить</button></div>' : ''}</div></div>`;
+    });
+    
+    // Добавляем кнопку "Добавить олимпиаду" для администраторов
+    if (adminModeEnabled && isAdmin) {
+        content += `<button class="add-olympiad-in-day-btn" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 20px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);" onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)';" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)';">✚ Добавить олимпиаду</button>`;
+    }
+    
+    dayPanelContent.innerHTML = content;
     dayPanel.classList.add('active');
 }
 
@@ -1286,6 +1303,11 @@ function handleFormSubmit(e) {
     // Если был открыт месяц олимпиад, обновляем его
     if (currentOpenMonth !== null) {
         openMonthOlympiadsModal(currentOpenMonth);
+    }
+    
+    // Если была открыта панель дня, обновляем её
+    if (currentOpenDate) {
+        showDayPanel(currentOpenDate);
     }
 }
 
