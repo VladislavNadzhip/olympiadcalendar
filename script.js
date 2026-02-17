@@ -113,9 +113,6 @@ const addOlympiadInMonthBtn = document.getElementById('addOlympiadInMonthBtn');
 function checkAdminMode() {
     const urlParams = new URLSearchParams(window.location.search);
     adminModeEnabled = urlParams.has('admin');
-    
-// Кнопки редактирования столбцов в модальном окне олимпиад месяца
-const columnEditButtons = document.querySelectorAll('.column-edit-btn');
     console.log('🔐 Админ-режим:', adminModeEnabled ? 'включен' : 'отключен');
 }
 
@@ -515,10 +512,11 @@ function initializeEventListeners() {
     if (headerMonthOlympiadsBtn) headerMonthOlympiadsBtn.addEventListener('click', e => { e.stopPropagation(); openCurrentMonthOlympiadsModal(); });
     if (addOlympiadInMonthBtn) addOlympiadInMonthBtn.addEventListener('click', e => { e.stopPropagation(); handleAddOlympiadInMonth(); });
 
-        // Обработчики для кнопок редактирования столбцов
-    columnEditButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const columnType = btn.dataset.column;
+    // Обработчики для кнопок редактирования столбцов - ищем их после рендеринга модального окна
+    document.addEventListener('click', (e) => {
+        const columnEditBtn = e.target.closest('.column-edit-btn');
+        if (columnEditBtn) {
+            const columnType = columnEditBtn.dataset.column;
             editingOlympiadId = null;
             openOlympiadModal();
             // Устанавливаем контекст, что добавляем олимпиаду в определенный столбец
@@ -526,8 +524,9 @@ function initializeEventListeners() {
             currentOpenMonth = null;
             currentOpenDate = null;
             currentOpenOlympiadId = null;
-        });
+        }
     });
+    
     if (tutorialBtn) tutorialBtn.addEventListener('click', e => { e.stopPropagation(); openTutorialModal(); });
     if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', closeTutorialModal);
     if (editTutorialBtn) editTutorialBtn.addEventListener('click', openEditTutorialModal);
