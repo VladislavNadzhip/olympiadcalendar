@@ -117,24 +117,23 @@
         <div class="modal-content month-olympiads-modal-content">
             <div class="modal-header">
                 <h3 id="monthOlympiadsTitle">Олимпиады в этом месяце</h3>
-                <button id="addOlympiadInMonthBtn" class="add-olympiad-in-month-btn admin-only hidden">+ Добавить олимпиаду</button>
                 <button id="closeMonthOlympiadsBtn" class="close-btn">×</button>
             </div>
             <div class="month-olympiads-grid">
                 <div class="month-olympiads-column">
-                    <h4 class="column-title">Даты известны</h4>
+                    <h4 class="column-title">Даты известны< <button class="column-edit-btn admin-only hidden" data-column="known">✏️</button>/h4>
                     <div id="knownDatesColumn" class="olympiads-column-content">
                         <!-- Олимпиады с известными датами -->
                     </div>
                 </div>
                 <div class="month-olympiads-column">
-                    <h4 class="column-title">Даты неизвестны</h4>
+                    <h4 class="column-title">Даты неизвестн <button class="column-edit-btn admin-only hidden" data-column="unknown">✏️</button>ы</h4>
                     <div id="unknownDatesColumn" class="olympiads-column-content">
                         <!-- Олимпиады с неизвестными датами -->
                     </div>
                 </div>
                 <div class="month-olympiads-column">
-                    <h4 class="column-title">Отменены</h4>
+                    <h4 class="column-title">Отменены <button class="column-edit-btn admin-only hidden" data-column="cancelled">✏️</button></h4>
                     <div id="cancelledColumn" class="olympiads-column-content">
                         <!-- Отменённые олимпиады -->
                     </div>
