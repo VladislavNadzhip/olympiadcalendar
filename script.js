@@ -108,6 +108,7 @@ const closeEditTutorialBtn = document.getElementById('closeEditTutorialBtn');
 const editTutorialForm = document.getElementById('editTutorialForm');
 const cancelEditTutorialBtn = document.getElementById('cancelEditTutorialBtn');
 const tutorialTextInput = document.getElementById('tutorialTextInput');
+const addOlympiadInMonthBtn = document.getElementById('addOlympiadInMonthBtn');
 
 function checkAdminMode() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -320,6 +321,35 @@ function handleEditFromMonthModal(id) {
     }
 }
 
+function handleAddOlympiadInMonth() {
+    if (!isAdmin || currentOpenMonth === null) return;
+    
+    // Закрываем модальное окно месяца
+    const wasOpen = currentOpenMonth;
+    closeMonthOlympiadsModal();
+    
+    // Открываем форму создания олимпиады
+    openOlympiadModal();
+    
+    // Устанавливаем месяц и год, активируем чекбокс "Дата неизвестна"
+    setTimeout(() => {
+        const dateUnknownCheckbox = document.getElementById('dateUnknownCheckbox');
+        const monthSelect = document.getElementById('monthSelect');
+        const yearInput = document.getElementById('yearInput');
+        const monthYearContainer = document.getElementById('monthYearContainer');
+        const dateInput = document.getElementById('dateInput');
+        
+        if (dateUnknownCheckbox && monthSelect && yearInput) {
+            dateUnknownCheckbox.checked = true;
+            dateInput.disabled = true;
+            dateInput.value = '';
+            monthYearContainer.classList.remove('hidden');
+            monthSelect.value = wasOpen.toString();
+            yearInput.value = currentYear.toString();
+        }
+    }, 100);
+}
+
 function handleFocusPlatesCountChange() {
     const count = parseInt(focusPlatesCountInput.value) || 0;
     focusPlatesContainer.innerHTML = '';
@@ -480,6 +510,7 @@ function initializeEventListeners() {
     adminForm.addEventListener('submit', handleAdminLogin);
     closeMonthOlympiadsBtn.addEventListener('click', closeMonthOlympiadsModal);
     if (headerMonthOlympiadsBtn) headerMonthOlympiadsBtn.addEventListener('click', e => { e.stopPropagation(); openCurrentMonthOlympiadsModal(); });
+    if (addOlympiadInMonthBtn) addOlympiadInMonthBtn.addEventListener('click', e => { e.stopPropagation(); handleAddOlympiadInMonth(); });
     if (tutorialBtn) tutorialBtn.addEventListener('click', e => { e.stopPropagation(); openTutorialModal(); });
     if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', closeTutorialModal);
     if (editTutorialBtn) editTutorialBtn.addEventListener('click', openEditTutorialModal);
