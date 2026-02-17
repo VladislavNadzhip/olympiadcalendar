@@ -921,16 +921,22 @@ function handleDeleteFromDay(id) {
     if (!confirm('Вы уверены, что хотите удалить эту олимпиаду?')) return;
     const date = olympiads.find(o => o.id === id)?.date;
     olympiads = olympiads.filter(o => o.id !== id);
-        if (olympiad) {    if (focusedOlympiadId === id) exitFocusMode();
-            olympiad.cancelled = true;    if (olympiads.filter(o => o.date === date).length > 0) showDayPanel(date);
-                    localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
-            renderAllMonths();}
-        }
+    localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
+    if (focusedOlympiadId === id) exitFocusMode();
+    reloadOlympiads();
+    renderAllMonths();
+    if (date && olympiads.filter(o => o.date === date).length > 0) {
+        showDayPanel(date);
+    } else {
+        closeDayPanel();
     }
 }
 
-    reloadOlympiads();
-    if (sidePanel.classList.contains('active') && currentOpenOlympiadId === id) { closeSidePanel(); return; }
+function showOlympiadDetailsById(id) {
+    if (sidePanel.classList.contains('active') && currentOpenOlympiadId === id) { 
+        closeSidePanel(); 
+        return; 
+    }
     const o = olympiads.find(x => x.id === id);
     if (o) showOlympiadDetails(o);
 }
