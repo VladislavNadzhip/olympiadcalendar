@@ -587,6 +587,7 @@ function openMonthOlympiadsModal(month) {
 function createMonthOlympiadCard(olympiad) {
     const card = document.createElement('div');
     card.className = 'month-olympiad-card';
+        if (olympiad.cancelled) card.classList.add('cancelled');
     card.dataset.olympiadId = olympiad.id;
     card.style.background = `linear-gradient(135deg, ${olympiad.color || '#667eea'} 0%, ${adjustColor(olympiad.color || '#667eea', -20)} 100%)`;
     
