@@ -5,8 +5,11 @@ async function loadFebruaryOlympiads() {
         const response = await fetch('february_olympiads.json');
         const februaryData = await response.json();
         
+        // Получаем текущий город
+        const currentCity = localStorage.getItem('currentCity') || 'Москва';
+        
         // Получаем текущие олимпиады из localStorage
-        let olympiads = JSON.parse(localStorage.getItem('olympiads')) || [];
+        let olympiads = JSON.parse(localStorage.getItem(`olympiads_${currentCity}`)) || [];
         
         // Добавляем уникальные ID к каждой олимпиаде из февральских данных
         februaryData.forEach((olympiad, index) => {
@@ -27,18 +30,10 @@ async function loadFebruaryOlympiads() {
         olympiads = [...olympiads, ...newOlympiads];
         
         // Сохраняем в localStorage
-        localStorage.setItem('olympiads', JSON.stringify(olympiads));
+        localStorage.setItem(`olympiads_${currentCity}`, JSON.stringify(olympiads));
         
         console.log(`Загружено ${newOlympiads.length} новых олимпиад`);
         console.log(`Всего олимпиад в календаре: ${olympiads.length}`);
-        
-        // Обновляем отображение, если функция доступна
-        if (typeof updateMonthHeatMap === 'function') {
-            updateMonthHeatMap();
-        }
-        if (typeof renderMonthCalendar === 'function' && currentMonth === 1) {
-            renderMonthCalendar();
-        }
         
         return { success: true, added: newOlympiads.length, total: olympiads.length };
     } catch (error) {
@@ -58,9 +53,11 @@ if (typeof document !== 'undefined') {
                 if (result.success) {
                     localStorage.setItem('february_2026_loaded', 'true');
                     console.log('Февральские олимпиады успешно загружены!');
-                    alert(`Добавлено ${result.added} олимпиад из февральского календаря!`);
-                    // Перезагружаем страницу для отображения изменений
-                    location.reload();
+                    if (result.added > 0) {
+                        alert(`Добавлено ${result.added} олимпиад из февральского календаря!`);
+                        // Перезагружаем страницу для отображения изменений
+                        location.reload();
+                    }
                 }
             });
         }
