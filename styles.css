@@ -1048,6 +1048,17 @@ body.light-theme {
     line-height: 1.4;
 }
 
+/* Стили для отмененных олимпиад */
+.month-olympiad-card.cancelled {
+    opacity: 0.6;
+    filter: grayscale(50%);
+}
+
+.month-olympiad-card.cancelled .month-olympiad-name {
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
